@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Financeiro - Painel</title>
+  <style>
+    :root{
+      --bg:#e8ecf1; --card:#f0f3f7; --muted:#6b7684; --accent:#2b7be4; --success:#17b169; --danger:#ff4d4f;
+      --shadow: 0 6px 18px rgba(30,50,80,0.08);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#17233b}
+
+    /* SIDEBAR */
+    .layout{display:flex;min-height:100vh}
+    aside{width:320px;background:#ffffff;border-right:1px solid #e6edf6;padding:22px;box-shadow:var(--shadow);position:fixed;left:0;top:0;bottom:0}
+    .brand{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .brand img{width:38px;height:38px;border-radius:8px;object-fit:cover}
+    .brand h1{font-size:18px;margin:0}
+    nav{margin-top:8px}
+    .nav-item{padding:10px 12px;border-radius:8px;color:#17324a;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}
+    .nav-item:hover{background:#f0f6ff}
+    .section-title{font-size:12px;color:var(--muted);margin:18px 0 8px}
+
+    /* platforms list */
+    .platforms-list { max-height: 45vh; overflow-y: auto; padding-right: 8px; }
+    .platform-card {
+      background: #fdfdff;
+      border: 1px solid #e6edf6;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .platform-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(43, 123, 228, 0.1);
+    }
+    .platform-card .name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      word-break: break-all;
+      color: #17233b;
+    }
+    .platform-card .details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .platform-card .count {
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(0,0,0,0.04);
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+    .platform-card .actions { display: flex; gap: 6px; }
+    .platform-card .actions .btn { padding: 4px 10px; font-size: 12px; }
+    .platform-card .actions .btn-delete { background: transparent; color: var(--muted); border: none; padding: 4px; font-size: 16px; }
+    .platform-card .actions .btn-delete:hover { color: var(--danger); background: rgba(255, 77, 79, 0.1); box-shadow: none; transform: none; }
+
+    .platform-card.selected {
+      border-left: 3px solid var(--success);
+      background-color: rgba(23, 177, 105, 0.05);
+    }
+
+    .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(43,123,228,0.12)}
+
+    .btn.ghost.active {
+      background: rgba(43,123,228,0.1);
+      font-weight: 600;
+    }
+
+    .btn.danger {
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+    .btn.danger:hover {
+      background: #ff7875;
+    }
+
+    /* main content */
+    main{margin-left:340px;padding:28px;flex:1}
+    header.top{display:flex;align-items:center;justify-content:space-between}
+    .cards{display:flex;gap:18px;margin-top:14px}
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:var(--shadow);min-width:200px}
+    .card h3{margin:0;font-size:13px;color:var(--muted)}
+    .card p{font-size:20px;margin:8px 0 0;font-weight:600}
+    .card p.lucro{color:var(--success) !important;}
+    .card p.negative{color:var(--danger) !important;}
+
+    .panel{margin-top:22px;background:var(--card);padding:18px;border-radius:12px;box-shadow:var(--shadow)}
+    .row{display:flex;gap:12px;align-items:center}
+    .field{flex:1}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type=number], input[type=text], select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6edf6;background:#fbfdff}
+
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:10px;border-bottom:1px solid #eef3f8;text-align:left}
+    th{background:transparent;color:var(--muted);font-weight:600}
+    .small{width:90px}
+    .lucro{font-weight:700;color:var(--success) !important;}
+    .negative{font-weight:700;color:var(--danger) !important;}
+
+    .actions{text-align:right}
+    .muted{color:var(--muted);font-size:13px}
+
+    footer{margin-top:22px;color:var(--muted);font-size:13px}
+
+    .note-card{background:var(--card);padding:14px;border-radius:10px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid #e6edf6;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .note-card.used{opacity:0.5;background:rgba(82,196,26,0.05)}
+    .note-card .cpf-text{flex:1;font-family:monospace;font-size:14px;color:#17233b;font-weight:500}
+    .note-card input[type="checkbox"]{width:18px;height:18px;cursor:pointer;flex-shrink:0}
+    body.dark .note-card{border-color:#2a2d33;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+    body.dark .note-card .cpf-text{color:#e6eef8}
+    body.dark .note-card.used{background:rgba(82,196,26,0.08)}
+
+    .btn-notes-container {
+      position: relative;
+    }
+    .notes-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: var(--danger);
+      color: white;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--card);
+      pointer-events: none;
+    }
+
+    /* Modal de Notas */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background-color: var(--card);
+      margin: 10% auto;
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 { margin: 0; }
+    .close-modal {
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .notes-container { max-height: 300px; overflow-y: auto; margin-bottom: 16px; }
+    .note-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.03); border-radius: 6px; margin-bottom: 8px; }
+    body.dark .note-item { background: rgba(255,255,255,0.05); }
+    .note-item span { font-size: 14px; flex: 1; margin-right: 10px; }
+    .add-note-box { display: flex; gap: 8px; }
+
+    /* responsive */
+    @media (max-width:900px){aside{display:none}main{margin-left:16px;padding:16px}}
+
+    /* Animações suaves */
+    * {
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+    }
+    .btn {
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(43, 123, 228, 0.3);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .card {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(30,50,80,0.12);
+    }
+    .nav-item {
+      transition: all 0.2s ease;
+    }
+    .platform-card {
+      transition: all 0.2s ease;
+    }
+    .note-card {
+      transition: all 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .panel, .card {
+      animation: fadeIn 0.3s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(43, 123, 228, 0.1);
+    }
+  
+    /* Dark-mode fixes: daily box, tables, inputs */
+    .daily-box {
+      margin-top:20px;
+      padding:12px;
+      background:var(--card);
+      border-radius:10px;
+    }
+    body.dark .daily-box { background:#1c1f24; }
+
+    body.dark table { background:#1a1d22; color:#e5e7eb; }
+    body.dark th { color:#9ca3af; background:#1a1d22; }
+    body.dark td { border-color:#2a2d33; }
+
+
+
+    /* ensure cards and panels use variables so dark mode applies */
+    body.dark .card { background: #1a1d22; }
+    body.dark .panel { background: #1a1d22; }
+
+
+/* FORCE full-site dark mode overrides */
+body.dark, body.dark main, body.dark header, body.dark footer, body.dark aside, body.dark .layout {
+  background: #0b0c0e !important;
+  color: #e6eef8 !important;
+}
+body.dark .brand h1, body.dark .muted, body.dark th, body.dark label {
+  color: #9aa6b2 !important;
+}
+body.dark aside { background: #0f1215 !important; border-right-color: #1f2326 !important; }
+body.dark nav .nav-item { color: #b9c6cf !important; }
+body.dark .nav-item:hover { background: rgba(255,255,255,0.02) !important; }body.dark .platform-card {
+      background: #13171c;
+      border-color: #2a2d33;
+    }
+    body.dark .platform-card:hover {
+      border-color: var(--accent);
+      background: #161b22;
+    }
+    body.dark .platform-card .name { color: #c9d8e4; }
+    body.dark .platform-card .count { background: rgba(255,255,255,0.05); color: #8f9aa3; }
+    body.dark .platform-card .actions .btn-delete { color: #77818f; }
+
+    body.dark .platform-card.selected {
+      background-color: rgba(23, 177, 105, 0.1);
+    }
+
+    body.dark .btn.danger:hover {
+      background: #d9363e;
+    }
+
+    body.dark #searchPlatforms {
+      background: #0b0c0e !important; color: #e6eef8 !important; border-color: #222428 !important;
+    }
+
+body.dark input, body.dark select, body.dark textarea {
+  background: #0b0c0e !important;
+  color: #e6eef8 !important;
+  border-color: #222428 !important;
+}
+body.dark .card, body.dark .panel, body.dark .daily-box {
+  background: #0f1316 !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6) !important;
+}
+body.dark table { background: transparent !important; color: #d7e6f2 !important; }
+body.dark th, body.dark td { border-color: #222428 !important; color: #c9d8e4 !important; }
+body.dark .btn { box-shadow: none; }
+body.dark .btn.ghost { background: transparent !important; color: #9fb8ff !important; border-color: rgba(159,184,255,0.08) !important; }
+body.dark .brand img { filter: none !important; }
+body.dark .cards .card p { color: #d7e6f2 !important; }
+body.dark .cards .card h3 { color: #9aa6b2 !important; }
+body.dark footer, body.dark .muted { color: #8f9aa3 !important; }
+/* These MUST come last to override the generic .cards .card p rule above */
+body.dark .lucro { color: #17b169 !important; }
+body.dark .negative { color: #ff4d4f !important; }
+body.dark .card p.lucro { color: #17b169 !important; }
+body.dark .card p.negative { color: #ff4d4f !important; }
+body.dark .cards .card p.lucro { color: #17b169 !important; }
+body.dark .cards .card p.negative { color: #ff4d4f !important; }
+body.dark #lucroTotalDisplay.lucro { color: #17b169 !important; }
+body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
+
+</style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <label for="logoUpload" style="cursor: pointer;" title="Clique para alterar a logo">
+          <img id="brandLogo" src="meu_logo.jpeg" alt="logo" />
+        </label>
+        <input type="file" id="logoUpload" accept="image/*" style="display: none;" />
+        <div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <h1 id="appTitleDisplay" style="font-size:18px;margin:0">Painel Financeiro</h1>
+            <button id="editAppTitleBtn" class="btn ghost" style="padding:0 4px;font-size:12px;border:none;color:var(--muted);cursor:pointer" title="Editar nome do painel">✏️</button>
+          </div>
+          <div class="muted" id="saveStatus">Seu controle rápido</div>
+        </div>
+      </div>
+
+      <nav>
+        <div class="nav-item" data-view="dashboard">🏠 Dashboard</div>
+        <div class="nav-item" data-view="gastos">💸 Gastos</div>
+        <div class="nav-item" data-view="plataformas">🖥️ Plataformas</div>
+        <div class="nav-item" data-view="dados">👤 CPFs</div>
+        <div class="nav-item" data-view="fintech">🏦 Fintech</div>
+      </nav>
+
+      <div class="section-title">Plataformas</div>
+      <input type="text" id="searchPlatforms" placeholder="🔎 Buscar plataforma..." style="width: 100%; margin-bottom: 10px; padding: 8px; border-radius: 8px; border: 1px solid #e6edf6; background: #fbfdff;">
+      <div class="platforms-list" id="platformsList"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <input id="newPlatformName" placeholder="Adicionar plataforma (ex: 389win88.com)" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6edf6;background:#fbfdff" />
+        <button class="btn" id="addPlatformBtn">Adicionar</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="top">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <div class="muted">Salvamento automático: salvo no navegador</div>
+        </div>
+        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px"><div class="muted">Lucro Total</div><button id="toggleTheme" class="btn ghost" style="margin-left:8px;padding:6px 10px">Tema</button></div>
+          <div style="font-size:20px;font-weight:700" id="lucroTotalDisplay">R$ 0,00</div>
+        </div>
+      </header>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Total de Contas</h3>
+          <p id="totalContas">0</p>
+        </div>
+        <div class="card">
+          <h3>Lucro Bruto (R$)</h3>
+          <p id="lucroBruto">0.00</p>
+        </div>
+        <div class="card">
+          <h3>Gastos (Proxy + Números)</h3>
+          <p id="gastosTotal">0.00</p>
+        </div>
+
+        <div class="card">
+          <h3 id="lucroMesTitle">Lucro do Mês (Dias Fechados)</h3>
+          <p id="lucroTotalDias">0.00</p>
+        </div>
+
+        <div class="card">
+          <h3>CPFs Disponíveis</h3>
+          <p id="cpfsDisponiveis">0</p>
+        </div>
+    </div>
+
+      <!-- Dashboard panel -->
+      <div class="panel" id="dashboardPanel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <h3 style="margin:0">Visão geral</h3>
+            <div class="muted">Resumo por plataforma</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label for="sortPlatforms" class="muted" style="margin:0">Ordenar por:</label>
+            <select id="sortPlatforms" style="padding:8px;border-radius:8px;border:1px solid #e5e7eb">
+              <option value="name">Nome</option>
+              <option value="profit">Lucro</option>
+              <option value="date">Data (mais recente)</option>
+            </select>
+          </div>
+        </div>
+        <table id="summaryTable">
+          <thead>
+            <tr><th>Plataforma</th><th>Contas</th><th>Lucro</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <!-- KPIs Dashboard -->
+        <div style="margin-top:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="margin:0">📊 Análise Mensal</h3>
+            <div>
+              <button class="btn ghost active" id="showKpiBtn">Indicadores</button>
+              <button class="btn ghost" id="showChartBtn">Gráfico</button>
+            </div>
+          </div>
+
+          <div id="kpiContainer">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--accent);">
+                <div class="muted" style="font-size:12px;margin-bottom:4px">📈 Média Diária</div>
+                <div style="font-size:22px;font-weight:700" id="kpiMediaDiaria">R$ 0,00</div>
+              </div>
+
+              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--success);">
+                <div class="muted" style="font-size:12px;margin-bottom:4px">🏆 Melhor Dia</div>
+                <div style="font-size:14px;font-weight:600;color:var(--success)" id="kpiMelhorDia">-</div>
+                <div style="font-size:18px;font-weight:700;margin-top:4px" id="kpiMelhorDiaValor">R$ 0,00</div>
+              </div>
+
+              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--danger);">
+                <div class="muted" style="font-size:12px;margin-bottom:4px">💔 Pior Dia</div>
+                <div style="font-size:14px;font-weight:600;color:var(--danger)" id="kpiPiorDia">-</div>
+                <div style="font-size:18px;font-weight:700;margin-top:4px" id="kpiPiorDiaValor">R$ 0,00</div>
+              </div>
+
+              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid #9ca3af;">
+                <div class="muted" style="font-size:12px;margin-bottom:4px">🗓️ Total de Dias</div>
+                <div style="font-size:22px;font-weight:700" id="kpiTotalDias">0</div>
+              </div>
+
+              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--accent);">
+                <div class="muted" style="font-size:12px;margin-bottom:4px">🎯 Taxa de Sucesso</div>
+                <div style="font-size:22px;font-weight:700" id="kpiTaxaSucesso">0%</div>
+                <div class="muted" style="font-size:11px;margin-top:2px">dias com lucro positivo</div>
+              </div>
+
+              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid #9ca3af;">
+                <div class="muted" style="font-size:12px;margin-bottom:4px">💰 Lucro Médio/Conta</div>
+                <div style="font-size:22px;font-weight:700" id="kpiLucroMedioConta">R$ 0,00</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="chartContainer" style="display:none; background:var(--card); padding:16px; border-radius:10px; height: 350px;">
+            <canvas id="dailyProfitChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Controle diário / filtro -->
+        <div class="daily-box">
+          <h3>Controle Diário</h3>
+          
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.03);padding:8px 12px;border-radius:8px;margin-bottom:16px;border:1px solid rgba(0,0,0,0.05)">
+            <button class="btn ghost" id="btnPrevMonth" style="font-size:18px;padding:4px 12px;min-width:40px">‹</button>
+            <span id="displayMonthYear" style="font-weight:600;font-size:15px;text-transform:capitalize">Mês Ano</span>
+            <button class="btn ghost" id="btnNextMonth" style="font-size:18px;padding:4px 12px;min-width:40px">›</button>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;margin-top:10px">
+            <label for="diaSelecionado" class="muted" style="margin-right:6px">Dia do mês</label>
+            <select id="diaSelecionado" style="padding:8px;border-radius:8px;border:1px solid #e5e7eb">
+              <option value="">Selecione o dia</option>
+            </select>
+
+            <button class="btn" id="fecharDiaBtn">Fechar Dia</button>
+            <button class="btn ghost danger" id="limparHistoricoBtn">Limpar Histórico</button>
+          </div>
+
+          <h4 style="margin-top:16px">Histórico Diário</h4>
+          <table id="tabelaDias">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Lucro Bruto</th>
+                <th>Gastos</th>
+                <th>Lucro Líquido</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gastos -->
+      <div class="panel" id="gastosPanel" style="display:none">
+        <h3>Despesas Operacionais</h3>
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <div style="flex:1">
+            <label>Gastos com Proxy (R$)</label>
+            <input type="number" id="gastoProxy" step="0.01" value="0" />
+          </div>
+          <div style="flex:1">
+            <label>Gastos com Números (R$)</label>
+            <input type="number" id="gastoNumeros" step="0.01" value="0" />
+          </div>
+        </div>
+        <div style="margin-top:12px" class="muted">Os valores são subtraídos do lucro total automaticamente.</div>
+      </div>
+
+      <!-- Plataformas -->
+      <div class="panel" id="plataformasPanel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h3 id="plataformaTitle">Plataformas</h3>
+            <div class="muted">Selecione uma plataforma na lateral ou crie uma nova.</div>
+          </div>
+          <div>
+            <button class="btn" id="addContaBtn">+ Adicionar Conta</button>
+          </div>
+        </div>
+
+        <table id="contasTable">
+          <thead>
+            <tr>
+              <th class="small">Conta</th>
+              <th>Nome</th>
+              <th class="small">Depósito (R$)</th>
+              <th class="small">Re-depósito (R$)</th>
+              <th class="small">Saque (R$)</th>
+              <th class="small">Baú (R$)</th>
+              <th>Lucro (R$)</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Dados -->
+      <div class="panel" id="dadosPanel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div>
+            <h3>Gerenciador de CPFs</h3>
+            <div class="muted">Armazene e gerencie CPFs para as contas</div>
+          </div>
+          <button class="btn" id="addNotaBtn">+ Adicionar CPF</button>
+        </div>
+
+        <div style="background:var(--card);padding:16px;border-radius:10px;margin-bottom:20px;border:1px solid #e6edf6">
+          <h4 style="margin:0 0 10px 0;font-size:15px">Importação em Massa</h4>
+          <textarea id="bulkImportArea" placeholder="Cole aqui múltiplos CPFs (um por linha)&#10;Exemplo:&#10;123.456.789-00&#10;987.654.321-00&#10;111.222.333-44" style="width:100%;min-height:120px;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:monospace;font-size:13px;resize:vertical"></textarea>
+          <div style="display:flex;gap:10px;margin-top:10px">
+            <button class="btn" id="bulkImportBtn">Importar CPFs</button>
+            <button class="btn ghost" id="removeUsedBtn">Remover CPFs Usados</button>
+          </div>
+        </div>
+
+        <div id="notasList"></div>
+      </div>
+
+      <!-- Fintech -->
+      <div class="panel" id="fintechPanel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div>
+            <h3>Fintech</h3>
+            <div class="muted">Gerencie contas Fintech com desconto de 25% nos saques</div>
+          </div>
+          <button class="btn" id="addFintechBtn">+ Adicionar Conta</button>
+        </div>
+
+        <table id="fintechTable">
+          <thead>
+            <tr>
+              <th>Nome da Conta</th>
+              <th>Saque (R$)</th>
+              <th>Valor Final (75%)</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div style="margin-top:20px;padding:16px;background:var(--card);border-radius:10px;border:1px solid #e6edf6">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:500">Total Fintech (após desconto):</span>
+            <span style="font-size:18px;font-weight:600;color:var(--success)" id="fintechTotal">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <span class="muted">v<span id="appVersionDisplay">1.0</span> • Dados salvos localmente no seu navegador.</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Generic Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="confirmModalTitle">Confirmação</h3>
+        <span class="close-modal" id="closeConfirmModal">&times;</span>
+      </div>
+      <p id="confirmModalText" style="margin: 16px 0; line-height: 1.6;"></p>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
+        <button class="btn ghost" id="confirmCancelBtn">Cancelar</button>
+        <button class="btn" id="confirmOkBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+  <!-- Modal de Notas -->
+  <div id="notesModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Notas da Conta</h3>
+        <span class="close-modal" id="closeNotesModal">&times;</span>
+      </div>
+      <div id="accountNotesList" class="notes-container">
+        <!-- Notas aparecerão aqui -->
+      </div>
+      <div class="add-note-box">
+        <input type="text" id="newAccountNote" placeholder="Escrever nova nota..." style="flex:1">
+        <button class="btn" id="saveAccountNoteBtn">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Storage key
+    const STORAGE_KEY = 'painel_financeiro_v1';
+    const APP_VERSION = '1.0'; // Mude este número quando atualizar o site
+
+    // --- App state (agora com dailyRecords)
+    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [] };
+    let saveTimer = null;
+
+    // --- Utils
+    function money(v){
+      return Number(v || 0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+
+    function formatDateKey(year, month, day){
+      // month is 1-12, pad to 2
+      const mm = String(month).padStart(2,'0');
+      const dd = String(day).padStart(2,'0');
+      return `${year}-${mm}-${dd}`;
+    }
+
+    // --- Load / Save
+    function loadData(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        try{ state = JSON.parse(raw); }
+        catch(e){ console.warn('load error',e); }
+      } else {
+        // seed example
+        state.platforms = {
+          '389win88.com': {name:'389win88.com', accounts:[{deposito:21, redeposito:0, saque:56, bau:5},{deposito:21, redeposito:0, saque:30, bau:5},{deposito:20, redeposito:0, saque:15, bau:5}]}
+        };
+        state.selectedPlatform = '389win88.com';
+      }
+
+      if (state.brandLogo) {
+        const logoEl = document.getElementById('brandLogo');
+        if (logoEl) logoEl.src = state.brandLogo;
+      }
+
+      if (!state.appTitle) state.appTitle = 'Painel Financeiro';
+      const titleEl = document.getElementById('appTitleDisplay');
+      if(titleEl) titleEl.textContent = state.appTitle;
+
+      // ensure dailyRecords exists
+      if(!state.dailyRecords) state.dailyRecords = {};
+      if(!state.notas) state.notas = [];
+      if(!state.fintechAccounts) state.fintechAccounts = [];
+      if(!state.platformOrder || state.platformOrder.length !== Object.keys(state.platforms).length) {
+        // Rebuild order if it's missing or out of sync
+        state.platformOrder = Object.keys(state.platforms);
+        scheduleSave();
+      }
+
+      // Update version display
+      const vDisplay = document.getElementById('appVersionDisplay');
+      if(vDisplay) vDisplay.textContent = APP_VERSION;
+    }
+
+    function saveData(){
+      const status = document.getElementById('saveStatus');
+      if(status) status.textContent = '💾 Salvando...';
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(STORAGE_KEY + '_backup1', JSON.stringify(state));
+
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+        const lastBackup = localStorage.getItem('lastBackupDate');
+        if(lastBackup !== today) {
+          localStorage.setItem(STORAGE_KEY + '_daily_backup', JSON.stringify(state));
+          localStorage.setItem('lastBackupDate', today);
+        }
+
+        if(status) {
+          status.textContent = '✓ Salvo';
+          setTimeout(()=> { if(status) status.textContent = 'Salvamento automático'; }, 2000);
+        }
+      } catch(e) {
+        console.error('Erro ao salvar:', e);
+        if(status) status.textContent = '⚠️ Erro ao salvar!';
+      }
+    }
+
+    function saveDataImmediate(){
+      if(saveTimer) clearTimeout(saveTimer);
+      saveData();
+    }
+
+    function scheduleSave(){
+      if(saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(()=>{ saveData(); }, 2000);
+    }
+
+    // --- UI Renderers
+    function renderPlatformsList(){
+      const container = document.getElementById('platformsList');
+      container.innerHTML='';
+      const searchTerm = document.getElementById('searchPlatforms').value.toLowerCase();
+
+      const platformOrder = state.platformOrder || Object.keys(state.platforms);
+
+      const filteredOrder = platformOrder.filter(pName => 
+        state.platforms[pName] && state.platforms[pName].name.toLowerCase().includes(searchTerm)
+      );
+
+      filteredOrder.forEach(pName => {
+        const p = state.platforms[pName];
+        if (!p) return;
+
+        const el = document.createElement('div');
+        el.className = 'platform-card';
+        el.dataset.platformName = p.name;
+        if (p.name === state.selectedPlatform) {
+          el.classList.add('selected');
+        }
+        el.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="name" style="margin-bottom:0">${p.name}</div>
+            <button class="btn ghost btn-edit-plat" style="padding:2px 6px;font-size:12px;border:none;opacity:0.7" title="Renomear">✏️</button>
+          </div>
+          <div class="details">
+            <div class="count">${p.accounts.length} contas</div>
+            <div class="actions">
+              <button class="btn ghost btn-open">Abrir</button>
+              <button class="btn ghost btn-delete" title="Remover plataforma">🗑️</button>
+            </div>
+          </div>
+        `;
+        
+        el.onclick = (e) => {
+          if (e.target.closest('button')) return;
+          selectPlatform(p.name);
+        };
+        el.querySelector('.btn-edit-plat').onclick = (e) => {
+            e.stopPropagation();
+            const newName = prompt('Novo nome para a plataforma:', p.name);
+            if(newName && newName.trim() !== '' && newName !== p.name) {
+                if(state.platforms[newName]) return alert('Já existe uma plataforma com este nome.');
+                
+                // Copy and delete
+                state.platforms[newName] = state.platforms[p.name];
+                state.platforms[newName].name = newName;
+                delete state.platforms[p.name];
+                
+                const idx = state.platformOrder.indexOf(p.name);
+                if(idx !== -1) state.platformOrder[idx] = newName;
+                
+                if(state.selectedPlatform === p.name) state.selectedPlatform = newName;
+                
+                saveDataImmediate();
+                updateUI();
+            }
+        };
+        el.querySelector('.btn-open').onclick = () => selectPlatform(p.name);
+        el.querySelector('.btn-delete').onclick = () => {
+          showConfirm(`Tem certeza que deseja remover a plataforma <strong>"${p.name}"</strong> e todas as suas contas? <br><br>Esta ação não pode ser desfeita.`, () => {
+              delete state.platforms[p.name];
+
+              const index = state.platformOrder.indexOf(p.name);
+              if (index > -1) {
+                state.platformOrder.splice(index, 1);
+              }
+
+              if(state.selectedPlatform === p.name) {
+                state.selectedPlatform = state.platformOrder[0] || null;
+                if (!state.selectedPlatform) { selectView('dashboard'); }
+              }
+              saveDataImmediate();
+              updateUI();
+          }, { isDanger: true, title: 'Remover Plataforma' });
+        };
+        container.appendChild(el);
+      });
+    }
+
+    function renderSummary(){
+      const tbody = document.querySelector('#summaryTable tbody'); tbody.innerHTML='';
+      let totalAccounts=0, totalLucro=0;
+      
+        const sortBy = document.getElementById('sortPlatforms')?.value || 'name';
+  
+        const platformsData = Object.values(state.platforms).map(p => {
+        const lucroPlat = p.accounts.reduce((s,a)=>
+        s + (((a.saque||0) + (a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+        return {
+        platform: p,
+        name: p.name,
+      lucro: lucroPlat,
+createdAt: p.createdAt || new Date().toISOString()
+      };
+      });
+        
+          if(sortBy === 'name') {
+          platformsData.sort((a, b) => a.name.localeCompare(b.name));
+        } else if(sortBy === 'profit') {
+        platformsData.sort((a, b) => b.lucro - a.lucro);
+      } else if(sortBy === 'date') {
+platformsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      
+platformsData.forEach(data => {
+      const p = data.platform;
+      const lucroPlat = data.lucro;
+      totalAccounts += p.accounts.length;
+      totalLucro += lucroPlat;
+const tr = document.createElement('tr');
+      const lucroClass = lucroPlat >= 0 ? 'lucro' : 'negative';
+      tr.innerHTML = `<td>${p.name}</td><td>${p.accounts.length}</td><td class="${lucroClass}">R$ ${money(lucroPlat)}</td>`;
+      tbody.appendChild(tr);
+      });
+
+      let totalFintech = 0;
+      if(state.fintechAccounts){
+      state.fintechAccounts.forEach(acc => {
+      const saque = Number(acc.saque) || 0;
+      totalFintech += saque * 0.75;
+});
+      totalLucro += totalFintech;
+      }
+      
+      document.getElementById('totalContas').textContent = totalAccounts;
+      
+        const lucroBrutoEl = document.getElementById('lucroBruto');
+        const lucroBrutoClass = totalLucro >= 0 ? 'lucro' : 'negative';
+        lucroBrutoEl.textContent = money(totalLucro);
+      lucroBrutoEl.className = lucroBrutoClass;
+
+      const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0);
+      const gastosTotalEl = document.getElementById('gastosTotal');
+      gastosTotalEl.textContent = money(gastos);
+      gastosTotalEl.className = 'negative';
+        
+      const lucroFinal = totalLucro - gastos;
+    const lucroTotalDisplayEl = document.getElementById('lucroTotalDisplay');
+    const lucroFinalClass = lucroFinal >= 0 ? 'lucro' : 'negative';
+    lucroTotalDisplayEl.textContent = `R$ ${money(lucroFinal)}`;
+    lucroTotalDisplayEl.className = lucroFinalClass;
+    
+    let somaDias = 0;
+    const filteredRecords = getFilteredRecords();
+    Object.values(filteredRecords || {}).forEach(r => { somaDias += Number(r && r.lucroLiquido ? r.lucroLiquido : 0); });
+    const lucroTotalDiasEl = document.getElementById('lucroTotalDias');
+    if(lucroTotalDiasEl) {
+    const somaDiasClass = somaDias >= 0 ? 'lucro' : 'negative';
+    lucroTotalDiasEl.textContent = `R$ ${money(somaDias)}`;
+    lucroTotalDiasEl.className = somaDiasClass;
+    }
+    
+    const cpfsDisponiveis = state.notas.filter(n => !n.used).length;
+    const cpfsDisponiveisEl = document.getElementById('cpfsDisponiveis');
+    if(cpfsDisponiveisEl) {
+    cpfsDisponiveisEl.textContent = cpfsDisponiveis;
+    }
+    }
+
+    function renderContas(){
+      const tbody = document.querySelector('#contasTable tbody'); tbody.innerHTML='';
+      const platform = state.selectedPlatform;
+      if(!platform || !state.platforms[platform]) return;
+      const accounts = state.platforms[platform].accounts;
+      accounts.forEach((acc,i)=>{
+        if(!acc.name) acc.name = '';
+        const notesCount = acc.notes ? acc.notes.length : 0;
+
+        const tr = document.createElement('tr');
+        const lucro = ((acc.saque||0) + (acc.bau||0)) - ((acc.deposito||0) + (acc.redeposito||0));
+        const lucroClass = lucro >= 0 ? 'lucro' : 'negative';
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td><input type="text" class="inp inp-name" value="${acc.name||''}" placeholder="Nome da conta" style="width:160px;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
+          <td><input type="number" class="inp deposito" value="${acc.deposito||0}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td><input type="number" class="inp redeposito" value="${acc.redeposito||0}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td><input type="number" class="inp saque" value="${acc.saque||0}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td><input type="number" class="inp bau" value="${acc.bau||0}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td class="${lucroClass} lucro-cell">R$ ${money(lucro)}</td>
+          <td class="actions" style="display:flex;gap:4px;justify-content:flex-end">
+            <div class="btn-notes-container">
+              <button class="btn ghost btn-notes">📝</button>
+              ${notesCount > 0 ? `<span class="notes-badge">${notesCount}</span>` : ''}
+            </div>
+            <button class="btn ghost del">X</button>
+          </td>
+        `;
+        const lucroCell = tr.querySelector('.lucro-cell');
+
+        tr.querySelector('.inp-name').addEventListener('input', (e)=>{
+          state.platforms[platform].accounts[i].name = e.target.value;
+          scheduleSave();
+        });
+
+        tr.querySelectorAll('.inp:not(.inp-name)').forEach((input)=>{
+        input.addEventListener('input', (e)=>{
+            const rowIdx = i;
+            const row = state.platforms[platform].accounts[rowIdx];
+            row.deposito = Number(tr.querySelector('.deposito').value) || 0;
+            row.redeposito = Number(tr.querySelector('.redeposito').value) || 0;
+            row.saque = Number(tr.querySelector('.saque').value) || 0;
+            row.bau = Number(tr.querySelector('.bau').value) || 0;
+            const newLucro = ((row.saque||0) + (row.bau||0)) - ((row.deposito||0) + (row.redeposito||0));
+            const newLucroClass = newLucro >= 0 ? 'lucro' : 'negative';
+            lucroCell.textContent = `R$ ${money(newLucro)}`;
+            lucroCell.className = `${newLucroClass} lucro-cell`;
+            scheduleSave();
+        });
+        input.addEventListener('blur', ()=>{
+            renderSummary();
+            renderDiasTabela();
+        });
+        input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.target.blur(); } });
+    });
+        
+        tr.querySelector('.btn-notes').onclick = () => { openNotesModal(platform, i); };
+        tr.querySelector('.del').onclick = ()=>{ 
+          showConfirm('Tem certeza que deseja remover esta conta?', () => {
+            state.platforms[platform].accounts.splice(i,1); scheduleSave(); renderContas(); renderPlatformsList(); renderSummary(); renderDiasTabela(); 
+          }, { isDanger: true, title: 'Remover Conta' });
+        };
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderDiasTabela(){
+      const tbody = document.querySelector("#tabelaDias tbody");
+      if(!tbody) return;
+      tbody.innerHTML = "";
+
+      const records = getFilteredRecords();
+      const keys = Object.keys(records).sort((a,b)=> b.localeCompare(a));
+      keys.forEach(dateKey=>{
+        const r = records[dateKey];
+        const tr = document.createElement("tr");
+        const lucroBrutoClass = r.lucroBruto >= 0 ? 'lucro' : 'negative';
+        const lucroLiquidoClass = r.lucroLiquido >= 0 ? 'lucro' : 'negative';
+        tr.innerHTML = `
+          <td>${dateKey}</td>
+          <td class="${lucroBrutoClass}">R$ ${money(r.lucroBruto)}</td>
+          <td class="negative">R$ ${money(r.gastos)}</td>
+          <td class="${lucroLiquidoClass}">R$ ${money(r.lucroLiquido)}</td>
+          <td class="actions"><button class="btn ghost del-day">X</button></td>
+        `;
+
+        tr.querySelector('.del-day').addEventListener('click', () => {
+          showConfirm(`Deseja realmente excluir o registro do dia <strong>${dateKey}</strong>?<br><br>Lucro Líquido: R$ ${money(r.lucroLiquido)}<br><br>Esta ação não pode ser desfeita.`, () => {
+              delete state.dailyRecords[dateKey];
+              saveDataImmediate();
+              renderDiasTabela();
+              renderSummary();
+              renderKPIs();
+              renderDailyProfitChart();
+          }, { isDanger: true, title: 'Excluir Registro do Dia' });
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderKPIs(){
+      const records = Object.values(getFilteredRecords() || {});
+
+      if(records.length === 0){
+        document.getElementById('kpiMediaDiaria').textContent = 'R$ 0,00';
+        document.getElementById('kpiMelhorDia').textContent = '-';
+        document.getElementById('kpiMelhorDiaValor').textContent = 'R$ 0,00';
+        document.getElementById('kpiPiorDia').textContent = '-';
+        document.getElementById('kpiPiorDiaValor').textContent = 'R$ 0,00';
+        document.getElementById('kpiTotalDias').textContent = '0';
+        document.getElementById('kpiTaxaSucesso').textContent = '0%';
+        document.getElementById('kpiLucroMedioConta').textContent = 'R$ 0,00';
+        return;
+      }
+
+      const totalLucro = records.reduce((sum, r) => sum + (r.lucroLiquido || 0), 0);
+      const mediaDiaria = totalLucro / records.length;
+
+      let melhorDia = null;
+      let piorDia = null;
+      let melhorValor = -Infinity;
+      let piorValor = Infinity;
+
+      const diasPositivos = records.filter(r => (r.lucroLiquido || 0) > 0).length;
+      const taxaSucesso = (diasPositivos / records.length) * 100;
+
+      const filtered = getFilteredRecords();
+      Object.keys(filtered).forEach(dateKey => {
+        const r = filtered[dateKey];
+        const lucro = r.lucroLiquido || 0;
+
+        if(lucro > melhorValor){
+          melhorValor = lucro;
+          melhorDia = dateKey;
+        }
+
+        if(lucro < piorValor){
+          piorValor = lucro;
+          piorDia = dateKey;
+        }
+      });
+
+      let totalContas = 0;
+      Object.values(state.platforms).forEach(p => {
+        totalContas += p.accounts.length;
+      });
+      const lucroMedioConta = totalContas > 0 ? totalLucro / totalContas : 0;
+
+      document.getElementById('kpiMediaDiaria').textContent = `R$ ${money(mediaDiaria)}`;
+      document.getElementById('kpiMelhorDia').textContent = melhorDia || '-';
+      document.getElementById('kpiMelhorDiaValor').textContent = `R$ ${money(melhorValor === -Infinity ? 0 : melhorValor)}`;
+      document.getElementById('kpiPiorDia').textContent = piorDia || '-';
+      document.getElementById('kpiPiorDiaValor').textContent = `R$ ${money(piorValor === Infinity ? 0 : piorValor)}`;
+      document.getElementById('kpiTotalDias').textContent = records.length;
+      document.getElementById('kpiTaxaSucesso').textContent = `${Math.round(taxaSucesso)}%`;
+      document.getElementById('kpiLucroMedioConta').textContent = `R$ ${money(lucroMedioConta)}`;
+    }
+
+    function updateUI(){
+      // Sincroniza os inputs de gastos com o estado, garantindo que a UI reflita o state
+      const gp = document.getElementById('gastoProxy');
+      const gn = document.getElementById('gastoNumeros');
+      if(gp) gp.value = state.gastoProxy || 0;
+      if(gn) gn.value = state.gastoNumeros || 0;
+
+      renderPlatformsList();
+      renderSummary();
+      renderContas();
+      renderDiasTabela();
+      renderKPIs();
+      renderNotas();
+      renderFintech();
+      renderFilterHeader();
+    }
+    
+    let dailyChart = null;
+
+    // --- Actions
+    function selectView(view){
+      let title = view.charAt(0).toUpperCase()+view.slice(1);
+      if (view === 'dados') {
+        title = 'CPFs';
+      }
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('dashboardPanel').style.display = view==='dashboard'? 'block' : 'none';
+      document.getElementById('gastosPanel').style.display = view==='gastos'? 'block' : 'none';
+      document.getElementById('plataformasPanel').style.display = view==='plataformas'? 'block' : 'none';
+      document.getElementById('dadosPanel').style.display = view==='dados'? 'block' : 'none';
+      document.getElementById('fintechPanel').style.display = view==='fintech'? 'block' : 'none';
+    }
+
+    function selectPlatform(name){
+      state.selectedPlatform = name; scheduleSave();
+      // switch to platforms view
+      selectView('plataformas');
+      document.getElementById('plataformaTitle').textContent = name;
+      updateUI();
+    }
+
+    // --- Event listeners (buttons, inputs)
+    document.getElementById('addPlatformBtn').onclick = ()=>{
+      const v = document.getElementById('newPlatformName').value.trim();
+      if(!v) return alert('Digite o nome da plataforma');
+      if(state.platforms[v]) return alert('Plataforma já existe');
+      state.platforms[v] = {name:v, accounts:[], createdAt: new Date().toISOString()};
+      if(!state.platformOrder) state.platformOrder = [];
+      state.platformOrder.push(v);
+      document.getElementById('newPlatformName').value='';
+      scheduleSave(); updateUI();
+      setTimeout(() => {
+        const inp = document.getElementById('newPlatformName');
+        if(inp) inp.focus();
+      }, 100);
+    };
+
+    document.getElementById('addContaBtn').onclick = ()=>{
+      const p = state.selectedPlatform || Object.keys(state.platforms)[0];
+      if(!p) return alert('Crie uma plataforma primeiro');
+      state.platforms[p].accounts.push({deposito:0,redeposito:0,saque:0, bau:0});
+      scheduleSave(); updateUI(); renderContas();
+      setTimeout(() => {
+        const firstInput = document.querySelector('#contasTable tbody tr:last-child .inp.deposito');
+        if(firstInput) firstInput.focus();
+      }, 100);
+    }
+
+    document.getElementById('searchPlatforms').addEventListener('input', renderPlatformsList);
+
+    document.querySelectorAll('nav .nav-item').forEach(it=>{
+      it.addEventListener('click',()=>{ selectView(it.dataset.view); });
+    });
+
+    const sortDropdown = document.getElementById('sortPlatforms');
+    if(sortDropdown) {
+      sortDropdown.addEventListener('change', () => {
+        renderSummary();
+      });
+    }
+
+    document.getElementById('showKpiBtn').addEventListener('click', () => {
+        document.getElementById('kpiContainer').style.display = 'block';
+        document.getElementById('chartContainer').style.display = 'none';
+        document.getElementById('showKpiBtn').classList.add('active');
+        document.getElementById('showChartBtn').classList.remove('active');
+    });
+
+    document.getElementById('showChartBtn').addEventListener('click', () => {
+        document.getElementById('kpiContainer').style.display = 'none';
+        document.getElementById('chartContainer').style.display = 'block';
+        document.getElementById('showChartBtn').classList.add('active');
+        document.getElementById('showKpiBtn').classList.remove('active');
+        renderDailyProfitChart(); // Render chart when shown
+    });
+
+    function renderDailyProfitChart() {
+        const ctx = document.getElementById('dailyProfitChart').getContext('2d');
+        if (!ctx) return;
+
+        const isDark = document.body.classList.contains('dark');
+        const textColor = isDark ? '#9ca3af' : '#6b7684';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
+        const records = getFilteredRecords();
+        const sortedKeys = Object.keys(records).sort((a, b) => a.localeCompare(b));
+
+        const labels = sortedKeys.map(key => key.split('-')[2]); // Just the day
+        const data = sortedKeys.map(key => records[key].lucroLiquido);
+
+        const backgroundColors = data.map(value => value >= 0 ? 'rgba(23, 177, 105, 0.8)' : 'rgba(255, 77, 79, 0.8)');
+        const hoverColors = data.map(value => value >= 0 ? 'rgba(23, 177, 105, 1)' : 'rgba(255, 77, 79, 1)');
+
+        if (dailyChart) {
+            dailyChart.destroy();
+        }
+
+        dailyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Lucro Líquido',
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    hoverBackgroundColor: hoverColors,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor,
+                            borderDash: [3, 3],
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: textColor,
+                            font: { family: "'Inter', sans-serif", size: 11 },
+                            callback: function(value) { return value.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL', maximumFractionDigits: 0}); }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: textColor,
+                            font: { family: "'Inter', sans-serif", size: 11 }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: isDark ? '#2a2d33' : '#ffffff',
+                        titleColor: isDark ? '#e6eef8' : '#17233b',
+                        bodyColor: isDark ? '#e6eef8' : '#17233b',
+                        borderColor: isDark ? '#333' : '#e6edf6',
+                        borderWidth: 1,
+                        padding: 12,
+                        titleFont: { family: "'Inter', sans-serif", size: 13 },
+                        bodyFont: { family: "'Inter', sans-serif", size: 13 },
+                        callbacks: { label: (ctx) => `Lucro: R$ ${money(ctx.parsed.y)}` },
+                        displayColors: false,
+                        cornerRadius: 8,
+                        boxPadding: 4
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+    }
+
+    document.getElementById('addNotaBtn').onclick = ()=>{
+      state.notas.unshift({text:'', used: false, createdAt: new Date().toISOString()});
+      scheduleSave();
+      renderNotas();
+    };
+
+    function renderNotas(){
+      const container = document.getElementById('notasList');
+      if(!container) return;
+      container.innerHTML = '';
+      (state.notas || []).forEach((nota, i)=>{
+        const card = document.createElement('div');
+        card.className = 'note-card';
+        if(nota.used) card.classList.add('used');
+
+        const cpfText = document.createElement('div');
+        cpfText.className = 'cpf-text';
+        cpfText.textContent = nota.text || 'CPF não informado';
+
+        const rightSection = document.createElement('div');
+        rightSection.style.display = 'flex';
+        rightSection.style.alignItems = 'center';
+        rightSection.style.gap = '8px';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = 'Copiar';
+        copyBtn.className = 'btn ghost';
+        copyBtn.style.padding = '4px 8px';
+        copyBtn.onclick = () => {
+          if(!nota.text) return;
+          navigator.clipboard.writeText(nota.text).then(() => {
+            state.notas[i].used = true;
+            copyBtn.textContent = 'Copiado!';
+            setTimeout(() => { copyBtn.textContent = 'Copiar'; }, 1500);
+            
+            saveDataImmediate();
+            renderNotas();
+            renderSummary();
+          }).catch(err => {
+            console.error('Falha ao copiar:', err);
+            alert('Não foi possível copiar o texto.');
+          });
+        };
+
+        const usedLabel = document.createElement('span');
+        usedLabel.textContent = 'CPF usado';
+        usedLabel.style.fontSize = '12px';
+        usedLabel.style.color = 'var(--success)';
+        usedLabel.style.fontWeight = '500';
+        usedLabel.style.display = nota.used ? 'block' : 'none';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = nota.used || false;
+        checkbox.addEventListener('change', ()=>{
+          state.notas[i].used = checkbox.checked;
+          saveDataImmediate();
+          renderNotas();
+          renderSummary();
+        });
+
+        rightSection.appendChild(copyBtn);
+        rightSection.appendChild(usedLabel);
+        rightSection.appendChild(checkbox);
+        card.appendChild(cpfText);
+        card.appendChild(rightSection);
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('bulkImportBtn').addEventListener('click', async ()=>{
+      const textarea = document.getElementById('bulkImportArea');
+      const text = textarea.value.trim();
+      if(!text) return alert('Cole os CPFs no campo acima, um por linha.');
+
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+      if(lines.length === 0) return alert('Nenhum CPF válido encontrado.');
+
+      lines.forEach(cpf => {
+        state.notas.push({text: cpf, used: false, createdAt: new Date().toISOString()});
+      });
+
+      textarea.value = '';
+      saveData();
+      renderSummary();
+      renderNotas();
+      alert(`${lines.length} CPF(s) importado(s) com sucesso!`);
+    });
+
+    document.getElementById('removeUsedBtn').addEventListener('click', ()=>{
+      const usedCount = state.notas.filter(n => n.used).length;
+      if(usedCount === 0) return showAlert('Nenhum CPF marcado como usado.');
+      
+      showConfirm(`Remover <strong>${usedCount}</strong> CPF(s) marcado(s) como usado?`, () => {
+        state.notas = state.notas.filter(n => !n.used);
+        saveData();
+        renderSummary();
+        renderNotas();
+      }, { isDanger: true, title: 'Remover CPFs Usados' });
+    });
+
+    function renderFintech(){
+      const tbody = document.querySelector('#fintechTable tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+
+      let totalFinal = 0;
+
+      state.fintechAccounts.forEach((acc, i) => {
+        const saque = Number(acc.saque) || 0;
+        const valorFinal = saque * 0.75;
+        totalFinal += valorFinal;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" class="inp-name" value="${acc.name || ''}" placeholder="Nome da conta" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
+          <td><input type="number" class="inp-saque" value="${saque}" step="0.01" style="width:120px;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
+          <td class="valor-final lucro">R$ ${money(valorFinal)}</td>
+          <td class="actions"><button class="btn ghost del-fintech">X</button></td>
+        `;
+
+        tr.querySelector('.inp-name').addEventListener('input', (e) => {
+          state.fintechAccounts[i].name = e.target.value;
+          scheduleSave();
+        });
+
+        tr.querySelector('.inp-saque').addEventListener('input', (e) => {
+          const newSaque = Number(e.target.value) || 0;
+          state.fintechAccounts[i].saque = newSaque;
+
+          const newValorFinal = newSaque * 0.75;
+          const valorFinalCell = tr.querySelector('.valor-final');
+          valorFinalCell.textContent = `R$ ${money(newValorFinal)}`;
+
+          let newTotal = 0;
+          state.fintechAccounts.forEach(acc => {
+            newTotal += (Number(acc.saque) || 0) * 0.75;
+          });
+          const totalEl = document.getElementById('fintechTotal');
+          if(totalEl) totalEl.textContent = `R$ ${money(newTotal)}`;
+
+          scheduleSave();
+          renderSummary();
+        });
+
+        tr.querySelector('.del-fintech').addEventListener('click', () => {
+          showConfirm('Tem certeza que deseja remover esta conta Fintech?', () => {
+              state.fintechAccounts.splice(i, 1);
+              scheduleSave();
+              renderFintech();
+              renderSummary();
+          }, { isDanger: true, title: 'Remover Conta Fintech' });
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      const totalEl = document.getElementById('fintechTotal');
+      if(totalEl) totalEl.textContent = `R$ ${money(totalFinal)}`;
+    }
+
+    document.getElementById('addFintechBtn').addEventListener('click', () => {
+      state.fintechAccounts.push({ name: '', saque: 0 });
+      scheduleSave();
+      renderFintech();
+    });
+
+    // gastos inputs
+    document.getElementById('gastoProxy').addEventListener('input', (e)=>{
+      const val = Number(e.target.value)||0;
+      if(val < 0) {
+        e.target.value = 0;
+        alert('Valores negativos não são permitidos');
+        return;
+      }
+      state.gastoProxy = val;
+      scheduleSave();
+      renderSummary();
+      renderDiasTabela();
+    });
+
+    document.getElementById('gastoNumeros').addEventListener('input', (e)=>{
+      const val = Number(e.target.value)||0;
+      if(val < 0) {
+        e.target.value = 0;
+        alert('Valores negativos não são permitidos');
+        return;
+      }
+      state.gastoNumeros = val;
+      scheduleSave();
+      renderSummary();
+      renderDiasTabela();
+    });
+
+    // fechar dia button (OPÇÃO B — manual)
+    document.getElementById('fecharDiaBtn').addEventListener('click', ()=>{
+      const diaSel = document.getElementById('diaSelecionado').value;
+      if(!diaSel){
+        return showAlert('Selecione o dia do mês que deseja fechar.');
+      }
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const day = Number(diaSel);
+      const dateKey = formatDateKey(year, month, day);
+
+      // Calcula o lucro bruto total, incluindo plataformas e fintech
+      let totalLucroPlataformas = 0;
+      Object.values(state.platforms).forEach(p=>{
+        totalLucroPlataformas += p.accounts.reduce((s,a)=>
+    s + (((a.saque||0) + (a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+      });
+
+      let totalFintech = 0;
+      if(state.fintechAccounts){
+        state.fintechAccounts.forEach(acc => {
+          totalFintech += (Number(acc.saque) || 0) * 0.75;
+        });
+      }
+
+      const totalLucro = totalLucroPlataformas + totalFintech;
+      const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0);
+      const lucroFinal = totalLucro - gastos;
+
+      const message = `Deseja fechar o dia <strong>${dateKey}</strong>?<br><br>
+                       Lucro Bruto: R$ ${totalLucro.toFixed(2)}<br>
+                       Gastos: R$ ${gastos.toFixed(2)}<br>
+                       <strong>Lucro Líquido: R$ ${lucroFinal.toFixed(2)}</strong><br><br>
+                       <strong style="color:var(--danger)">ATENÇÃO:</strong> Todos os valores de plataformas, fintech e gastos serão <strong>ZERADOS</strong>. Esta ação é irreversível.`;
+
+      showConfirm(message, () => {
+          state.dailyRecords[dateKey] = {
+            lucroBruto: totalLucro,
+            gastos: gastos,
+            lucroLiquido: lucroFinal,
+            savedAt: new Date().toISOString()
+          };
+          state.gastoProxy = 0;
+          state.gastoNumeros = 0;
+          state.platforms = {};
+          state.selectedPlatform = null;
+          state.fintechAccounts = [];
+          saveDataImmediate();
+          updateUI();
+      }, { isDanger: true, title: 'Fechar o Dia e Zerar Contas?', okText: 'Sim, Fechar o Dia' });
+    });
+
+    // limpar histórico (opcional)
+    document.getElementById('limparHistoricoBtn').addEventListener('click', ()=>{
+      showConfirm('Deseja limpar <strong>TODO</strong> o histórico diário? <br><br>Esta ação é irreversível.', () => {
+          state.dailyRecords = {};
+          saveDataImmediate();
+          updateUI();
+      }, { isDanger: true, title: 'Limpar Histórico' });
+    });
+
+    // populate day select (1..31)
+    function populateDaySelect(){
+      const sel = document.getElementById('diaSelecionado');
+      sel.innerHTML = '<option value="">Selecione o dia</option>';
+      for(let i=1;i<=31;i++){
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = String(i);
+        sel.appendChild(opt);
+      }
+    }
+
+    // --- Filter Logic
+    let filterDate = new Date();
+
+    function getFilteredRecords() {
+      const year = filterDate.getFullYear();
+      const month = String(filterDate.getMonth() + 1).padStart(2, '0');
+      const prefix = `${year}-${month}-`;
+      
+      const filtered = {};
+      Object.keys(state.dailyRecords).forEach(key => {
+        if(key.startsWith(prefix)) {
+          filtered[key] = state.dailyRecords[key];
+        }
+      });
+      return filtered;
+    }
+
+    function renderFilterHeader() {
+      const el = document.getElementById('displayMonthYear');
+      if(el) {
+        const opt = { month: 'long', year: 'numeric' };
+        el.textContent = filterDate.toLocaleDateString('pt-BR', opt);
+      }
+      const title = document.getElementById('lucroMesTitle');
+      if(title) {
+         const monthName = filterDate.toLocaleDateString('pt-BR', { month: 'long' });
+         title.textContent = `Lucro de ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} (Dias Fechados)`;
+      }
+    }
+
+    document.getElementById('btnPrevMonth').addEventListener('click', () => {
+      filterDate.setMonth(filterDate.getMonth() - 1);
+      updateUI();
+    });
+    document.getElementById('btnNextMonth').addEventListener('click', () => {
+      filterDate.setMonth(filterDate.getMonth() + 1);
+      updateUI();
+    });
+
+    // --- Custom Modal Logic
+    let confirmCallback = null;
+
+    function showConfirm(message, onConfirm, {title = 'Confirmação', okText = 'Confirmar', cancelText = 'Cancelar', isDanger = false} = {}) {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalText').innerHTML = message;
+        
+        const okBtn = document.getElementById('confirmOkBtn');
+        const cancelBtn = document.getElementById('confirmCancelBtn');
+
+        okBtn.textContent = okText;
+        cancelBtn.textContent = cancelText;
+
+        okBtn.classList.remove('danger');
+        if (isDanger) okBtn.classList.add('danger');
+
+        confirmCallback = onConfirm;
+        document.getElementById('confirmModal').style.display = 'block';
+    }
+
+    function hideConfirm() {
+        document.getElementById('confirmModal').style.display = 'none';
+        confirmCallback = null;
+    }
+
+    document.getElementById('confirmOkBtn').addEventListener('click', () => {
+        if (typeof confirmCallback === 'function') {
+            confirmCallback();
+        }
+        hideConfirm();
+    });
+    document.getElementById('confirmCancelBtn').addEventListener('click', hideConfirm);
+    document.getElementById('closeConfirmModal').addEventListener('click', hideConfirm);
+    // --- End Custom Modal Logic
+
+    // --- Notas por Conta Logic
+    let currentEditingAccount = { platform: null, index: null };
+
+    function openNotesModal(platform, index) {
+      currentEditingAccount = { platform, index };
+      const acc = state.platforms[platform].accounts[index];
+      if(!acc.notes) acc.notes = [];
+
+      document.getElementById('modalTitle').textContent = `Notas: ${acc.name || 'Conta ' + (index + 1)}`;
+      renderAccountNotes();
+      document.getElementById('notesModal').style.display = 'block';
+    }
+
+    function renderAccountNotes() {
+      const container = document.getElementById('accountNotesList');
+      container.innerHTML = '';
+      const acc = state.platforms[currentEditingAccount.platform].accounts[currentEditingAccount.index];
+
+      if(!acc.notes || acc.notes.length === 0) {
+        container.innerHTML = '<div class="muted" style="text-align:center;padding:20px">Nenhuma nota adicionada.</div>';
+        return;
+      }
+
+      acc.notes.forEach((note, i) => {
+        const div = document.createElement('div');
+        div.className = 'note-item';
+        div.innerHTML = `<span>${note}</span><button class="btn ghost" style="padding:2px 6px;color:var(--danger);border-color:transparent" onclick="deleteAccountNote(${i})">remover</button>`;
+        container.appendChild(div);
+      });
+    }
+
+    window.deleteAccountNote = (i) => {
+      const acc = state.platforms[currentEditingAccount.platform].accounts[currentEditingAccount.index];
+      acc.notes.splice(i, 1);
+      scheduleSave();
+      renderAccountNotes();
+      renderContas();
+    };
+
+    document.getElementById('saveAccountNoteBtn').onclick = () => {
+      const input = document.getElementById('newAccountNote');
+      const text = input.value.trim();
+      if(!text) return;
+
+      const acc = state.platforms[currentEditingAccount.platform].accounts[currentEditingAccount.index];
+      if(!acc.notes) acc.notes = [];
+      acc.notes.push(text);
+
+      input.value = '';
+      scheduleSave();
+      renderAccountNotes();
+      renderContas();
+    };
+
+    document.getElementById('closeNotesModal').onclick = () => {
+      document.getElementById('notesModal').style.display = 'none';
+    };
+
+    window.onclick = (event) => {
+      if (event.target == document.getElementById('notesModal')) {
+        document.getElementById('notesModal').style.display = 'none';
+      }
+      if (event.target == document.getElementById('confirmModal')) {
+        hideConfirm();
+      }
+    };
+
+    // --- init
+    loadData();
+    // ensure gasto inputs exist and set their values
+    const gp = document.getElementById('gastoProxy');
+    const gn = document.getElementById('gastoNumeros');
+    if(gp) gp.value = state.gastoProxy || 0;
+    if(gn) gn.value = state.gastoNumeros || 0;
+
+    // ensure selected platform exists
+    if(!state.selectedPlatform) state.selectedPlatform = Object.keys(state.platforms)[0] || null;
+
+    populateDaySelect();
+
+    document.getElementById('logoUpload').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataUrl = e.target.result;
+            document.getElementById('brandLogo').src = dataUrl;
+            state.brandLogo = dataUrl;
+            saveDataImmediate();
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('editAppTitleBtn').addEventListener('click', () => {
+        const current = state.appTitle || 'Painel Financeiro';
+        const newTitle = prompt('Novo nome do Painel:', current);
+        if(newTitle && newTitle.trim() !== '') {
+            state.appTitle = newTitle.trim();
+            document.getElementById('appTitleDisplay').textContent = state.appTitle;
+            saveDataImmediate();
+        }
+    });
+
+    const platformsListEl = document.getElementById('platformsList');
+    if (platformsListEl) {
+        new Sortable(platformsListEl, {
+            animation: 150,
+            onEnd: function (evt) {
+                const newOrder = Array.from(evt.to.children).map(el => el.dataset.platformName);
+                state.platformOrder = newOrder;
+                saveDataImmediate();
+            }
+        });
+    }
+
+    updateUI();
+    selectView('dashboard');
+
+    window.addEventListener('beforeunload', (e) => {
+      if(saveTimer) {
+        clearTimeout(saveTimer);
+        saveData();
+      }
+    });
+
+    // autosave indicator change back to muted after some seconds
+    setInterval(()=>{ const s = document.getElementById('saveStatus'); if(s) s.textContent = 'Salvamento automático: salvo no navegador'; }, 5000);
+
+    // keyboard shortcuts: Ctrl+S to save, Ctrl+E to export
+    document.addEventListener('keydown', (e) => {
+      if(e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveDataImmediate();
+        const status = document.getElementById('saveStatus');
+        if(status) {
+          status.textContent = '✓ Salvo manualmente (Ctrl+S)';
+          setTimeout(() => { if(status) status.textContent = 'Salvamento automático: salvo no navegador'; }, 3000);
+        }
+      }
+      if(e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        window.exportData();
+      }
+    });
+
+    // export/import shortcuts (dev)
+
+window.exportData = ()=>{ const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(state)); a.download='painel_export.json'; a.click(); };
+    window.importData = (raw)=>{ try{ state = JSON.parse(raw); scheduleSave(); updateUI(); alert('Importado com sucesso'); }catch(e){ alert('Erro ao importar'); }};
+  
+
+// Improved theme toggle: explicitly sets CSS variables for dark and light to ensure full switch
+(function(){
+  const root = document.documentElement;
+  const setVars = (vars) => {
+    Object.keys(vars).forEach(k => root.style.setProperty(k, vars[k]));
+  };
+
+  const darkVars = {
+    '--bg': '#0f1115',
+    '--card': '#1a1d22',
+    '--muted': '#9ca3af',
+    '--accent': '#3b82f6',
+    '--success': '#17b169',
+    '--danger': '#ff4d4f'
+  };
+
+  const lightVars = {
+    '--bg': '#e8ecf1',
+    '--card': '#f0f3f7',
+    '--muted': '#6b7684',
+    '--accent': '#2b7be4',
+    '--success': '#17b169',
+    '--danger': '#ff4d4f'
+  };
+
+  const applyTheme = (theme) => {
+    if(theme === 'dark') {
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+      setVars(darkVars);
+    } else {
+      document.body.classList.remove('dark');
+      document.body.classList.add('light');
+      setVars(lightVars);
+    }
+  };
+
+  // init from storage or system preference
+  const saved = localStorage.getItem('temaPainel');
+  if(saved === 'dark' || saved === 'light') {
+    applyTheme(saved);
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+  }
+
+  // wire toggle button (if exists) to flip theme
+  const btn = document.getElementById('toggleTheme');
+  if(btn) {
+    btn.addEventListener('click', ()=>{
+      const current = document.body.classList.contains('dark') ? 'dark' : 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('temaPainel', next);
+      if(typeof renderDailyProfitChart === 'function' && document.getElementById('chartContainer').style.display !== 'none') {
+        renderDailyProfitChart();
+      }
+    });
+  }
+})();
+
+</script>
+</body>
+</html>
