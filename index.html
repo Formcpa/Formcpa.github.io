@@ -89,7 +89,7 @@
     /* main content */
     main{margin-left:340px;padding:28px;flex:1}
     header.top{display:flex;align-items:center;justify-content:space-between}
-    .cards{display:flex;gap:18px;margin-top:14px}
+    .cards{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
     .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:var(--shadow);min-width:200px}
     .card h3{margin:0;font-size:13px;color:var(--muted)}
     .card p{font-size:20px;margin:8px 0 0;font-weight:600}
@@ -100,6 +100,11 @@
     .row{display:flex;gap:12px;align-items:center}
     .field{flex:1}
     label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    
+    .header-left { display:flex; align-items:center; gap: 12px; }
+    .header-right { text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+    .header-actions { display:flex; align-items:center; gap:8px; }
+
     input[type=number], input[type=text], select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6edf6;background:#fbfdff}
 
     table{width:100%;border-collapse:collapse;margin-top:12px}
@@ -223,7 +228,12 @@
         opacity: 1;
       }
       
-      .panel { overflow-x: auto; }
+      .panel, .daily-box { overflow-x: auto; }
+      .card { flex: 1 1 100%; }
+      
+      header.top { flex-direction: column; align-items: stretch; gap: 16px; }
+      .header-right { align-items: center; text-align: center; width: 100%; }
+      .header-actions { justify-content: center; width: 100%; flex-wrap: wrap; }
     }
 
     /* Animações suaves */
@@ -454,15 +464,15 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
 
     <main>
       <header class="top">
-        <div style="display:flex; align-items:center; gap: 12px;">
+        <div class="header-left">
           <button id="mobileMenuBtn">☰</button>
           <div>
             <h2 id="pageTitle" style="margin:0">Dashboard</h2>
             <div class="muted">Salvamento automático: salvo no navegador</div>
           </div>
         </div>
-        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-          <div style="display:flex;align-items:center;gap:8px">
+        <div class="header-right">
+          <div class="header-actions">
             <div class="muted">Lucro Total</div>
             <button id="importDataHeaderBtn" class="btn ghost" style="padding:6px 10px">Importar dados</button>
             <button id="toggleTheme" class="btn ghost" style="padding:6px 10px">Tema</button>
@@ -693,7 +703,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       <div class="panel" id="fintechPanel" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
           <div>
-            <h3>Fintech</h3>
+            <h3>Fintech Otanpay (25%)</h3>
             <div class="muted">Gerencie contas Fintech com desconto de 25% nos saques</div>
           </div>
           <button class="btn" id="addFintechBtn">+ Adicionar Conta</button>
@@ -711,9 +721,32 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
           <tbody></tbody>
         </table>
 
+        <div style="margin: 30px 0; border-top: 1px solid #e6edf6;"></div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div>
+            <h3>Fintech Organpay (10%)</h3>
+            <div class="muted">Gerencie contas Fintech com desconto de 10% nos saques</div>
+          </div>
+          <button class="btn" id="addFintech10Btn">+ Adicionar Conta</button>
+        </div>
+
+        <table id="fintechTable10">
+          <thead>
+            <tr>
+              <th>Nome da Conta</th>
+              <th>Saque (R$)</th>
+              <th>CPFs (R$ 0,49)</th>
+              <th>Valor Final (90%)</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
         <div style="margin-top:20px;padding:16px;background:var(--card);border-radius:10px;border:1px solid #e6edf6">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-weight:500">Total Fintech (após desconto):</span>
+            <span style="font-weight:500">Total Fintech Geral (após descontos):</span>
             <span style="font-size:18px;font-weight:600;color:var(--success)" id="fintechTotal">R$ 0,00</span>
           </div>
         </div>
@@ -821,7 +854,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
     const APP_VERSION = '1.1'; // Mude este número quando atualizar o site
 
     // --- App state (agora com dailyRecords)
-    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], pendingNotes: [] };
+    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [] };
     let saveTimer = null;
 
     // --- Utils
@@ -880,6 +913,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             dailyRecords: {}, 
             notas: [], 
             fintechAccounts: [], 
+            fintechAccounts10: [],
             pendingNotes: [],
             status: 'pending' // Novos usuários começam como pendentes
         };
@@ -919,6 +953,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       if(!state.dailyRecords) state.dailyRecords = {};
       if(!state.notas) state.notas = [];
       if(!state.fintechAccounts) state.fintechAccounts = [];
+      if(!state.fintechAccounts10) state.fintechAccounts10 = [];
       if(!state.pendingNotes) state.pendingNotes = [];
       if(!state.platformOrder || state.platformOrder.length !== Object.keys(state.platforms).length) {
         // Rebuild order if it's missing or out of sync
@@ -1081,12 +1116,19 @@ const tr = document.createElement('tr');
 
       let totalFintech = 0;
       if(state.fintechAccounts){
-      state.fintechAccounts.forEach(acc => {
-      const saque = Number(acc.saque) || 0;
-      totalFintech += saque * 0.75;
-});
-      totalLucro += totalFintech;
+        state.fintechAccounts.forEach(acc => {
+          const saque = Number(acc.saque) || 0;
+          totalFintech += saque * 0.75;
+        });
       }
+      if(state.fintechAccounts10){
+        state.fintechAccounts10.forEach(acc => {
+          const saque = Number(acc.saque) || 0;
+          const cpf = Number(acc.cpfCount) || 0;
+          totalFintech += (saque * 0.90) - (cpf * 0.49);
+        });
+      }
+      totalLucro += totalFintech;
       
       document.getElementById('totalContas').textContent = totalAccounts;
       
@@ -1312,6 +1354,10 @@ const tr = document.createElement('tr');
         title = 'CPFs';
       }
       document.getElementById('pageTitle').textContent = title;
+
+      const cardsContainer = document.querySelector('.cards');
+      if(cardsContainer) cardsContainer.style.display = view==='dashboard'? 'flex' : 'none';
+
       document.getElementById('dashboardPanel').style.display = view==='dashboard'? 'block' : 'none';
       document.getElementById('gastosPanel').style.display = view==='gastos'? 'block' : 'none';
       document.getElementById('plataformasPanel').style.display = view==='plataformas'? 'block' : 'none';
@@ -1596,11 +1642,14 @@ const tr = document.createElement('tr');
 
     function renderFintech(){
       const tbody = document.querySelector('#fintechTable tbody');
-      if(!tbody) return;
+      const tbody10 = document.querySelector('#fintechTable10 tbody');
+      if(!tbody || !tbody10) return;
       tbody.innerHTML = '';
+      tbody10.innerHTML = '';
 
       let totalFinal = 0;
 
+      // Render 25% Accounts
       state.fintechAccounts.forEach((acc, i) => {
         const saque = Number(acc.saque) || 0;
         const valorFinal = saque * 0.75;
@@ -1627,13 +1676,7 @@ const tr = document.createElement('tr');
           const valorFinalCell = tr.querySelector('.valor-final');
           valorFinalCell.textContent = `R$ ${money(newValorFinal)}`;
 
-          let newTotal = 0;
-          state.fintechAccounts.forEach(acc => {
-            newTotal += (Number(acc.saque) || 0) * 0.75;
-          });
-          const totalEl = document.getElementById('fintechTotal');
-          if(totalEl) totalEl.textContent = `R$ ${money(newTotal)}`;
-
+          updateFintechTotal();
           scheduleSave();
           renderSummary();
         });
@@ -1650,12 +1693,92 @@ const tr = document.createElement('tr');
         tbody.appendChild(tr);
       });
 
+      // Render 10% Accounts
+      state.fintechAccounts10.forEach((acc, i) => {
+        const saque = Number(acc.saque) || 0;
+        const cpfCount = Number(acc.cpfCount) || 0;
+        const valorFinal = (saque * 0.90) - (cpfCount * 0.49);
+        totalFinal += valorFinal;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" class="inp-name" value="${acc.name || ''}" placeholder="Nome da conta" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
+          <td><input type="text" inputmode="decimal" class="inp-saque" value="${String(saque).replace('.',',')}" style="width:120px;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
+          <td><input type="number" class="inp-cpf" value="${cpfCount}" style="width:80px;padding:8px;border-radius:6px;border:1px solid #e6edf6" placeholder="Qtd" /></td>
+          <td class="valor-final lucro">R$ ${money(valorFinal)}</td>
+          <td class="actions"><button class="btn ghost del-fintech">X</button></td>
+        `;
+
+        tr.querySelector('.inp-name').addEventListener('input', (e) => {
+          state.fintechAccounts10[i].name = e.target.value;
+          scheduleSave();
+        });
+
+        tr.querySelector('.inp-saque').addEventListener('input', (e) => {
+          const newSaque = parseDecimal(e.target.value);
+          state.fintechAccounts10[i].saque = newSaque;
+
+          const currentCpf = Number(state.fintechAccounts10[i].cpfCount) || 0;
+          const newValorFinal = (newSaque * 0.90) - (currentCpf * 0.49);
+          const valorFinalCell = tr.querySelector('.valor-final');
+          valorFinalCell.textContent = `R$ ${money(newValorFinal)}`;
+
+          updateFintechTotal();
+          scheduleSave();
+          renderSummary();
+        });
+
+        tr.querySelector('.inp-cpf').addEventListener('input', (e) => {
+          const newCpf = Number(e.target.value) || 0;
+          state.fintechAccounts10[i].cpfCount = newCpf;
+          
+          const currentSaque = Number(state.fintechAccounts10[i].saque) || 0;
+          const newValorFinal = (currentSaque * 0.90) - (newCpf * 0.49);
+          
+          const valorFinalCell = tr.querySelector('.valor-final');
+          valorFinalCell.textContent = `R$ ${money(newValorFinal)}`;
+
+          updateFintechTotal();
+          scheduleSave();
+          renderSummary();
+        });
+
+        tr.querySelector('.del-fintech').addEventListener('click', () => {
+          showConfirm('Tem certeza que deseja remover esta conta Fintech (10%)?', () => {
+              state.fintechAccounts10.splice(i, 1);
+              scheduleSave();
+              renderFintech();
+              renderSummary();
+          }, { isDanger: true, title: 'Remover Conta Fintech' });
+        });
+
+        tbody10.appendChild(tr);
+      });
+
       const totalEl = document.getElementById('fintechTotal');
       if(totalEl) totalEl.textContent = `R$ ${money(totalFinal)}`;
     }
 
+    function updateFintechTotal() {
+        let total = 0;
+        state.fintechAccounts.forEach(acc => total += (Number(acc.saque)||0) * 0.75);
+        state.fintechAccounts10.forEach(acc => {
+            const s = Number(acc.saque)||0;
+            const c = Number(acc.cpfCount)||0;
+            total += (s * 0.90) - (c * 0.49);
+        });
+        const totalEl = document.getElementById('fintechTotal');
+        if(totalEl) totalEl.textContent = `R$ ${money(total)}`;
+    }
+
     document.getElementById('addFintechBtn').addEventListener('click', () => {
       state.fintechAccounts.push({ name: '', saque: 0 });
+      scheduleSave();
+      renderFintech();
+    });
+
+    document.getElementById('addFintech10Btn').addEventListener('click', () => {
+      state.fintechAccounts10.push({ name: '', saque: 0 });
       scheduleSave();
       renderFintech();
     });
@@ -1726,6 +1849,13 @@ const tr = document.createElement('tr');
           totalFintech += (Number(acc.saque) || 0) * 0.75;
         });
       }
+      if(state.fintechAccounts10){
+        state.fintechAccounts10.forEach(acc => {
+          const s = Number(acc.saque) || 0;
+          const c = Number(acc.cpfCount) || 0;
+          totalFintech += (s * 0.90) - (c * 0.49);
+        });
+      }
 
       const totalLucro = totalLucroPlataformas + totalFintech;
       const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0) + Number(state.gastoBot||0);
@@ -1769,6 +1899,7 @@ const tr = document.createElement('tr');
           state.platformOrder = [];
           state.selectedPlatform = null;
           state.fintechAccounts = [];
+          state.fintechAccounts10 = [];
           saveDataImmediate();
           updateUI();
       }, { isDanger: true, title: 'Fechar o Dia e Zerar Contas?', okText: 'Sim, Fechar o Dia' });
