@@ -1,0 +1,191 @@
+<!-- c:\Users\Administrator\Documents\Planilha cpa\login.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Painel Financeiro</title>
+  <!-- Biblioteca do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg:#e8ecf1; --card:#ffffff; --text:#17233b; --accent:#2b7be4; --muted:#6b7684;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+    }
+    body { margin: 0; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; height: 100vh; }
+    .login-card { background: var(--card); padding: 40px; border-radius: 12px; box-shadow: 0 6px 18px rgba(30,50,80,0.08); width: 100%; max-width: 360px; }
+    h2 { margin-top: 0; text-align: center; color: var(--accent); }
+    .input-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--muted); }
+    input { width: 100%; padding: 10px; border: 1px solid #e6edf6; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+    input:focus { outline: none; border-color: var(--accent); }
+    button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+    .toggle-link { text-align: center; margin-top: 16px; font-size: 14px; color: var(--accent); cursor: pointer; }
+    .error { color: #ff4d4f; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0f1115; --card:#1a1d22; --text:#e6eef8; --muted:#9ca3af; }
+      input { background: #0b0c0e; border-color: #2a2d33; color: white; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h2 id="formTitle">Painel Financeiro</h2>
+    <form id="loginForm">
+      <div class="input-group">
+        <label for="email">E-mail</label>
+        <input type="text" id="email" placeholder="seu@email.com" required>
+      </div>
+      <div class="input-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" placeholder="Digite sua senha" required>
+      </div>
+      <button type="submit" id="submitBtn">Entrar</button>
+      <div class="error" id="errorMsg"></div>
+      <div class="toggle-link" id="toggleMode">Não tem conta? Cadastre-se</div>
+      <div class="toggle-link" id="forgotPassword" style="margin-top: 10px; font-size: 13px; opacity: 0.8;">Esqueci minha senha</div>
+    </form>
+  </div>
+
+  <script>
+    window.addEventListener('load', function() {
+      // --- CONFIGURAÇÃO DO SUPABASE ---
+      const SUPABASE_URL = 'https://jljufumckmhfohnanaot.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsanVmdW1ja21oZm9obmFuYW90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4MDg3MTUsImV4cCI6MjA4NzM4NDcxNX0.2Vod5MSgHIZToDVKmE1Pk1tE9itn2VRaqOHezDjl5Z4';
+      
+      let supabase;
+      try {
+        if (!window.supabase) throw new Error('A biblioteca do sistema (Supabase) não foi carregada.');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      } catch (err) {
+        document.body.innerHTML = `<div style="color:#e74c3c;text-align:center;padding:40px;font-family:sans-serif"><h3>Erro Crítico de Conexão</h3><p>${err.message}</p><p>Verifique sua conexão com a internet, desative bloqueadores de anúncio e recarregue a página.</p><button onclick="location.reload()" style="padding:10px 20px;cursor:pointer">Recarregar</button></div>`;
+        console.error(err);
+        return;
+      }
+
+      // Verifica se já está logado e redireciona
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          window.location.href = 'index.html';
+        }
+      });
+
+      let isRegistering = false;
+      let isResetting = false;
+
+      const formTitle = document.getElementById('formTitle');
+      const submitBtn = document.getElementById('submitBtn');
+      const toggleLink = document.getElementById('toggleMode');
+      const forgotLink = document.getElementById('forgotPassword');
+      const errorMsg = document.getElementById('errorMsg');
+      const passwordInput = document.getElementById('password');
+
+      toggleLink.addEventListener('click', () => {
+        isRegistering = !isRegistering;
+        if(isRegistering) {
+          formTitle.textContent = 'Criar Nova Conta';
+          submitBtn.textContent = 'Cadastrar';
+          toggleLink.textContent = 'Já tem conta? Entrar';
+          errorMsg.style.display = 'none';
+          forgotLink.style.display = 'none';
+        } else {
+          formTitle.textContent = 'Painel Financeiro';
+          submitBtn.textContent = 'Entrar';
+          toggleLink.textContent = 'Não tem conta? Cadastre-se';
+          errorMsg.style.display = 'none';
+          forgotLink.style.display = 'block';
+        }
+      });
+
+      forgotLink.addEventListener('click', () => {
+        isResetting = !isResetting;
+        if(isResetting) {
+          isRegistering = false;
+          formTitle.textContent = 'Recuperar Senha';
+          submitBtn.textContent = 'Enviar Email';
+          passwordInput.parentElement.style.display = 'none';
+          passwordInput.required = false;
+          toggleLink.style.display = 'none';
+          forgotLink.textContent = 'Voltar para Login';
+          errorMsg.style.display = 'none';
+        } else {
+          formTitle.textContent = 'Painel Financeiro';
+          submitBtn.textContent = 'Entrar';
+          passwordInput.parentElement.style.display = 'block';
+          passwordInput.required = true;
+          toggleLink.style.display = 'block';
+          forgotLink.textContent = 'Esqueci minha senha';
+          errorMsg.style.display = 'none';
+        }
+      });
+
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+          const email = document.getElementById('email').value.trim();
+          const pass = document.getElementById('password').value;
+          
+          if(!email) return;
+          if(!isResetting && !pass) return;
+          
+          submitBtn.textContent = 'Aguarde...';
+          submitBtn.disabled = true;
+          errorMsg.style.display = 'none';
+
+          let result;
+          if (isResetting) {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: window.location.href
+            });
+            if (error) result = { error };
+            else {
+              alert('Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.');
+              window.location.reload();
+              return;
+            }
+          } else if (isRegistering) {
+            // Criar conta no Supabase
+            result = await supabase.auth.signUp({ email: email, password: pass });
+          } else {
+            // Login no Supabase
+            result = await supabase.auth.signInWithPassword({ email: email, password: pass });
+          }
+
+          if (result.error) {
+            let msg = result.error.message;
+            // Tradução de erros comuns
+            if (msg === 'Invalid login credentials') msg = 'Usuário ou senha incorretos.';
+            if (msg.includes('Password should be at least')) msg = 'A senha precisa ter no mínimo 6 caracteres.';
+            if (msg.includes('User already registered')) msg = 'Usuário já cadastrado. Tente entrar.';
+            
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+            submitBtn.textContent = isResetting ? 'Enviar Email' : (isRegistering ? 'Cadastrar' : 'Entrar');
+            submitBtn.disabled = false;
+          } else {
+            // Sucesso! O Supabase salva a sessão automaticamente.
+            
+            // Verificação extra: Se cadastrou mas não veio sessão, é porque precisa confirmar email
+            if (isRegistering && !result.data.session) {
+                alert('⚠️ ATENÇÃO: Conta criada, mas o login foi bloqueado.\n\nO Supabase está exigindo confirmação de e-mail.\n\n1. Vá no Supabase > Authentication > Providers > Email.\n2. DESMARQUE a opção "Confirm email".\n3. Exclua este usuário na aba Users e tente de novo.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Cadastrar';
+            } else {
+                window.location.href = 'index.html';
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Erro inesperado ao conectar: ' + err.message);
+          submitBtn.textContent = isResetting ? 'Enviar Email' : (isRegistering ? 'Cadastrar' : 'Entrar');
+          submitBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

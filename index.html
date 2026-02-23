@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard Financeiro - Painel</title>
+  <!-- Biblioteca do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
       --bg:#e8ecf1; --card:#f0f3f7; --muted:#6b7684; --accent:#2b7be4; --success:#17b169; --danger:#ff4d4f;
@@ -15,7 +17,7 @@
 
     /* SIDEBAR */
     .layout{display:flex;min-height:100vh}
-    aside{width:320px;background:#ffffff;border-right:1px solid #e6edf6;padding:22px;box-shadow:var(--shadow);position:fixed;left:0;top:0;bottom:0}
+    aside{width:320px;background:#ffffff;border-right:1px solid #e6edf6;padding:22px;box-shadow:var(--shadow);position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column}
     .brand{display:flex;gap:12px;align-items:center;margin-bottom:18px}
     .brand img{width:38px;height:38px;border-radius:8px;object-fit:cover}
     .brand h1{font-size:18px;margin:0}
@@ -25,7 +27,7 @@
     .section-title{font-size:12px;color:var(--muted);margin:18px 0 8px}
 
     /* platforms list */
-    .platforms-list { max-height: 45vh; overflow-y: auto; padding-right: 8px; }
+    .platforms-list { flex:1; overflow-y: auto; padding-right: 8px; min-height:0; }
     .platform-card {
       background: #fdfdff;
       border: 1px solid #e6edf6;
@@ -183,7 +185,46 @@
     .add-note-box { display: flex; gap: 8px; }
 
     /* responsive */
-    @media (max-width:900px){aside{display:none}main{margin-left:16px;padding:16px}}
+    #mobileMenuBtn { display: none; }
+    .sidebar-overlay { display: none; }
+
+    @media (max-width:900px){
+      aside {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        width: 280px;
+      }
+      aside.open {
+        transform: translateX(0);
+      }
+      main { margin-left:0; padding:16px; width: 100%; }
+      
+      #mobileMenuBtn {
+        display: inline-flex;
+        margin-right: 12px;
+        font-size: 24px;
+        padding: 4px;
+        border: none;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+      }
+      
+      .sidebar-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .sidebar-overlay.open {
+        display: block;
+        opacity: 1;
+      }
+      
+      .panel { overflow-x: auto; }
+    }
 
     /* Animações suaves */
     * {
@@ -273,6 +314,12 @@ body.dark .nav-item:hover { background: rgba(255,255,255,0.02) !important; }body
     body.dark .platform-card.selected {
       background-color: rgba(23, 177, 105, 0.1);
     }
+    body.dark .platform-card .actions .btn-edit-plat:hover {
+      background: rgba(59, 130, 246, 0.15);
+    }
+    body.dark .platform-card .actions .btn-delete:hover {
+      background-color: rgba(23, 177, 105, 0.1);
+    }
 
     body.dark .btn.danger:hover {
       background: #d9363e;
@@ -280,6 +327,37 @@ body.dark .nav-item:hover { background: rgba(255,255,255,0.02) !important; }body
 
     body.dark #searchPlatforms {
       background: #0b0c0e !important; color: #e6eef8 !important; border-color: #222428 !important;
+    }
+
+    /* Add Platform Input Styling */
+    .add-platform-wrapper {
+      position: relative;
+      margin-top: 12px;
+    }
+    .add-platform-wrapper input {
+      width: 100%;
+      padding: 10px 12px;
+      padding-right: 45px;
+      border-radius: 8px;
+      border: 1px solid #e6edf6;
+      background: #fbfdff;
+      font-size: 13px;
+    }
+    .add-platform-wrapper input:focus {
+      background: #fff;
+    }
+    .add-platform-wrapper button {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      bottom: 5px;
+      width: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 18px;
     }
 
 body.dark input, body.dark select, body.dark textarea {
@@ -309,10 +387,29 @@ body.dark .cards .card p.negative { color: #ff4d4f !important; }
 body.dark #lucroTotalDisplay.lucro { color: #17b169 !important; }
 body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
 
+    /* Loading Spinner */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(43, 123, 228, 0.2);
+      border-left-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
 </style>
 </head>
 <body>
-  <div class="layout">
+  <div id="initialLoader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;">
+    <div class="spinner"></div>
+    <div style="font-size:16px;color:var(--muted);font-weight:500">Carregando...</div>
+  </div>
+
+  <div class="layout" style="display:none">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <aside>
       <div class="brand">
         <label for="logoUpload" style="cursor: pointer;" title="Clique para alterar a logo">
@@ -334,25 +431,42 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         <div class="nav-item" data-view="plataformas">🖥️ Plataformas</div>
         <div class="nav-item" data-view="dados">👤 CPFs</div>
         <div class="nav-item" data-view="fintech">🏦 Fintech</div>
+        <div class="nav-item" data-view="notasPendentes">
+          <span>📝 Notas Pendentes</span>
+          <span id="navPendingBadge" class="notes-badge" style="position:static;display:none">0</span>
+        </div>
+        <div class="nav-item" data-view="admin" id="navAdmin" style="display:none">🛡️ Admin</div>
       </nav>
+
+      <div class="section-title">Criação de conta</div>
+      <div class="add-platform-wrapper" style="margin-top:0;margin-bottom:10px">
+        <input id="newPlatformName" placeholder="Nova plataforma..." />
+        <button class="btn" id="addPlatformBtn" title="Adicionar">+</button>
+      </div>
 
       <div class="section-title">Plataformas</div>
       <input type="text" id="searchPlatforms" placeholder="🔎 Buscar plataforma..." style="width: 100%; margin-bottom: 10px; padding: 8px; border-radius: 8px; border: 1px solid #e6edf6; background: #fbfdff;">
       <div class="platforms-list" id="platformsList"></div>
-      <div style="margin-top:12px;display:flex;gap:8px">
-        <input id="newPlatformName" placeholder="Adicionar plataforma (ex: 389win88.com)" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6edf6;background:#fbfdff" />
-        <button class="btn" id="addPlatformBtn">Adicionar</button>
+      <div class="nav-item" id="logoutBtn" style="margin-top: 10px; color: var(--danger); flex-shrink: 0;">
+        🚪 Sair
       </div>
     </aside>
 
     <main>
       <header class="top">
-        <div>
-          <h2 id="pageTitle">Dashboard</h2>
-          <div class="muted">Salvamento automático: salvo no navegador</div>
+        <div style="display:flex; align-items:center; gap: 12px;">
+          <button id="mobileMenuBtn">☰</button>
+          <div>
+            <h2 id="pageTitle" style="margin:0">Dashboard</h2>
+            <div class="muted">Salvamento automático: salvo no navegador</div>
+          </div>
         </div>
         <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-          <div style="display:flex;align-items:center;gap:8px"><div class="muted">Lucro Total</div><button id="toggleTheme" class="btn ghost" style="margin-left:8px;padding:6px 10px">Tema</button></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="muted">Lucro Total</div>
+            <button id="importDataHeaderBtn" class="btn ghost" style="padding:6px 10px">Importar dados</button>
+            <button id="toggleTheme" class="btn ghost" style="padding:6px 10px">Tema</button>
+          </div>
           <div style="font-size:20px;font-weight:700" id="lucroTotalDisplay">R$ 0,00</div>
         </div>
       </header>
@@ -499,11 +613,15 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         <div style="display:flex;gap:12px;margin-top:8px">
           <div style="flex:1">
             <label>Gastos com Proxy (R$)</label>
-            <input type="number" id="gastoProxy" step="0.01" value="0" />
+            <input type="text" inputmode="decimal" id="gastoProxy" value="0" />
           </div>
           <div style="flex:1">
             <label>Gastos com Números (R$)</label>
-            <input type="number" id="gastoNumeros" step="0.01" value="0" />
+            <input type="text" inputmode="decimal" id="gastoNumeros" value="0" />
+          </div>
+          <div style="flex:1">
+            <label>Gastos com Bot (R$)</label>
+            <input type="text" inputmode="decimal" id="gastoBot" value="0" />
           </div>
         </div>
         <div style="margin-top:12px" class="muted">Os valores são subtraídos do lucro total automaticamente.</div>
@@ -558,6 +676,17 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         </div>
 
         <div id="notasList"></div>
+
+        <!-- Backup Section -->
+        <div style="margin-top: 24px; border-top: 1px solid #e6edf6; padding-top: 18px;">
+            <h3>Backup e Transferência</h3>
+            <div class="muted">Exporte seus dados para usar em outro dispositivo (ex: celular).</div>
+            <div style="display:flex; gap: 10px; margin-top: 12px;">
+                <button class="btn" id="btnExportData">⬇️ Baixar Dados (Backup)</button>
+                <button class="btn ghost" onclick="document.getElementById('importFile').click()">⬆️ Carregar Dados</button>
+                <input type="file" id="importFile" style="display:none" accept=".json" />
+            </div>
+        </div>
       </div>
 
       <!-- Fintech -->
@@ -590,6 +719,34 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         </div>
       </div>
 
+      <!-- Admin Panel -->
+      <div class="panel" id="adminPanel" style="display:none">
+        <h3>Administração de Usuários</h3>
+        <div class="muted">Gerencie as solicitações de cadastro</div>
+        
+        <h4 style="margin-top:20px">Solicitações Pendentes</h4>
+        <div id="pendingUsersList"></div>
+
+        <h4 style="margin-top:24px">Usuários Ativos</h4>
+        <div id="activeUsersList"></div>
+
+        <h4 style="margin-top:24px">📜 Log de Atividades</h4>
+        <div class="muted" style="margin-bottom:8px">Histórico de acessos recentes ao painel</div>
+        <div id="activityLogsList" style="max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px; border: 1px solid var(--muted);"></div>
+        <button class="btn ghost" style="margin-top:8px;font-size:12px" onclick="clearActivityLogs()">Limpar Histórico</button>
+      </div>
+
+      <!-- Notas Pendentes -->
+      <div class="panel" id="notasPendentesPanel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div>
+            <h3>Notas Pendentes</h3>
+            <div class="muted">Notas preservadas de dias fechados</div>
+          </div>
+        </div>
+        <div id="pendingNotesList"></div>
+      </div>
+
       <footer>
         <span class="muted">v<span id="appVersionDisplay">1.0</span> • Dados salvos localmente no seu navegador.</span>
       </footer>
@@ -609,6 +766,15 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         <button class="btn" id="confirmOkBtn">Confirmar</button>
       </div>
     </div>
+  </div>
+
+  <!-- Overlay de Aprovação Pendente -->
+  <div id="pendingAccessOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:2000; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
+    <div style="font-size:48px; margin-bottom:20px;">⏳</div>
+    <h2>Cadastro em Análise</h2>
+    <p class="muted" style="max-width:400px; margin-bottom:30px; line-height:1.5;">Sua conta foi criada com sucesso, mas precisa ser aprovada pelo administrador para acessar o painel.</p>
+    <button class="btn" id="checkAccessBtn">Verificar Novamente</button>
+    <button class="btn ghost" id="pendingLogoutBtn" style="margin-top:10px;">Sair</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -632,17 +798,41 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
   </div>
 
   <script>
-    // --- Storage key
-    const STORAGE_KEY = 'painel_financeiro_v1';
-    const APP_VERSION = '1.0'; // Mude este número quando atualizar o site
+    window.addEventListener('load', function() {
+      // --- CONFIGURAÇÃO DO SUPABASE ---
+      const SUPABASE_URL = 'https://jljufumckmhfohnanaot.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsanVmdW1ja21oZm9obmFuYW90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4MDg3MTUsImV4cCI6MjA4NzM4NDcxNX0.2Vod5MSgHIZToDVKmE1Pk1tE9itn2VRaqOHezDjl5Z4';
+      
+      let supabase;
+      try {
+        if (!window.supabase || !window.Chart || !window.Sortable) throw new Error('Uma ou mais bibliotecas externas (Supabase, Chart.js) não foram carregadas.');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      } catch (err) {
+        document.body.innerHTML = `<div style="color:#e74c3c;text-align:center;padding:40px;font-family:sans-serif"><h3>Erro Crítico de Conexão</h3><p>${err.message}</p><p>Verifique sua conexão com a internet, desative bloqueadores de anúncio e recarregue a página.</p><button onclick="location.reload()" style="padding:10px 20px;cursor:pointer">Recarregar</button></div>`;
+        console.error('Falha crítica ao iniciar:', err);
+        return; // Para a execução do script
+      }
+
+    // --- CONFIGURAÇÃO DO ADMIN ---
+    const ADMIN_EMAIL = atob('d3JsaW5rbHVhbmFkbWluQGdtYWlsLmNvbQ=='); 
+
+    let currentUserEmail = '';
+    
+    const APP_VERSION = '1.1'; // Mude este número quando atualizar o site
 
     // --- App state (agora com dailyRecords)
-    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [] };
+    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], pendingNotes: [] };
     let saveTimer = null;
 
     // --- Utils
     function money(v){
       return Number(v || 0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+
+    function parseDecimal(value) {
+      if (typeof value === 'number') return value;
+      if (typeof value !== 'string') return 0;
+      return Number(value.replace(',', '.')) || 0;
     }
 
     function formatDateKey(year, month, day){
@@ -653,17 +843,35 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
     }
 
     // --- Load / Save
-    function loadData(){
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
-        try{ state = JSON.parse(raw); }
-        catch(e){ console.warn('load error',e); }
+    async function loadData(){
+      // Verifica sessão no Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if(!session) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      currentUserEmail = session.user.email;
+      const displayUser = currentUserEmail.split('@')[0]; // Mostra só o nome antes do @
+      const logoutBtn = document.getElementById('logoutBtn');
+      if(logoutBtn) logoutBtn.innerHTML = `🚪 Sair <small style="opacity:0.7">(${displayUser})</small>`;
+
+      // Busca dados da nuvem
+      const { data, error } = await supabase
+        .from('user_data')
+        .select('content')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if(data && data.content){
+        state = data.content;
       } else {
-        // seed example
-        state.platforms = {
-          '389win88.com': {name:'389win88.com', accounts:[{deposito:21, redeposito:0, saque:56, bau:5},{deposito:21, redeposito:0, saque:30, bau:5},{deposito:20, redeposito:0, saque:15, bau:5}]}
-        };
-        state.selectedPlatform = '389win88.com';
+        // É um usuário novo, cria um registro pendente zerado.
+        state.platforms = {};
+        state.selectedPlatform = null;
+        state.status = 'pending'; // Novos usuários começam como pendentes
+        await saveData(); // Salva imediatamente para aparecer no Admin
       }
 
       if (state.brandLogo) {
@@ -675,10 +883,51 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       const titleEl = document.getElementById('appTitleDisplay');
       if(titleEl) titleEl.textContent = state.appTitle;
 
+      // Se for o admin, mostra a aba Admin
+      if(currentUserEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        document.getElementById('navAdmin').style.display = 'flex';
+      }
+      
+      // --- VERIFICAÇÃO DE APROVAÇÃO ---
+      if (state.status === 'pending' && currentUserEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        document.getElementById('initialLoader').style.display = 'none';
+        document.getElementById('pendingAccessOverlay').style.display = 'flex';
+        document.getElementById('checkAccessBtn').onclick = () => location.reload();
+        document.getElementById('pendingLogoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        };
+        return; // Para a execução aqui, não carrega o resto do painel
+      }
+
+      document.getElementById('initialLoader').style.display = 'none';
+      document.querySelector('.layout').style.display = 'flex';
+
+      // --- OFERECER IMPORTAÇÃO (APÓS APROVAÇÃO) ---
+      // Se o usuário está aprovado e a importação ainda não foi oferecida...
+      if (state.importOffered !== true) {
+        const localData = localStorage.getItem('painel_financeiro_v1');
+        if (localData) {
+            if (confirm('Bem-vindo! Encontramos dados salvos neste navegador. Deseja importar esses dados para sua conta na nuvem?')) {
+                try {
+                    const oldState = JSON.parse(localData);
+                    // Mantém o status e outras flags, mas importa o resto
+                    state = { ...oldState, status: state.status, importOffered: true };
+                } catch (e) {
+                    console.error('Erro ao importar dados locais:', e);
+                }
+            }
+        }
+        // Marca que a oferta foi feita, mesmo que o usuário recuse ou não haja dados
+        state.importOffered = true;
+        await saveData();
+      }
+
       // ensure dailyRecords exists
       if(!state.dailyRecords) state.dailyRecords = {};
       if(!state.notas) state.notas = [];
       if(!state.fintechAccounts) state.fintechAccounts = [];
+      if(!state.pendingNotes) state.pendingNotes = [];
       if(!state.platformOrder || state.platformOrder.length !== Object.keys(state.platforms).length) {
         // Rebuild order if it's missing or out of sync
         state.platformOrder = Object.keys(state.platforms);
@@ -688,24 +937,24 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       // Update version display
       const vDisplay = document.getElementById('appVersionDisplay');
       if(vDisplay) vDisplay.textContent = APP_VERSION;
+      
+      updateUI();
+      selectView('dashboard');
     }
 
-    function saveData(){
+    async function saveData(){
       const status = document.getElementById('saveStatus');
-      if(status) status.textContent = '💾 Salvando...';
+      if(status) status.textContent = '☁️ Sincronizando...';
 
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        localStorage.setItem(STORAGE_KEY + '_backup1', JSON.stringify(state));
-
-        const now = new Date();
-        const today = now.toISOString().split('T')[0];
-        const lastBackup = localStorage.getItem('lastBackupDate');
-        if(lastBackup !== today) {
-          localStorage.setItem(STORAGE_KEY + '_daily_backup', JSON.stringify(state));
-          localStorage.setItem('lastBackupDate', today);
+        const { data: { session } } = await supabase.auth.getSession();
+        if(session) {
+            state.savedBy = session.user.email; // Salva o email para identificação no Admin
+            await supabase.from('user_data').upsert({ 
+                user_id: session.user.id, 
+                content: state 
+            });
         }
-
         if(status) {
           status.textContent = '✓ Salvo';
           setTimeout(()=> { if(status) status.textContent = 'Salvamento automático'; }, 2000);
@@ -749,14 +998,11 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
           el.classList.add('selected');
         }
         el.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div class="name" style="margin-bottom:0">${p.name}</div>
-            <button class="btn ghost btn-edit-plat" style="padding:2px 6px;font-size:12px;border:none;opacity:0.7" title="Renomear">✏️</button>
-          </div>
+          <div class="name">${p.name}</div>
           <div class="details">
             <div class="count">${p.accounts.length} contas</div>
             <div class="actions">
-              <button class="btn ghost btn-open">Abrir</button>
+              <button class="btn ghost btn-edit-plat" title="Renomear">✏️</button>
               <button class="btn ghost btn-delete" title="Remover plataforma">🗑️</button>
             </div>
           </div>
@@ -786,16 +1032,13 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
                 updateUI();
             }
         };
-        el.querySelector('.btn-open').onclick = () => selectPlatform(p.name);
         el.querySelector('.btn-delete').onclick = () => {
           showConfirm(`Tem certeza que deseja remover a plataforma <strong>"${p.name}"</strong> e todas as suas contas? <br><br>Esta ação não pode ser desfeita.`, () => {
               delete state.platforms[p.name];
-
               const index = state.platformOrder.indexOf(p.name);
               if (index > -1) {
                 state.platformOrder.splice(index, 1);
               }
-
               if(state.selectedPlatform === p.name) {
                 state.selectedPlatform = state.platformOrder[0] || null;
                 if (!state.selectedPlatform) { selectView('dashboard'); }
@@ -860,7 +1103,7 @@ const tr = document.createElement('tr');
         lucroBrutoEl.textContent = money(totalLucro);
       lucroBrutoEl.className = lucroBrutoClass;
 
-      const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0);
+      const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0) + Number(state.gastoBot||0);
       const gastosTotalEl = document.getElementById('gastosTotal');
       gastosTotalEl.textContent = money(gastos);
       gastosTotalEl.className = 'negative';
@@ -903,10 +1146,10 @@ const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${i+1}</td>
           <td><input type="text" class="inp inp-name" value="${acc.name||''}" placeholder="Nome da conta" style="width:160px;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
-          <td><input type="number" class="inp deposito" value="${acc.deposito||0}" style="width:180px;padding:8px;font-size:14px" /></td>
-          <td><input type="number" class="inp redeposito" value="${acc.redeposito||0}" style="width:180px;padding:8px;font-size:14px" /></td>
-          <td><input type="number" class="inp saque" value="${acc.saque||0}" style="width:180px;padding:8px;font-size:14px" /></td>
-          <td><input type="number" class="inp bau" value="${acc.bau||0}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td><input type="text" inputmode="decimal" class="inp deposito" value="${String(acc.deposito||0).replace('.',',')}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td><input type="text" inputmode="decimal" class="inp redeposito" value="${String(acc.redeposito||0).replace('.',',')}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td><input type="text" inputmode="decimal" class="inp saque" value="${String(acc.saque||0).replace('.',',')}" style="width:180px;padding:8px;font-size:14px" /></td>
+          <td><input type="text" inputmode="decimal" class="inp bau" value="${String(acc.bau||0).replace('.',',')}" style="width:180px;padding:8px;font-size:14px" /></td>
           <td class="${lucroClass} lucro-cell">R$ ${money(lucro)}</td>
           <td class="actions" style="display:flex;gap:4px;justify-content:flex-end">
             <div class="btn-notes-container">
@@ -927,10 +1170,10 @@ const tr = document.createElement('tr');
         input.addEventListener('input', (e)=>{
             const rowIdx = i;
             const row = state.platforms[platform].accounts[rowIdx];
-            row.deposito = Number(tr.querySelector('.deposito').value) || 0;
-            row.redeposito = Number(tr.querySelector('.redeposito').value) || 0;
-            row.saque = Number(tr.querySelector('.saque').value) || 0;
-            row.bau = Number(tr.querySelector('.bau').value) || 0;
+            row.deposito = parseDecimal(tr.querySelector('.deposito').value);
+            row.redeposito = parseDecimal(tr.querySelector('.redeposito').value);
+            row.saque = parseDecimal(tr.querySelector('.saque').value);
+            row.bau = parseDecimal(tr.querySelector('.bau').value);
             const newLucro = ((row.saque||0) + (row.bau||0)) - ((row.deposito||0) + (row.redeposito||0));
             const newLucroClass = newLucro >= 0 ? 'lucro' : 'negative';
             lucroCell.textContent = `R$ ${money(newLucro)}`;
@@ -1052,8 +1295,10 @@ const tr = document.createElement('tr');
       // Sincroniza os inputs de gastos com o estado, garantindo que a UI reflita o state
       const gp = document.getElementById('gastoProxy');
       const gn = document.getElementById('gastoNumeros');
-      if(gp) gp.value = state.gastoProxy || 0;
-      if(gn) gn.value = state.gastoNumeros || 0;
+      const gb = document.getElementById('gastoBot');
+      if(gp) gp.value = String(state.gastoProxy || 0).replace('.',',');
+      if(gn) gn.value = String(state.gastoNumeros || 0).replace('.',',');
+      if(gb) gb.value = String(state.gastoBot || 0).replace('.',',');
 
       renderPlatformsList();
       renderSummary();
@@ -1062,6 +1307,7 @@ const tr = document.createElement('tr');
       renderKPIs();
       renderNotas();
       renderFintech();
+      renderPendingNotes();
       renderFilterHeader();
     }
     
@@ -1079,6 +1325,9 @@ const tr = document.createElement('tr');
       document.getElementById('plataformasPanel').style.display = view==='plataformas'? 'block' : 'none';
       document.getElementById('dadosPanel').style.display = view==='dados'? 'block' : 'none';
       document.getElementById('fintechPanel').style.display = view==='fintech'? 'block' : 'none';
+      document.getElementById('notasPendentesPanel').style.display = view==='notasPendentes'? 'block' : 'none';
+      document.getElementById('adminPanel').style.display = view==='admin'? 'block' : 'none';
+      if(view === 'admin' && typeof renderAdminPanel === 'function') renderAdminPanel();
     }
 
     function selectPlatform(name){
@@ -1243,6 +1492,21 @@ const tr = document.createElement('tr');
       renderNotas();
     };
 
+    // --- Backup Logic
+    document.getElementById('btnExportData').addEventListener('click', () => { window.exportData(); });
+    
+    document.getElementById('importFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => { window.importData(ev.target.result); };
+        reader.readAsText(file);
+    });
+
+    document.getElementById('importDataHeaderBtn').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+    });
+
     function renderNotas(){
       const container = document.getElementById('notasList');
       if(!container) return;
@@ -1353,7 +1617,7 @@ const tr = document.createElement('tr');
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><input type="text" class="inp-name" value="${acc.name || ''}" placeholder="Nome da conta" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
-          <td><input type="number" class="inp-saque" value="${saque}" step="0.01" style="width:120px;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
+          <td><input type="text" inputmode="decimal" class="inp-saque" value="${String(saque).replace('.',',')}" style="width:120px;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
           <td class="valor-final lucro">R$ ${money(valorFinal)}</td>
           <td class="actions"><button class="btn ghost del-fintech">X</button></td>
         `;
@@ -1364,7 +1628,7 @@ const tr = document.createElement('tr');
         });
 
         tr.querySelector('.inp-saque').addEventListener('input', (e) => {
-          const newSaque = Number(e.target.value) || 0;
+          const newSaque = parseDecimal(e.target.value);
           state.fintechAccounts[i].saque = newSaque;
 
           const newValorFinal = newSaque * 0.75;
@@ -1406,9 +1670,9 @@ const tr = document.createElement('tr');
 
     // gastos inputs
     document.getElementById('gastoProxy').addEventListener('input', (e)=>{
-      const val = Number(e.target.value)||0;
+      const val = parseDecimal(e.target.value);
       if(val < 0) {
-        e.target.value = 0;
+        e.target.value = '0';
         alert('Valores negativos não são permitidos');
         return;
       }
@@ -1419,13 +1683,26 @@ const tr = document.createElement('tr');
     });
 
     document.getElementById('gastoNumeros').addEventListener('input', (e)=>{
-      const val = Number(e.target.value)||0;
+      const val = parseDecimal(e.target.value);
       if(val < 0) {
-        e.target.value = 0;
+        e.target.value = '0';
         alert('Valores negativos não são permitidos');
         return;
       }
       state.gastoNumeros = val;
+      scheduleSave();
+      renderSummary();
+      renderDiasTabela();
+    });
+
+    document.getElementById('gastoBot').addEventListener('input', (e)=>{
+      const val = parseDecimal(e.target.value);
+      if(val < 0) {
+        e.target.value = '0';
+        alert('Valores negativos não são permitidos');
+        return;
+      }
+      state.gastoBot = val;
       scheduleSave();
       renderSummary();
       renderDiasTabela();
@@ -1459,7 +1736,7 @@ const tr = document.createElement('tr');
       }
 
       const totalLucro = totalLucroPlataformas + totalFintech;
-      const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0);
+      const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0) + Number(state.gastoBot||0);
       const lucroFinal = totalLucro - gastos;
 
       const message = `Deseja fechar o dia <strong>${dateKey}</strong>?<br><br>
@@ -1475,9 +1752,29 @@ const tr = document.createElement('tr');
             lucroLiquido: lucroFinal,
             savedAt: new Date().toISOString()
           };
+
+          // Mover notas existentes para a aba Notas Pendentes
+          Object.values(state.platforms).forEach(p => {
+            p.accounts.forEach(acc => {
+              if (acc.notes && acc.notes.length > 0) {
+                acc.notes.forEach(note => {
+                  state.pendingNotes.push({
+                    platform: p.name,
+                    account: acc.name || 'Conta sem nome',
+                    text: note,
+                    date: dateKey,
+                    savedAt: new Date().toISOString()
+                  });
+                });
+              }
+            });
+          });
+
           state.gastoProxy = 0;
           state.gastoNumeros = 0;
+          state.gastoBot = 0;
           state.platforms = {};
+          state.platformOrder = [];
           state.selectedPlatform = null;
           state.fintechAccounts = [];
           saveDataImmediate();
@@ -1638,6 +1935,192 @@ const tr = document.createElement('tr');
       document.getElementById('notesModal').style.display = 'none';
     };
 
+    // --- Pending Notes Logic
+    function renderPendingNotes(){
+      const container = document.getElementById('pendingNotesList');
+      if(!container) return;
+      container.innerHTML = '';
+      
+      if(!state.pendingNotes || state.pendingNotes.length === 0) {
+        container.innerHTML = '<div class="muted" style="text-align:center;padding:40px">Nenhuma nota pendente.</div>';
+        updateSidebarBadge();
+        return;
+      }
+
+      state.pendingNotes.forEach((note, i) => {
+        const el = document.createElement('div');
+        el.className = 'note-card';
+        el.innerHTML = `
+          <div style="flex:1">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">
+              <span style="color: var(--muted); font-weight: 500;">Usuário:</span> ${note.account}
+            </div>
+            <div style="font-size:14px; color:var(--text); padding-left: 10px; border-left: 3px solid var(--accent); margin-bottom: 8px;">
+              ${note.text}
+            </div>
+            <div style="font-size:12px; color:var(--muted);">
+              <strong>${note.platform}</strong> • ${note.date}
+            </div>
+          </div>
+          <button class="btn ghost" style="color:var(--danger);border-color:transparent" onclick="deletePendingNote(${i})">Resolver</button>
+        `;
+        container.appendChild(el);
+      });
+      
+      updateSidebarBadge();
+    }
+
+    window.deletePendingNote = (i) => {
+        showConfirm('Marcar nota como resolvida/remover?', () => {
+            state.pendingNotes.splice(i, 1);
+            scheduleSave();
+            renderPendingNotes();
+        }, { title: 'Resolver Nota' });
+    };
+
+    function updateSidebarBadge() {
+        const count = state.pendingNotes ? state.pendingNotes.length : 0;
+        const badge = document.getElementById('navPendingBadge');
+        if(badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+
+    // --- Admin Logic (Simplificado para Cloud: Desativado por enquanto)
+    let adminUsersCache = []; // Cache para facilitar a aprovação
+
+    async function renderAdminPanel() {
+      const container = document.getElementById('adminPanel');
+      if(!container) return;
+      
+      container.innerHTML = '<div class="muted">Carregando dados do servidor...</div>';
+
+      // Busca todos os dados da tabela user_data
+      const { data, error } = await supabase
+        .from('user_data')
+        .select('user_id, updated_at, content');
+
+      if(error) {
+        container.innerHTML = `
+          <div style="color:var(--danger); padding:15px; border:1px solid var(--danger); border-radius:8px; background:rgba(255,0,0,0.05)">
+            <strong>Erro de Permissão:</strong> O Supabase bloqueou o acesso aos dados dos outros usuários.<br><br>
+            Para corrigir, vá no <strong>SQL Editor</strong> do Supabase e rode este comando:<br>
+            <code style="display:block; background:#000; color:#0f0; padding:10px; margin-top:10px; border-radius:4px; font-size:12px">
+              create policy "Admin ve tudo" on user_data for select using (auth.jwt() ->> 'email' = 'wrlinkluanadmin@gmail.com');
+            </code>
+          </div>
+        `;
+        return;
+      }
+
+      adminUsersCache = data; // Salva para uso nas funções de aprovar
+
+      const pendingUsers = data.filter(u => u.content && u.content.status === 'pending');
+      const activeUsers = data.filter(u => !u.content || u.content.status !== 'pending');
+
+      // Renderiza a lista
+      container.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3>Administração</h3>
+          <button class="btn ghost" onclick="renderAdminPanel()">🔄 Atualizar Lista</button>
+        </div>
+        <div class="muted">Total de usuários: <strong>${data.length}</strong></div>
+        
+        <h4 style="margin-top:20px; color:var(--accent)">⏳ Pendentes (${pendingUsers.length})</h4>
+        <div style="margin-top:15px; display:flex; flex-direction:column; gap:10px">
+          ${pendingUsers.length === 0 ? '<div class="muted">Nenhuma solicitação pendente.</div>' : ''}
+          ${pendingUsers.map(row => {
+            const email = (row.content && row.content.savedBy) ? row.content.savedBy : 'Email não salvo (versão antiga)';
+            const lastUpdate = new Date(row.updated_at).toLocaleString('pt-BR');
+            const plataformas = row.content && row.content.platforms ? Object.keys(row.content.platforms).length : 0;
+            
+            return `
+              <div class="card" style="padding:12px; display:flex; justify-content:space-between; align-items:center">
+                <div>
+                  <div style="font-weight:600; font-size:15px">${email}</div>
+                  <div class="muted" style="font-size:12px">ID: ${row.user_id}</div>
+                  <div class="muted" style="font-size:12px">Última sincronização: ${lastUpdate}</div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn" onclick="approveUserCloud('${row.user_id}')">Aprovar</button>
+                  <button class="btn danger" onclick="rejectUserCloud('${row.user_id}')">Reprovar</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <h4 style="margin-top:24px; color:var(--success)">✅ Ativos (${activeUsers.length})</h4>
+        <div style="margin-top:15px; display:flex; flex-direction:column; gap:10px">
+          ${activeUsers.map(row => {
+            const email = (row.content && row.content.savedBy) ? row.content.savedBy : 'Email não salvo (antigo)';
+            const lastUpdate = new Date(row.updated_at).toLocaleString('pt-BR');
+            const plataformas = row.content && row.content.platforms ? Object.keys(row.content.platforms).length : 0;
+            const isAdmin = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+            const adminTag = isAdmin ? ' <span style="color:var(--accent); font-size:12px; font-weight:600;">(Admin)</span>' : '';
+            const deleteButton = !isAdmin ? `<button class="btn ghost danger" style="padding:6px 10px;font-size:12px" onclick="deleteUserCloud('${row.user_id}', '${email}')">Excluir</button>` : '';
+            
+            return `
+              <div class="card" style="padding:12px; display:flex; justify-content:space-between; align-items:center">
+                <div>
+                  <div style="font-weight:600; font-size:15px">${email}${adminTag}</div>
+                  <div class="muted" style="font-size:12px">ID: ${row.user_id}</div>
+                  <div class="muted" style="font-size:12px">Última sincronização: ${lastUpdate}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div class="muted">${plataformas} plataformas</div>
+                  ${deleteButton}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    window.approveUserCloud = async (userId) => {
+        const userRow = adminUsersCache.find(u => u.user_id === userId);
+        if (!userRow) return;
+
+        const newContent = { ...userRow.content, status: 'approved' };
+        
+        const { error } = await supabase.from('user_data').update({ content: newContent }).eq('user_id', userId);
+        
+        if (error) {
+            alert('Erro ao aprovar: ' + error.message);
+        } else {
+            alert('Usuário aprovado com sucesso!');
+            renderAdminPanel();
+        }
+    };
+
+    window.rejectUserCloud = async (userId) => {
+        if(confirm('Tem certeza que deseja REPROVAR este usuário? Isso excluirá a solicitação de cadastro.')) {
+            const { error } = await supabase.from('user_data').delete().eq('user_id', userId);
+            
+            if (error) {
+                alert('Erro ao reprovar: ' + error.message);
+            } else {
+                alert('Usuário reprovado com sucesso!');
+                renderAdminPanel();
+            }
+        }
+    };
+
+    window.deleteUserCloud = async (userId, email) => {
+        if(confirm(`ATENÇÃO: Tem certeza que deseja EXCLUIR o usuário "${email}"?\n\nIsso apagará todos os dados dele do banco de dados. Essa ação não pode ser desfeita.`)) {
+            const { error } = await supabase.from('user_data').delete().eq('user_id', userId);
+            
+            if (error) {
+                alert('Erro ao excluir: ' + error.message + '\n\nDICA: Verifique se você adicionou a permissão de DELETE no Supabase.');
+            } else {
+                alert('Usuário excluído com sucesso!');
+                renderAdminPanel();
+            }
+        }
+    };
+
     window.onclick = (event) => {
       if (event.target == document.getElementById('notesModal')) {
         document.getElementById('notesModal').style.display = 'none';
@@ -1647,13 +2130,44 @@ const tr = document.createElement('tr');
       }
     };
 
+    // --- Logout Logic (Botão Sair)
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'login.html';
+    });
+
+    // --- Mobile Menu Logic
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('aside');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    if(mobileBtn) mobileBtn.addEventListener('click', toggleSidebar);
+    if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+    // Close sidebar when clicking a nav item on mobile
+    document.querySelectorAll('nav .nav-item').forEach(it => {
+      it.addEventListener('click', () => {
+        if(window.innerWidth <= 900) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('open');
+        }
+      });
+    });
+
     // --- init
     loadData();
     // ensure gasto inputs exist and set their values
     const gp = document.getElementById('gastoProxy');
     const gn = document.getElementById('gastoNumeros');
-    if(gp) gp.value = state.gastoProxy || 0;
-    if(gn) gn.value = state.gastoNumeros || 0;
+    const gb = document.getElementById('gastoBot');
+    if(gp) gp.value = String(state.gastoProxy || 0).replace('.',',');
+    if(gn) gn.value = String(state.gastoNumeros || 0).replace('.',',');
+    if(gb) gb.value = String(state.gastoBot || 0).replace('.',',');
 
     // ensure selected platform exists
     if(!state.selectedPlatform) state.selectedPlatform = Object.keys(state.platforms)[0] || null;
@@ -1696,8 +2210,6 @@ const tr = document.createElement('tr');
         });
     }
 
-    updateUI();
-    selectView('dashboard');
 
     window.addEventListener('beforeunload', (e) => {
       if(saveTimer) {
@@ -1793,6 +2305,7 @@ window.exportData = ()=>{ const a = document.createElement('a'); a.href = 'data:
   }
 })();
 
+    }); // Fim do window.addEventListener('load')
 </script>
 </body>
 </html>
