@@ -868,9 +868,21 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         state = data.content;
       } else {
         // É um usuário novo, cria um registro pendente zerado.
-        state.platforms = {};
-        state.selectedPlatform = null;
-        state.status = 'pending'; // Novos usuários começam como pendentes
+        state = { 
+            platforms: {}, 
+            platformOrder: [], 
+            brandLogo: null, 
+            appTitle: 'Painel Financeiro', 
+            gastoProxy:0, 
+            gastoNumeros:0, 
+            gastoBot:0, 
+            selectedPlatform: null, 
+            dailyRecords: {}, 
+            notas: [], 
+            fintechAccounts: [], 
+            pendingNotes: [],
+            status: 'pending' // Novos usuários começam como pendentes
+        };
         await saveData(); // Salva imediatamente para aparecer no Admin
       }
 
@@ -902,26 +914,6 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
 
       document.getElementById('initialLoader').style.display = 'none';
       document.querySelector('.layout').style.display = 'flex';
-
-      // --- OFERECER IMPORTAÇÃO (APÓS APROVAÇÃO) ---
-      // Se o usuário está aprovado e a importação ainda não foi oferecida...
-      if (state.importOffered !== true) {
-        const localData = localStorage.getItem('painel_financeiro_v1');
-        if (localData) {
-            if (confirm('Bem-vindo! Encontramos dados salvos neste navegador. Deseja importar esses dados para sua conta na nuvem?')) {
-                try {
-                    const oldState = JSON.parse(localData);
-                    // Mantém o status e outras flags, mas importa o resto
-                    state = { ...oldState, status: state.status, importOffered: true };
-                } catch (e) {
-                    console.error('Erro ao importar dados locais:', e);
-                }
-            }
-        }
-        // Marca que a oferta foi feita, mesmo que o usuário recuse ou não haja dados
-        state.importOffered = true;
-        await saveData();
-      }
 
       // ensure dailyRecords exists
       if(!state.dailyRecords) state.dailyRecords = {};
@@ -1990,7 +1982,7 @@ const tr = document.createElement('tr');
     // --- Admin Logic (Simplificado para Cloud: Desativado por enquanto)
     let adminUsersCache = []; // Cache para facilitar a aprovação
 
-    async function renderAdminPanel() {
+    window.renderAdminPanel = async function() {
       const container = document.getElementById('adminPanel');
       if(!container) return;
       
