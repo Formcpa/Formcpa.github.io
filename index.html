@@ -86,6 +86,14 @@
       background: #ff7875;
     }
 
+    .btn.ghost.success {
+      color: var(--success);
+      border-color: rgba(23, 177, 105, 0.2);
+    }
+    .btn.ghost.success:hover {
+      background: rgba(23, 177, 105, 0.1);
+    }
+
     /* main content */
     main{margin-left:340px;padding:28px;flex:1}
     header.top{display:flex;align-items:center;justify-content:space-between}
@@ -440,6 +448,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         <div class="nav-item" data-view="gastos">💸 Gastos</div>
         <div class="nav-item" data-view="plataformas">🖥️ Plataformas</div>
         <div class="nav-item" data-view="dados">👤 CPFs</div>
+        <div class="nav-item" data-view="sms">📱 SMS</div>
         <div class="nav-item" data-view="fintech">🏦 Fintech</div>
         <div class="nav-item" data-view="notasPendentes">
           <span>📝 Notas Pendentes</span>
@@ -468,7 +477,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
           <button id="mobileMenuBtn">☰</button>
           <div>
             <h2 id="pageTitle" style="margin:0">Dashboard</h2>
-            <div class="muted">Salvamento automático: salvo no navegador</div>
+            <div class="muted">Sincronização automática com a nuvem</div>
           </div>
         </div>
         <div class="header-right">
@@ -752,6 +761,87 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         </div>
       </div>
 
+      <!-- SMS Panel -->
+      <div class="panel" id="smsPanel" style="display:none">
+        <h3>Gerenciador de SMS</h3>
+        
+        <!-- API Settings -->
+        <div class="card" style="padding: 16px; margin-bottom: 20px;">
+            <h4>Configurações da API (sms24h.org)</h4>
+            <div class="row" style="align-items: flex-end; gap: 16px;">
+                <div class="field" style="flex: 0.5;">
+                    <label for="smsApiKey">API Key</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="password" id="smsApiKey" placeholder="Cole sua API Key aqui" style="flex:1">
+                        <button class="btn" id="saveSmsApiKey" style="white-space: nowrap;">Salvar</button>
+                    </div>
+                </div>
+                <div class="field" style="flex: 6; text-align: right;">
+                    <div class="muted">Saldo:</div>
+                    <div id="smsBalance" style="font-weight: 700; font-size: 28px; color: var(--success);">R$ --,--</div>
+                </div>
+                <div class="field" style="flex: 1;">
+                     <button class="btn ghost" id="checkSmsBalance">Verificar Saldo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Activation -->
+        <div class="card" style="padding: 16px; margin-bottom: 20px;">
+            <h4>Nova Ativação</h4>
+            <div class="row" style="align-items: flex-end; gap: 16px;">
+                <div class="field">
+                    <label for="smsService">Serviço</label>
+                    <div style="display:flex; gap:8px; align-items: center;">
+                        <select id="smsService" style="flex:1"></select>
+                        <button class="btn ghost" id="toggleFavoriteSms" title="Favoritar" style="padding: 0 10px; font-size: 18px;">☆</button>
+                        <button class="btn ghost" id="refreshSmsPrices" title="Atualizar Preços" style="padding: 0 10px; font-size: 16px;">🔄</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="smsOperator">Operadora (Brasil)</label>
+                    <select id="smsOperator">
+                        <option value="any">Qualquer</option>
+                        <option value="algartelecom">Algar Telecom</option>
+                        <option value="claro">Claro</option>
+                        <option value="correios_celular">Correios Celular</option>
+                        <option value="nlt">NLT</option>
+                        <option value="oi">Oi</option>
+                        <option value="tim">TIM</option>
+                        <option value="vivo">Vivo</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <button class="btn" id="getNumberBtn" style="width: 100%;">Pedir Número</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SMS Tabs -->
+        <div style="display:flex; gap:10px; margin-bottom:16px; border-bottom:1px solid #e6edf6;">
+            <button class="btn ghost" id="tabSmsActive" onclick="switchSmsTab('active')" style="border:none; border-bottom: 2px solid var(--accent); border-radius: 0;">Ativas</button>
+            <button class="btn ghost" id="tabSmsHistory" onclick="switchSmsTab('history')" style="border:none; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted);">Histórico</button>
+        </div>
+
+        <!-- Active Activations Container -->
+        <div id="smsActiveContainer">
+            <div id="smsActivationsList">
+                <div class="muted" style="text-align: center; padding: 30px;">Nenhuma ativação em andamento.</div>
+            </div>
+        </div>
+
+        <!-- History Container -->
+        <div id="smsHistoryContainer" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+                <h4 style="margin:0">Histórico de SMS</h4>
+                <button class="btn ghost" onclick="clearSmsHistory()" style="font-size:12px">Limpar Histórico</button>
+            </div>
+            <div id="smsHistoryList" style="max-height: 400px; overflow-y: auto; background: var(--card); border-radius: 8px; border: 1px solid #e6edf6;">
+                <div class="muted" style="text-align: center; padding: 20px;">Nenhum histórico disponível.</div>
+            </div>
+        </div>
+      </div>
+
       <!-- Admin Panel -->
       <div class="panel" id="adminPanel" style="display:none">
         <h3>Administração de Usuários</h3>
@@ -781,7 +871,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       </div>
 
       <footer>
-        <span class="muted">v<span id="appVersionDisplay">1.0</span> • Dados salvos localmente no seu navegador.</span>
+        <span class="muted">v<span id="appVersionDisplay">1.0</span> • Dados salvos na nuvem (Supabase).</span>
       </footer>
     </main>
   </div>
@@ -854,7 +944,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
     const APP_VERSION = '1.1'; // Mude este número quando atualizar o site
 
     // --- App state (agora com dailyRecords)
-    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [] };
+    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [], smsApiKey: null, smsActivations: [], favoriteSmsServices: [], smsHistory: [] };
     let saveTimer = null;
 
     // --- Utils
@@ -915,6 +1005,10 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             fintechAccounts: [], 
             fintechAccounts10: [],
             pendingNotes: [],
+            smsApiKey: null, 
+            smsActivations: [],
+            favoriteSmsServices: [],
+            smsHistory: [],
             status: 'pending' // Novos usuários começam como pendentes
         };
         await saveData(); // Salva imediatamente para aparecer no Admin
@@ -954,6 +1048,10 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       if(!state.notas) state.notas = [];
       if(!state.fintechAccounts) state.fintechAccounts = [];
       if(!state.fintechAccounts10) state.fintechAccounts10 = [];
+      if(!state.smsApiKey) state.smsApiKey = null;
+      if(!state.smsActivations) state.smsActivations = [];
+      if(!state.favoriteSmsServices) state.favoriteSmsServices = [];
+      if(!state.smsHistory) state.smsHistory = [];
       if(!state.pendingNotes) state.pendingNotes = [];
       if(!state.platformOrder || state.platformOrder.length !== Object.keys(state.platforms).length) {
         // Rebuild order if it's missing or out of sync
@@ -1342,6 +1440,7 @@ const tr = document.createElement('tr');
       renderNotas();
       renderFintech();
       renderPendingNotes();
+      renderSmsPanel();
       renderFilterHeader();
     }
     
@@ -1364,8 +1463,19 @@ const tr = document.createElement('tr');
       document.getElementById('dadosPanel').style.display = view==='dados'? 'block' : 'none';
       document.getElementById('fintechPanel').style.display = view==='fintech'? 'block' : 'none';
       document.getElementById('notasPendentesPanel').style.display = view==='notasPendentes'? 'block' : 'none';
+      document.getElementById('smsPanel').style.display = view==='sms'? 'block' : 'none';
       document.getElementById('adminPanel').style.display = view==='admin'? 'block' : 'none';
       if(view === 'admin' && typeof renderAdminPanel === 'function') renderAdminPanel();
+
+      if (view === 'sms') {
+        fetchAndDisplaySmsPrices();
+        if (!smsUiInterval) {
+            renderSmsActivations();
+            smsUiInterval = setInterval(renderSmsActivations, 1000);
+        }
+      } else {
+        if (smsUiInterval) { clearInterval(smsUiInterval); smsUiInterval = null; }
+      }
     }
 
     function selectPlatform(name){
@@ -2282,6 +2392,516 @@ const tr = document.createElement('tr');
       });
     });
 
+    // --- SMS Logic ---
+    const SMS_API_URL = 'https://api.sms24h.org/stubs/handler_api';
+    const CORS_PROXY = 'https://corsproxy.io/?';
+    let smsPollingIntervals = {}; // To store setInterval IDs
+    let smsUiInterval = null;
+    let smsPricesCache = {};
+    const SMS_SERVICES_LIST = [ // Preços manuais definidos
+        { id: 'lj', name: 'Santander', manualPrice: 0.50 },
+        { id: 'aaa', name: 'Nubank', manualPrice: 1.20 },
+        { id: 'anx', name: 'InfinitePay', manualPrice: 0.64 },
+        { id: 'abg', name: 'PagBank', manualPrice: 0.40 },
+        { id: 'aff', name: 'C6 Bank', manualPrice: 0.55 },
+        { id: 'cq', name: 'Mercado Pago/Livre', manualPrice: 1.30 },
+        { id: 'ot', name: 'Outros', manualPrice: 0.70 }
+    ];
+
+    async function smsApiCall(params) {
+        const apiKey = state.smsApiKey;
+        if (!apiKey) {
+            alert('Por favor, insira e salve sua API Key do sms24h.org primeiro.');
+            return null;
+        }
+        
+        const queryString = new URLSearchParams({ api_key: apiKey, ...params }).toString();
+        const url = `${SMS_API_URL}?${queryString}`;
+
+        try {
+            // Tenta conexão direta primeiro
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            return await response.text();
+        } catch (error) {
+            console.warn('Conexão direta falhou (provável CORS), tentando via proxy...', error);
+            try {
+                // Tenta via Proxy se a direta falhar
+                const proxyUrl = `${CORS_PROXY}${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error('Proxy response was not ok');
+                return await response.text();
+            } catch (proxyError) {
+                console.error('Erro fatal na API SMS:', proxyError);
+                return null;
+            }
+        }
+    }
+
+    function renderSmsPanel() {
+        const apiKeyInput = document.getElementById('smsApiKey');
+        if (apiKeyInput) apiKeyInput.value = state.smsApiKey || '';
+        renderSmsServices();
+        renderSmsActivations();
+        renderSmsHistory();
+    }
+
+    function renderSmsServices() {
+        const select = document.getElementById('smsService');
+        if (!select) return;
+        
+        const currentVal = select.value;
+        select.innerHTML = '';
+        
+        const favorites = state.favoriteSmsServices || [];
+        
+        // Ordena: Favoritos primeiro, depois a ordem original
+        const sortedServices = [...SMS_SERVICES_LIST].sort((a, b) => {
+            const isFavA = favorites.includes(a.id);
+            const isFavB = favorites.includes(b.id);
+            if (isFavA && !isFavB) return -1;
+            if (!isFavA && isFavB) return 1;
+            return 0;
+        });
+        
+        sortedServices.forEach(svc => {
+            const opt = document.createElement('option');
+            opt.value = svc.id;
+            let text = svc.name;
+            if (favorites.includes(svc.id)) {
+                text = '★ ' + text;
+            }
+            
+            // Usa preço manual se existir, senão tenta o cache da API
+            if (svc.manualPrice !== undefined) {
+                text += ` (R$ ${svc.manualPrice.toFixed(2)})`;
+            } else if (smsPricesCache[svc.id]) {
+                text += ` (R$ ${(smsPricesCache[svc.id].price / 100).toFixed(2)})`;
+            }
+            opt.textContent = text;
+            select.appendChild(opt);
+        });
+        
+        // Tenta manter a seleção anterior ou seleciona o primeiro
+        if (currentVal && sortedServices.find(s => s.id === currentVal)) {
+            select.value = currentVal;
+        } else if (sortedServices.length > 0) {
+            select.value = sortedServices[0].id;
+        }
+        
+        updateFavoriteButtonState();
+    }
+
+    function updateFavoriteButtonState() {
+        const select = document.getElementById('smsService');
+        const btn = document.getElementById('toggleFavoriteSms');
+        if (!select || !btn) return;
+        
+        const val = select.value;
+        const favorites = state.favoriteSmsServices || [];
+        if (favorites.includes(val)) {
+            btn.textContent = '★';
+            btn.style.color = 'var(--accent)';
+        } else {
+            btn.textContent = '☆';
+            btn.style.color = 'inherit';
+        }
+    }
+
+    document.getElementById('smsService')?.addEventListener('change', updateFavoriteButtonState);
+
+    document.getElementById('toggleFavoriteSms')?.addEventListener('click', () => {
+        const select = document.getElementById('smsService');
+        const val = select.value;
+        if (!val) return;
+
+        if (!state.favoriteSmsServices) state.favoriteSmsServices = [];
+        
+        const idx = state.favoriteSmsServices.indexOf(val);
+        if (idx > -1) {
+            state.favoriteSmsServices.splice(idx, 1); // Remove
+        } else {
+            state.favoriteSmsServices.push(val); // Adiciona
+        }
+        
+        saveDataImmediate();
+        renderSmsServices(); // Re-renderiza para reordenar
+    });
+
+    document.getElementById('refreshSmsPrices')?.addEventListener('click', () => {
+        fetchAndDisplaySmsPrices();
+    });
+
+    window.updateSmsBalance = async () => {
+        const balanceEl = document.getElementById('smsBalance');
+        if(balanceEl) balanceEl.textContent = '...';
+        const response = await smsApiCall({ action: 'getBalance' });
+        if (response && response.startsWith('ACCESS_BALANCE:')) {
+            const balance = response.split(':')[1];
+            if(balanceEl) balanceEl.textContent = `R$ ${parseFloat(balance).toFixed(2)}`;
+        }
+    };
+
+    function renderSmsActivations() {
+        const container = document.getElementById('smsActivationsList');
+        if (!container) return;
+
+        if (!state.smsActivations || state.smsActivations.length === 0) {
+            container.innerHTML = '<div class="muted" style="text-align: center; padding: 30px;">Nenhuma ativação em andamento.</div>';
+            return;
+        }
+
+        // Remove mensagem de vazio se existir e tivermos ativações
+        if (container.querySelector('.muted') && container.children.length === 1 && container.innerText.includes('Nenhuma ativação')) {
+            container.innerHTML = '';
+        }
+
+        // Remove cards de ativações que não existem mais
+        const activeIds = new Set(state.smsActivations.map(a => a.id));
+        Array.from(container.children).forEach(child => {
+            if (child.dataset.id && !activeIds.has(child.dataset.id)) {
+                child.remove();
+            }
+        });
+
+        state.smsActivations.forEach((act, index) => {
+            let card = document.getElementById(`sms-card-${act.id}`);
+            
+            const timeElapsed = (new Date() - new Date(act.startTime)) / 1000;
+            const timeRemaining = Math.max(0, 1200 - timeElapsed); // 20 min timeout
+            
+            let statusText = 'Aguardando SMS...';
+            let statusColor = 'var(--muted)';
+            if (act.status === 'received') {
+                statusText = 'SMS Recebido!';
+                statusColor = 'var(--success)';
+            } else if (act.status === 'error' || timeRemaining <= 0) {
+                statusText = 'Falhou ou expirou';
+                statusColor = 'var(--danger)';
+            }
+
+            const timerText = `${Math.floor(timeRemaining/60)}:${String(Math.floor(timeRemaining%60)).padStart(2,'0')}`;
+            const codeText = act.code || '------';
+
+            if (!card) {
+                // Cria o card se não existir
+                card = document.createElement('div');
+                card.className = 'card';
+                card.id = `sms-card-${act.id}`;
+                card.dataset.id = act.id;
+                card.style.marginBottom = '10px';
+
+                // Remove DDI 55 se for Brasil para facilitar a cópia
+                let numberNoDDI = act.number;
+                if (numberNoDDI.startsWith('55')) numberNoDDI = numberNoDDI.substring(2);
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                                <h4 style="margin:0;font-size:20px;">Numero: <span style="font-family:monospace;color:var(--accent);">${act.number}</span></h4>
+                                <button class="btn ghost" style="padding:2px 6px;font-size:12px" onclick="copyToClipboard('${numberNoDDI}', this)" title="Copiar sem DDI (55)">Copiar</button>
+                            </div>
+                            <div class="muted" style="font-size: 12px;">Serviço: ${act.serviceName} | ID: ${act.id}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="status-text" style="font-weight: 600; color: ${statusColor};">${statusText}</div>
+                            <div class="timer-text" class="muted" style="font-size: 12px;">Tempo: ${timerText}</div>
+                        </div>
+                    </div>
+                    <div class="sms-code-container" style="margin-top: 16px; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; text-align: center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height: 80px;">
+                        <div class="muted" style="font-size: 12px; margin-bottom: 4px;">Código Recebido</div>
+                        <div class="sms-code-display" style="font-size: 24px; font-weight: 700; letter-spacing: 4px; font-family: monospace;">
+                            ${codeText}
+                        </div>
+                        ${act.code ? `<button class="btn ghost" style="margin-top:8px; padding: 2px 8px; font-size: 12px;" onclick="copyToClipboard('${act.code}', this)">Copiar Código</button>` : ''}
+                    </div>
+                    <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: flex-end;">
+                        ${act.status === 'received' ? `
+                            <button class="btn ghost success" onclick="finishSmsActivation('${act.id}')" title="Confirmar e concluir (Status 6)">Finalizar</button>
+                            <button class="btn ghost" onclick="retrySmsActivation('${act.id}')" title="Pedir outro SMS no mesmo número (Status 3)">Outro SMS</button>
+                        ` : ''}
+                        <button class="btn ghost danger" onclick="cancelSmsActivation('${act.id}')">Cancelar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            } else {
+                // Atualiza apenas os elementos que mudam (evita piscar)
+                const statusEl = card.querySelector('.status-text');
+                if (statusEl.textContent !== statusText) {
+                    statusEl.textContent = statusText;
+                    statusEl.style.color = statusColor;
+                }
+                
+                const timerEl = card.querySelector('.timer-text');
+                if (timerEl) timerEl.textContent = `Tempo: ${timerText}`;
+
+                const codeEl = card.querySelector('.sms-code-display');
+                if (codeEl && codeEl.textContent.trim() !== codeText) {
+                    const container = card.querySelector('.sms-code-container');
+                    container.innerHTML = `
+                        <div class="muted" style="font-size: 12px; margin-bottom: 4px;">Código Recebido</div>
+                        <div class="sms-code-display" style="font-size: 24px; font-weight: 700; letter-spacing: 4px; font-family: monospace;">
+                            ${codeText}
+                        </div>
+                        ${act.code ? `<button class="btn ghost" style="margin-top:8px; padding: 2px 8px; font-size: 12px;" onclick="copyToClipboard('${act.code}', this)">Copiar Código</button>` : ''}
+                    `;
+                }
+            }
+        });
+    }
+
+    window.copyToClipboard = (text, btn) => {
+        navigator.clipboard.writeText(text).then(() => {
+            const original = btn.textContent;
+            btn.textContent = 'Copiado!';
+            setTimeout(() => btn.textContent = original, 1500);
+        });
+    };
+
+    document.getElementById('saveSmsApiKey')?.addEventListener('click', () => {
+        const key = document.getElementById('smsApiKey').value.trim();
+        if (key) {
+            state.smsApiKey = key;
+            saveDataImmediate();
+            alert('Chave API salva com sucesso!');
+            document.getElementById('checkSmsBalance').click();
+        }
+    });
+
+    document.getElementById('checkSmsBalance')?.addEventListener('click', async () => {
+        window.updateSmsBalance();
+    });
+
+    document.getElementById('getNumberBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('getNumberBtn');
+        btn.textContent = 'Aguarde...';
+        btn.disabled = true;
+
+        const serviceSelect = document.getElementById('smsService');
+        const operator = document.getElementById('smsOperator').value;
+        const service = serviceSelect.value;
+        const serviceName = serviceSelect.options[serviceSelect.selectedIndex].text;
+
+        const response = await smsApiCall({ action: 'getNumber', service: service, operator: operator, country: 73 });
+
+        if (response && response.startsWith('ACCESS_NUMBER:')) {
+            const [, id, number] = response.split(':');
+            const newActivation = { id, number, service, serviceName, operator, startTime: new Date().toISOString(), status: 'waiting', code: null };
+            state.smsActivations.push(newActivation);
+            saveDataImmediate();
+            renderSmsActivations();
+            startSmsPolling(newActivation);
+            window.updateSmsBalance(); // Atualiza saldo
+        } else {
+            if(response) alert(`Erro ao pedir número: ${response}`);
+        }
+
+        btn.textContent = 'Pedir Número';
+        btn.disabled = false;
+    });
+
+    function startSmsPolling(activation) {
+        if (smsPollingIntervals[activation.id]) clearInterval(smsPollingIntervals[activation.id]);
+
+        const intervalId = setInterval(async () => {
+            const actIndex = state.smsActivations.findIndex(a => a.id === activation.id);
+            if (actIndex === -1) { clearInterval(intervalId); delete smsPollingIntervals[activation.id]; return; }
+            
+            const timeElapsed = (new Date() - new Date(state.smsActivations[actIndex].startTime)) / 1000;
+            if (timeElapsed > 1200) {
+                state.smsActivations[actIndex].status = 'error';
+                clearInterval(intervalId); delete smsPollingIntervals[activation.id];
+            } else {
+                const response = await smsApiCall({ action: 'getStatus', id: activation.id });
+                if (response && response.startsWith('STATUS_OK:')) {
+                    const code = response.split(':')[1];
+                    state.smsActivations[actIndex].code = code;
+                    state.smsActivations[actIndex].status = 'received';
+                    clearInterval(intervalId); delete smsPollingIntervals[activation.id];
+                    new Audio('https://cdn.jsdelivr.net/gh/k-br/sfx/pop.mp3').play();
+                }
+            }
+            saveDataImmediate();
+            renderSmsActivations();
+        }, 3000);
+        smsPollingIntervals[activation.id] = intervalId;
+    }
+    
+    function restartSmsPolls() {
+        if (!state.smsActivations) return;
+        state.smsActivations.forEach(act => {
+            if (act.status === 'waiting') startSmsPolling(act);
+        });
+    }
+
+    window.getExtraSms = async (id) => {
+        const index = state.smsActivations.findIndex(a => a.id == id);
+        if (index === -1) return;
+        const activation = state.smsActivations[index];
+        const response = await smsApiCall({ action: 'getExtraActivation', activationId: activation.id });
+        if (response && response.startsWith('ACCESS_NUMBER:')) {
+            const [, newId] = response.split(':');
+            state.smsActivations[index] = { ...activation, id: newId, startTime: new Date().toISOString(), status: 'waiting', code: null };
+            saveDataImmediate();
+            renderSmsActivations();
+            startSmsPolling(state.smsActivations[index]);
+            alert('Nova ativação solicitada. Aguardando novo SMS.');
+        } else {
+            if(response) alert(`Erro ao pedir SMS extra: ${response}`);
+        }
+    };
+
+    window.finishSmsActivation = async (id) => {
+        const index = state.smsActivations.findIndex(a => a.id == id);
+        if (index === -1) return;
+        const activation = state.smsActivations[index];
+        
+        // Salva no histórico antes de finalizar
+        if (!state.smsHistory) state.smsHistory = [];
+        state.smsHistory.unshift({ ...activation, finishedAt: new Date().toISOString() });
+        if (state.smsHistory.length > 50) state.smsHistory.length = 50;
+        renderSmsHistory();
+
+        await smsApiCall({ action: 'setStatus', status: 6, id: activation.id });
+        state.smsActivations.splice(index, 1);
+        saveDataImmediate();
+        renderSmsActivations();
+        window.updateSmsBalance(); // Atualiza saldo
+    };
+
+    window.retrySmsActivation = async (id) => {
+        const index = state.smsActivations.findIndex(a => a.id == id);
+        if (index === -1) return;
+        const activation = state.smsActivations[index];
+        
+        // Salva o código atual no histórico antes de pedir outro
+        if (activation.code) {
+            if (!state.smsHistory) state.smsHistory = [];
+            state.smsHistory.unshift({ ...activation, finishedAt: new Date().toISOString() });
+            if (state.smsHistory.length > 50) state.smsHistory.length = 50;
+            renderSmsHistory();
+        }
+
+        const response = await smsApiCall({ action: 'setStatus', status: 3, id: activation.id });
+        
+        if (response && (response.includes('ACCESS_RETRY_GET') || response.includes('ACCESS_READY'))) {
+             state.smsActivations[index].code = null;
+             state.smsActivations[index].status = 'waiting';
+             saveDataImmediate();
+             renderSmsActivations();
+             startSmsPolling(state.smsActivations[index]);
+        } else {
+             alert('Erro ao solicitar outro SMS: ' + response);
+        }
+    };
+
+    window.cancelSmsActivation = async (id) => {
+        const index = state.smsActivations.findIndex(a => a.id == id);
+        if (index === -1) return;
+        const activation = state.smsActivations[index];
+        await smsApiCall({ action: 'setStatus', status: 8, id: activation.id });
+        if (smsPollingIntervals[activation.id]) {
+            clearInterval(smsPollingIntervals[activation.id]);
+            delete smsPollingIntervals[activation.id];
+        }
+        state.smsActivations.splice(index, 1);
+        saveDataImmediate();
+        renderSmsActivations();
+        window.updateSmsBalance(); // Atualiza saldo
+    };
+
+    window.switchSmsTab = (tab) => {
+        const activeContainer = document.getElementById('smsActiveContainer');
+        const historyContainer = document.getElementById('smsHistoryContainer');
+        const tabActive = document.getElementById('tabSmsActive');
+        const tabHistory = document.getElementById('tabSmsHistory');
+
+        activeContainer.style.display = tab === 'active' ? 'block' : 'none';
+        historyContainer.style.display = tab === 'history' ? 'block' : 'none';
+        
+        tabActive.style.borderColor = tab === 'active' ? 'var(--accent)' : 'transparent';
+        tabActive.style.color = tab === 'active' ? 'var(--accent)' : 'var(--muted)';
+        tabHistory.style.borderColor = tab === 'history' ? 'var(--accent)' : 'transparent';
+        tabHistory.style.color = tab === 'history' ? 'var(--accent)' : 'var(--muted)';
+    };
+
+    function renderSmsHistory() {
+        const container = document.getElementById('smsHistoryList');
+        if (!container) return;
+
+        if (!state.smsHistory || state.smsHistory.length === 0) {
+            container.innerHTML = '<div class="muted" style="text-align: center; padding: 20px;">Nenhum histórico disponível.</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        state.smsHistory.forEach(item => {
+            const date = new Date(item.finishedAt).toLocaleString('pt-BR');
+            const el = document.createElement('div');
+            el.style.padding = '12px';
+            el.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
+            el.innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px;">
+                    <strong>${item.serviceName}</strong>
+                    <span class="muted">${date}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-family:monospace; color:var(--text);">${item.number}</div>
+                    <div style="font-weight:700; font-family:monospace; color:var(--success); font-size:16px; letter-spacing:1px;">${item.code || '---'}</div>
+                </div>
+            `;
+            container.appendChild(el);
+        });
+    }
+
+    window.clearSmsHistory = () => {
+        if(confirm('Limpar todo o histórico de SMS?')) {
+            state.smsHistory = [];
+            saveDataImmediate();
+            renderSmsHistory();
+        }
+    };
+
+    async function fetchAndDisplaySmsPrices() {
+        const serviceSelect = document.getElementById('smsService');
+        const refreshBtn = document.getElementById('refreshSmsPrices');
+        
+        if(refreshBtn) {
+            refreshBtn.classList.add('active');
+            refreshBtn.textContent = '⏳';
+        }
+
+        const response = await smsApiCall({ action: 'getPrices', country: 73 });
+        
+        if(refreshBtn) {
+            refreshBtn.classList.remove('active');
+            refreshBtn.textContent = '🔄';
+        }
+
+        if (response) {
+            try {
+                const prices = JSON.parse(response);
+                const services = prices['73']; // Prices for Brazil
+                if (!services) return;
+                
+                Object.keys(services).forEach(svcId => {
+                    const priceMap = services[svcId];
+                    const priceKeys = Object.keys(priceMap);
+                    if (priceKeys.length > 0) {
+                        const priceStr = priceKeys[0];
+                        const count = priceMap[priceStr];
+                        smsPricesCache[svcId] = { price: parseFloat(priceStr), count: count };
+                    }
+                });
+                renderSmsServices(); // Re-renderiza com preços
+                serviceSelect.dataset.pricesLoaded = 'true';
+            } catch (e) {
+                console.error('Erro ao processar preços do SMS:', e);
+            }
+        }
+    }
+
     // --- init
     loadData();
     // ensure gasto inputs exist and set their values
@@ -2296,6 +2916,7 @@ const tr = document.createElement('tr');
     if(!state.selectedPlatform) state.selectedPlatform = Object.keys(state.platforms)[0] || null;
 
     populateDaySelect();
+    restartSmsPolls();
 
     document.getElementById('logoUpload').addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -2342,7 +2963,7 @@ const tr = document.createElement('tr');
     });
 
     // autosave indicator change back to muted after some seconds
-    setInterval(()=>{ const s = document.getElementById('saveStatus'); if(s) s.textContent = 'Salvamento automático: salvo no navegador'; }, 5000);
+    setInterval(()=>{ const s = document.getElementById('saveStatus'); if(s) s.textContent = 'Sincronizado com a nuvem'; }, 5000);
 
     // keyboard shortcuts: Ctrl+S to save, Ctrl+E to export
     document.addEventListener('keydown', (e) => {
@@ -2351,8 +2972,8 @@ const tr = document.createElement('tr');
         saveDataImmediate();
         const status = document.getElementById('saveStatus');
         if(status) {
-          status.textContent = '✓ Salvo manualmente (Ctrl+S)';
-          setTimeout(() => { if(status) status.textContent = 'Salvamento automático: salvo no navegador'; }, 3000);
+          status.textContent = '✓ Sincronizado (Ctrl+S)';
+          setTimeout(() => { if(status) status.textContent = 'Sincronizado com a nuvem'; }, 3000);
         }
       }
       if(e.ctrlKey && e.key === 'e') {
