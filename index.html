@@ -3195,7 +3195,7 @@ const tr = document.createElement('tr');
                             <div class="muted" style="font-size: 12px;">Serviço: ${act.serviceName} | ID: ${act.id}</div>
                         </div>
                         <div style="text-align: right;">
-                            <div class="status-text" style="font-weight: 600; color: ${statusColor};">${statusText}</div>
+                            <div class="status-badge ${badgeClass}">${statusText}</div>
                             <div class="timer-text" class="muted" style="font-size: 12px;">Tempo: ${timerText}</div>
                         </div>
                     </div>
@@ -3266,8 +3266,8 @@ const tr = document.createElement('tr');
             // Lógica do Temporizador de Cancelamento (China SMS)
             const cancelBtn = card.querySelector('.btn-cancel');
             if (cancelBtn && act.provider === 'chinasms' && act.status === 'waiting') {
-                const isRestricted = CHINA_SMS_RESTRICTED_CANCEL.includes(act.service);
-                if (isRestricted && timeElapsed < 120) {
+                // Aplica a restrição de 2 minutos para todos os serviços do ChinaSMS, conforme solicitado.
+                if (timeElapsed < 120) {
                     const remaining = 120 - Math.floor(timeElapsed);
                     const newText = `Cancelar (${remaining}s)`;
                     // Atualiza apenas o texto do nó de texto, evitando recriar o botão
