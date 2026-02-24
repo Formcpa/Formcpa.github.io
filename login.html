@@ -29,6 +29,11 @@
       :root { --bg:#0f1115; --card:#1a1d22; --text:#e6eef8; --muted:#9ca3af; }
       input { background: #0b0c0e; border-color: #2a2d33; color: white; }
     }
+    
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 1000; font-size: 14px; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { background: #ff4d4f; }
+    .toast.success { background: #17b169; }
   </style>
 </head>
 <body>
@@ -72,6 +77,18 @@
           window.location.href = 'index.html';
         }
       });
+
+      function showToast(msg, type='info') {
+        const t = document.createElement('div');
+        t.className = 'toast ' + type;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(()=>t.classList.add('show'), 10);
+        setTimeout(()=>{
+            t.classList.remove('show');
+            setTimeout(()=>t.remove(), 300);
+        }, 4000);
+      }
 
       let isRegistering = false;
       let isResetting = false;
@@ -143,8 +160,8 @@
             });
             if (error) result = { error };
             else {
-              alert('Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.');
-              window.location.reload();
+              showToast('Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.', 'success');
+              setTimeout(() => window.location.reload(), 3000);
               return;
             }
           } else if (isRegistering) {
@@ -171,7 +188,7 @@
             
             // Verificação extra: Se cadastrou mas não veio sessão, é porque precisa confirmar email
             if (isRegistering && !result.data.session) {
-                alert('⚠️ ATENÇÃO: Conta criada, mas o login foi bloqueado.\n\nO Supabase está exigindo confirmação de e-mail.\n\n1. Vá no Supabase > Authentication > Providers > Email.\n2. DESMARQUE a opção "Confirm email".\n3. Exclua este usuário na aba Users e tente de novo.');
+                showToast('Conta criada! Se o login falhar, verifique se a confirmação de e-mail está desativada no Supabase.', 'info');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Cadastrar';
             } else {
@@ -180,7 +197,7 @@
           }
         } catch (err) {
           console.error(err);
-          alert('Erro inesperado ao conectar: ' + err.message);
+          showToast('Erro inesperado ao conectar: ' + err.message, 'error');
           submitBtn.textContent = isResetting ? 'Enviar Email' : (isRegistering ? 'Cadastrar' : 'Entrar');
           submitBtn.disabled = false;
         }
