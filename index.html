@@ -983,7 +983,10 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
 
             <!-- History Container -->
             <div id="smsHistoryContainer" style="display:none;">
-                <div style="display:flex; justify-content:flex-end; margin-bottom:8px"><button class="btn ghost" onclick="clearSmsHistory()" style="font-size:11px">Limpar Histórico</button></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+                    <input type="text" id="searchSmsHistory" placeholder="🔍 Buscar número..." style="padding:6px; font-size:12px; width:150px; border-radius:6px; border:1px solid #e6edf6;">
+                    <button class="btn ghost" onclick="clearSmsHistory()" style="font-size:11px">Limpar Histórico</button>
+                </div>
                 <div id="smsHistoryList" style="max-height: 400px; overflow-y: auto; background: var(--card); border-radius: 8px; border: 1px solid #e6edf6;"></div>
             </div>
         </div>
@@ -3588,7 +3591,25 @@ const tr = document.createElement('tr');
             
             // Correção Ghost SMS: Se falhar (null), não remove o card e tenta buscar o código
             if (!result) {
-                showToast('Cancelamento falhou. Verificando se o SMS chegou...', 'info');
+                // Se falhar, oferece a opção de forçar a remoção (caso o ID esteja expirado/inválido)
+                showConfirm(
+                    'O cancelamento falhou na API (provavelmente o ID expirou).<br><br>Deseja <strong>forçar a remoção</strong> deste card da tela?',
+                    () => {
+                        const currentIdx = state.smsActivations.findIndex(a => a.id == id);
+                        if (currentIdx !== -1) {
+                            if (chinaSmsPollingControllers[activation.id]) {
+                                chinaSmsPollingControllers[activation.id].abort();
+                                delete chinaSmsPollingControllers[activation.id];
+                            }
+                            state.smsActivations.splice(currentIdx, 1);
+                            saveDataImmediate();
+                            renderSmsActivations();
+                            showToast('Removido forçadamente.', 'success');
+                        }
+                    },
+                    { title: 'Erro no Cancelamento', okText: 'Forçar Remoção', isDanger: true }
+                );
+
                 if (!chinaSmsPollingControllers[activation.id]) {
                     startChinaSmsPolling(activation);
                 }
@@ -3631,11 +3652,17 @@ const tr = document.createElement('tr');
         const container = document.getElementById('smsHistoryList');
         if (!container) return;
 
+        const searchTerm = document.getElementById('searchSmsHistory') ? document.getElementById('searchSmsHistory').value.trim().toLowerCase() : '';
+
         // Filtra histórico pelo provedor atual
         const currentProvider = state.currentSmsProvider || 'sms24h';
-        const filteredHistory = state.smsHistory.filter(h => 
+        let filteredHistory = state.smsHistory.filter(h => 
             (h.provider === currentProvider) || (!h.provider && currentProvider === 'sms24h')
         );
+
+        if (searchTerm) {
+            filteredHistory = filteredHistory.filter(h => h.number && h.number.includes(searchTerm));
+        }
 
         if (filteredHistory.length === 0) {
             container.innerHTML = '<div class="muted" style="text-align: center; padding: 20px;">Nenhum histórico disponível.</div>';
@@ -3661,6 +3688,10 @@ const tr = document.createElement('tr');
             container.appendChild(el);
         });
     }
+
+    document.getElementById('searchSmsHistory')?.addEventListener('input', () => {
+        renderSmsHistory();
+    });
 
     window.clearSmsHistory = () => {
         showConfirm('Limpar todo o histórico de SMS?', () => {
