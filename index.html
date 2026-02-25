@@ -3819,11 +3819,13 @@ const tr = document.createElement('tr');
                 }
                 playNotificationSound();
                 sendBrowserNotification(`Código: ${data.sms[0]}`, `China SMS: ${activation.serviceName}`);
-            } else if (data.status === 'waiting' && data.timeout) {
-                setTimeout(() => startChinaSmsPolling(activation), 3000); // Delay de 3s para evitar flood
             } else if (data.status === 'canceled') {
                 state.smsActivations.splice(actIndex, 1);
                 delete chinaSmsPollingControllers[activation.id];
+            } else {
+                // Auto-Force: Se for 'waiting' ou qualquer outro status desconhecido, continua tentando.
+                // Isso garante que o código apareça mesmo se a API falhar temporariamente.
+                setTimeout(() => startChinaSmsPolling(activation), 3000);
             }
             
             saveDataImmediate();
@@ -3832,6 +3834,8 @@ const tr = document.createElement('tr');
         } catch (error) {
             if (error.name !== 'AbortError') {
                 console.error('Error in ChinaSMS long-polling:', error);
+                // Auto-Force: Se der erro de rede/proxy, tenta de novo em 5s automaticamente
+                setTimeout(() => startChinaSmsPolling(activation), 5000);
             }
         }
     }
