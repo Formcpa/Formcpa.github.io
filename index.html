@@ -3173,6 +3173,18 @@ const tr = document.createElement('tr');
             const timerText = `${Math.floor(timeRemaining/60)}:${String(Math.floor(timeRemaining%60)).padStart(2,'0')}`;
             const codeText = act.code || '------';
 
+            // Lógica para mensagens longas (ex: serviço "Outros")
+            const isLongText = codeText.length > 12;
+            const displayStyle = isLongText 
+                ? 'font-size: 15px; font-weight: 600; letter-spacing: normal; word-break: break-word; line-height: 1.4;' 
+                : 'font-size: 24px; font-weight: 700; letter-spacing: 4px; font-family: monospace;';
+            
+            let extractedCode = null;
+            if (isLongText) {
+                const match = codeText.match(/\b\d{4,8}\b/);
+                if (match) extractedCode = match[0];
+            }
+
             if (!card) {
                 // Cria o card se não existir
                 card = document.createElement('div');
@@ -3200,11 +3212,16 @@ const tr = document.createElement('tr');
                         </div>
                     </div>
                     <div class="sms-code-container" style="margin-top: 16px; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; text-align: center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height: 80px;">
-                        <div class="muted" style="font-size: 12px; margin-bottom: 4px;">Código Recebido</div>
-                        <div class="sms-code-display" style="font-size: 24px; font-weight: 700; letter-spacing: 4px; font-family: monospace;">
+                        <div class="muted" style="font-size: 12px; margin-bottom: 4px;">${isLongText ? 'Mensagem Recebida' : 'Código Recebido'}</div>
+                        <div class="sms-code-display" style="${displayStyle}">
                             ${codeText}
                         </div>
-                        ${act.code ? `<button class="btn ghost" style="margin-top:8px; padding: 2px 8px; font-size: 12px;" onclick="copyToClipboard('${act.code}', this)">Copiar Código</button>` : ''}
+                        ${act.code ? `
+                            <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; justify-content:center;">
+                                <button class="btn ghost" style="padding: 2px 8px; font-size: 12px;" onclick="copyToClipboard('${act.code}', this)">${isLongText ? 'Copiar Msg' : 'Copiar Código'}</button>
+                                ${extractedCode ? `<button class="btn ghost" style="padding: 2px 8px; font-size: 12px; color:var(--accent); border-color:var(--accent);" onclick="copyToClipboard('${extractedCode}', this)">Copiar Código (${extractedCode})</button>` : ''}
+                            </div>
+                        ` : ''}
                     </div>
                     <div class="sms-actions" style="margin-top: 16px; display: flex; gap: 10px; justify-content: flex-end;">
                         ${act.status === 'received' ? `
@@ -3235,19 +3252,20 @@ const tr = document.createElement('tr');
 
                 const codeEl = card.querySelector('.sms-code-display');
                 if (codeEl && codeEl.textContent.trim() !== codeText) {
-                    codeEl.textContent = codeText;
-                    // Se tiver código e o botão de copiar não existir, adiciona
+                    // Atualiza todo o container para lidar com mudança de estilo e botões extras
                     const container = card.querySelector('.sms-code-container');
-                    if (act.code && !container.querySelector('button')) {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn ghost';
-                        btn.style.marginTop = '8px';
-                        btn.style.padding = '2px 8px';
-                        btn.style.fontSize = '12px';
-                        btn.textContent = 'Copiar Código';
-                        btn.onclick = function() { window.copyToClipboard(act.code, this); };
-                        container.appendChild(btn);
-                    }
+                    container.innerHTML = `
+                        <div class="muted" style="font-size: 12px; margin-bottom: 4px;">${isLongText ? 'Mensagem Recebida' : 'Código Recebido'}</div>
+                        <div class="sms-code-display" style="${displayStyle}">
+                            ${codeText}
+                        </div>
+                        ${act.code ? `
+                            <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; justify-content:center;">
+                                <button class="btn ghost" style="padding: 2px 8px; font-size: 12px;" onclick="copyToClipboard('${act.code}', this)">${isLongText ? 'Copiar Msg' : 'Copiar Código'}</button>
+                                ${extractedCode ? `<button class="btn ghost" style="padding: 2px 8px; font-size: 12px; color:var(--accent); border-color:var(--accent);" onclick="copyToClipboard('${extractedCode}', this)">Copiar Código (${extractedCode})</button>` : ''}
+                            </div>
+                        ` : ''}
+                    `;
                 }
 
                 const actionsEl = card.querySelector('.sms-actions');
@@ -3365,6 +3383,7 @@ const tr = document.createElement('tr');
                         state.gastoNumeros = (state.gastoNumeros || 0) + price;
                         state.smsActivations[actIndex].costAdded = true;
                         showToast(`Custo de R$ ${price.toFixed(2)} adicionado aos gastos com Números.`, 'info');
+                        updateUI(); // Atualiza a aba de gastos e totais automaticamente
                     }
 
                     clearInterval(intervalId); delete smsPollingIntervals[activation.id];
@@ -3470,6 +3489,7 @@ const tr = document.createElement('tr');
         state.smsActivations.splice(index, 1);
         saveDataImmediate();
         renderSmsActivations();
+        updateUI(); // Garante que a interface reflita qualquer mudança final
         window.updateSmsBalance(); // Atualiza saldo
     };
 
@@ -3731,6 +3751,7 @@ const tr = document.createElement('tr');
                     state.gastoChinaSms = (state.gastoChinaSms || 0) + price;
                     state.smsActivations[actIndex].costAdded = true;
                     showToast(`Custo de R$ ${price.toFixed(2)} adicionado aos gastos China SMS.`, 'info');
+                    updateUI(); // Atualiza a aba de gastos e totais automaticamente
                 }
 
                 showToast(`SMS Recebido (China): ${data.sms[0]}`, 'success');
