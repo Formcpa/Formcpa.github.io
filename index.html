@@ -481,6 +481,14 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
     .status-badge.waiting { background: rgba(255, 193, 7, 0.15); color: #d48806; border: 1px solid rgba(255, 193, 7, 0.3); }
     .status-badge.received { background: rgba(23, 177, 105, 0.15); color: var(--success); border: 1px solid rgba(23, 177, 105, 0.3); }
     .status-badge.error { background: rgba(255, 77, 79, 0.15); color: var(--danger); border: 1px solid rgba(255, 77, 79, 0.3); }
+    
+    @keyframes pulse-yellow {
+      0% { box-shadow: 0 0 0 0 rgba(212, 136, 6, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(212, 136, 6, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(212, 136, 6, 0); }
+    }
+    .status-badge.waiting { animation: pulse-yellow 2s infinite; }
+
     .sms-progress-track { width: 100%; height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; margin-top: 8px; overflow: hidden; position: relative; }
     .sms-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 1s linear; }
 
@@ -956,9 +964,15 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
                 <button class="sms-tab-btn" id="tabSmsHistory" onclick="switchSmsTab('history')">Histórico</button>
             </div>
             
-            <div style="display:flex; justify-content:flex-end; margin-bottom: 10px; padding: 0 4px;">
+            <div style="display:flex; justify-content:flex-end; align-items:center; gap:15px; margin-bottom: 10px; padding: 0 4px;">
+                <button id="btnEnableNotif" class="btn ghost" style="font-size:11px; padding:4px 8px; display:none" onclick="requestNotificationPermission()">🔔 Ativar Notificações</button>
+                
                 <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; color:var(--muted);">
-                    <input type="checkbox" id="autoCopyToggle" onchange="toggleAutoCopy(this.checked)" style="width:auto; margin:0;"> Copiar código automaticamente ao chegar
+                    <input type="checkbox" id="soundToggle" onchange="toggleSound(this.checked)" style="width:auto; margin:0;"> 🔊 Som
+                </label>
+
+                <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; color:var(--muted);">
+                    <input type="checkbox" id="autoCopyToggle" onchange="toggleAutoCopy(this.checked)" style="width:auto; margin:0;"> 📋 Auto-copiar
                 </label>
             </div>
 
@@ -1105,7 +1119,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
     const APP_VERSION = '1.2'; // Mude este número quando atualizar o site
 
     // --- App state (agora com dailyRecords)
-    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [], smsApiKey: null, smsActivations: [], favoriteSmsServices: [], smsHistory: [], chinaSmsToken: null, currentSmsProvider: 'sms24h', autoCopySms: false, monthlyGoal: 5000 };
+    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [], smsApiKey: null, smsActivations: [], favoriteSmsServices: [], smsHistory: [], chinaSmsToken: null, currentSmsProvider: 'sms24h', autoCopySms: false, soundEnabled: true, monthlyGoal: 5000 };
     let saveTimer = null;
 
     // --- Utils
@@ -1173,6 +1187,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             chinaSmsToken: null,
             smsHistory: [],
             currentSmsProvider: 'sms24h',
+            soundEnabled: true,
             autoCopySms: false,
             monthlyGoal: 5000,
             status: 'pending' // Novos usuários começam como pendentes
@@ -1220,6 +1235,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       if(!state.chinaSmsToken) state.chinaSmsToken = null;
       if(!state.currentSmsProvider) state.currentSmsProvider = 'sms24h';
       if(state.autoCopySms === undefined) state.autoCopySms = false;
+      if(state.soundEnabled === undefined) state.soundEnabled = true;
       if(!state.smsHistory) state.smsHistory = [];
       if(!state.monthlyGoal) state.monthlyGoal = 5000;
       if(!state.pendingNotes) state.pendingNotes = [];
@@ -2903,6 +2919,14 @@ const tr = document.createElement('tr');
         if(autoCopyCheck) {
             autoCopyCheck.checked = state.autoCopySms || false;
         }
+        const soundCheck = document.getElementById('soundToggle');
+        if(soundCheck) {
+            soundCheck.checked = state.soundEnabled !== false;
+        }
+        
+        if (Notification.permission === 'default') {
+            document.getElementById('btnEnableNotif').style.display = 'block';
+        }
 
         renderSmsActivations();
         renderSmsHistory();
@@ -3209,6 +3233,7 @@ const tr = document.createElement('tr');
                         <div style="text-align: right;">
                             <div class="status-badge ${badgeClass}">${statusText}</div>
                             <div class="timer-text" class="muted" style="font-size: 12px;">Tempo: ${timerText}</div>
+                            ${act.status === 'waiting' ? `<div style="margin-top:4px"><button class="btn ghost" style="padding:2px 6px;font-size:10px" onclick="forceCheckSms('${act.id}')" title="Forçar verificação na API agora">⚡ Checar</button></div>` : ''}
                         </div>
                     </div>
                     <div class="sms-code-container" style="margin-top: 16px; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; text-align: center; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height: 80px;">
@@ -3315,6 +3340,28 @@ const tr = document.createElement('tr');
         });
     };
 
+    window.forceCheckSms = async (id) => {
+        const act = state.smsActivations.find(a => a.id === id);
+        if(!act) return;
+        
+        showToast('Verificando status na API...', 'info');
+        
+        if(act.provider === 'chinasms') {
+            // Para ChinaSMS, abortamos o polling atual e iniciamos um novo imediatamente
+            if(chinaSmsPollingControllers[id]) {
+                chinaSmsPollingControllers[id].abort();
+                delete chinaSmsPollingControllers[id];
+            }
+            startChinaSmsPolling(act);
+        } else {
+            // Para SMS24h, fazemos uma chamada direta
+            const response = await smsApiCall({ action: 'getStatus', id: act.id });
+            if (response && response.startsWith('STATUS_OK:')) {
+                // O polling normal vai pegar isso, mas podemos acelerar se quisermos
+            }
+        }
+    };
+
     document.getElementById('saveSmsApiKey')?.addEventListener('click', () => {
         const key = document.getElementById('smsApiKey').value.trim();
         if (key) {
@@ -3393,7 +3440,8 @@ const tr = document.createElement('tr');
                         navigator.clipboard.writeText(code).catch(e => console.error(e));
                         showToast('Código copiado automaticamente!', 'info');
                     }
-                    new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(e => console.warn('Som bloqueado:', e));
+                    playNotificationSound();
+                    sendBrowserNotification(`Código: ${code}`, `SMS Recebido de ${activation.serviceName}`);
                 }
             }
             saveDataImmediate();
@@ -3536,7 +3584,17 @@ const tr = document.createElement('tr');
         const activation = state.smsActivations[index];
 
         if (activation.provider === 'chinasms') {
-            await chinaSmsApiCall('cancel', { aid: activation.id });
+            const result = await chinaSmsApiCall('cancel', { aid: activation.id });
+            
+            // Correção Ghost SMS: Se falhar (null), não remove o card e tenta buscar o código
+            if (!result) {
+                showToast('Cancelamento falhou. Verificando se o SMS chegou...', 'info');
+                if (!chinaSmsPollingControllers[activation.id]) {
+                    startChinaSmsPolling(activation);
+                }
+                return; 
+            }
+
             if (chinaSmsPollingControllers[activation.id]) {
                 chinaSmsPollingControllers[activation.id].abort();
                 delete chinaSmsPollingControllers[activation.id];
@@ -3759,7 +3817,8 @@ const tr = document.createElement('tr');
                     navigator.clipboard.writeText(data.sms[0]).catch(e => console.error(e));
                     showToast('Código copiado automaticamente!', 'info');
                 }
-                new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(e => console.warn('Som bloqueado:', e));
+                playNotificationSound();
+                sendBrowserNotification(`Código: ${data.sms[0]}`, `China SMS: ${activation.serviceName}`);
             } else if (data.status === 'waiting' && data.timeout) {
                 setTimeout(() => startChinaSmsPolling(activation), 3000); // Delay de 3s para evitar flood
             } else if (data.status === 'canceled') {
@@ -3807,6 +3866,32 @@ const tr = document.createElement('tr');
     window.toggleAutoCopy = (checked) => {
         state.autoCopySms = checked;
         saveDataImmediate();
+    };
+
+    window.toggleSound = (checked) => {
+        state.soundEnabled = checked;
+        saveDataImmediate();
+    };
+
+    window.playNotificationSound = () => {
+        if(!state.soundEnabled) return;
+        new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(e => console.warn('Som bloqueado:', e));
+    };
+
+    window.requestNotificationPermission = () => {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                showToast('Notificações ativadas!', 'success');
+                document.getElementById('btnEnableNotif').style.display = 'none';
+                new Notification("Painel Financeiro", { body: "As notificações estão funcionando!" });
+            }
+        });
+    };
+
+    window.sendBrowserNotification = (title, body) => {
+        if (Notification.permission === "granted") {
+            new Notification(title, { body: body, icon: 'https://cdn-icons-png.flaticon.com/512/561/561188.png' });
+        }
     };
 
     window.showToast = (message, type = 'info') => {
