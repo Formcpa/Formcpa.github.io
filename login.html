@@ -71,6 +71,56 @@
         return;
       }
 
+      // Handle password recovery flow
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          // This event is triggered when the user clicks the password recovery link.
+          // We now need to show a form to update the password.
+          
+          isResetting = false; // Not in "request reset" mode anymore
+          isRegistering = false;
+
+          formTitle.textContent = 'Crie sua Nova Senha';
+          submitBtn.textContent = 'Salvar Nova Senha';
+          
+          // Hide email input, show password input
+          document.getElementById('email').parentElement.style.display = 'none';
+          passwordInput.parentElement.style.display = 'block';
+          passwordInput.required = true;
+          passwordInput.placeholder = 'Digite a nova senha';
+
+          // Hide unnecessary links
+          toggleLink.style.display = 'none';
+          forgotLink.style.display = 'none';
+          errorMsg.style.display = 'none';
+
+          // Replace the form's submit logic
+          document.getElementById('loginForm').onsubmit = async (e) => {
+              e.preventDefault();
+              const newPassword = passwordInput.value;
+              if (newPassword.length < 6) {
+                  errorMsg.textContent = 'A senha precisa ter no mínimo 6 caracteres.';
+                  errorMsg.style.display = 'block';
+                  return;
+              }
+              submitBtn.textContent = 'Salvando...';
+              submitBtn.disabled = true;
+              const { error } = await supabase.auth.updateUser({ password: newPassword });
+              if (error) {
+                  errorMsg.textContent = 'Erro ao atualizar a senha: ' + error.message;
+                  errorMsg.style.display = 'block';
+                  submitBtn.textContent = 'Salvar Nova Senha';
+                  submitBtn.disabled = false;
+              } else {
+                  showToast('Senha atualizada com sucesso! Redirecionando para o login...', 'success');
+                  setTimeout(() => {
+                      window.location.href = 'login.html';
+                  }, 3000);
+              }
+          };
+        }
+      });
+
       // Verifica se já está logado e redireciona
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) {
@@ -155,9 +205,7 @@
 
           let result;
           if (isResetting) {
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: window.location.href
-            });
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
             if (error) result = { error };
             else {
               showToast('Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.', 'success');
