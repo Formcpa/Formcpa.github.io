@@ -143,6 +143,11 @@
     body.dark .note-card .cpf-text{color:#e6eef8}
     body.dark .note-card.used{background:rgba(82,196,26,0.08)}
 
+    .note-card.used .cpf-text {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
     .btn-notes-container {
       position: relative;
     }
@@ -781,16 +786,16 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             <h3>Gerenciador de CPFs</h3>
             <div class="muted">Armazene e gerencie CPFs para as contas</div>
           </div>
-          <button class="btn" id="addNotaBtn">+ Adicionar CPF</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn ghost" id="removeUsedBtn" title="Remover CPFs riscados">Limpar Usados</button>
+            <button class="btn" id="addNotaBtn">+ Adicionar CPFs</button>
+          </div>
         </div>
 
-        <div style="background:var(--card);padding:16px;border-radius:10px;margin-bottom:20px;border:1px solid #e6edf6">
-          <h4 style="margin:0 0 10px 0;font-size:15px">Importação em Massa</h4>
-          <textarea id="bulkImportArea" placeholder="Cole aqui múltiplos CPFs (um por linha)&#10;Exemplo:&#10;123.456.789-00&#10;987.654.321-00&#10;111.222.333-44" style="width:100%;min-height:120px;padding:10px;border:1px solid #ddd;border-radius:6px;font-family:monospace;font-size:13px;resize:vertical"></textarea>
-          <div style="display:flex;gap:10px;margin-top:10px">
-            <button class="btn" id="bulkImportBtn">Importar CPFs</button>
-            <button class="btn ghost" id="removeUsedBtn">Remover CPFs Usados</button>
-          </div>
+        <!-- Search and Stats -->
+        <div style="display:flex; gap:16px; align-items:center; margin-bottom:16px; background:rgba(0,0,0,0.02); padding:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.05)">
+          <input type="text" id="searchCpf" placeholder="🔎 Buscar CPF..." style="flex:1;">
+          <div id="cpfStats" class="muted" style="font-weight:500; white-space:nowrap;">Disponíveis: 0 / Total: 0</div>
         </div>
 
         <div id="notasList"></div>
@@ -823,29 +828,6 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
               <th>Nome da Conta</th>
               <th>Saque (R$)</th>
               <th>Valor Final (75%)</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div style="margin: 30px 0; border-top: 1px solid #e6edf6;"></div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-          <div>
-            <h3>Fintech Organpay (10%)</h3>
-            <div class="muted">Gerencie contas Fintech com desconto de 10% nos saques</div>
-          </div>
-          <button class="btn" id="addFintech10Btn">+ Adicionar Conta</button>
-        </div>
-
-        <table id="fintechTable10">
-          <thead>
-            <tr>
-              <th>Nome da Conta</th>
-              <th>Saque (R$)</th>
-              <th>CPFs (R$ 0,49)</th>
-              <th>Valor Final (90%)</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -1066,6 +1048,22 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       </div>
       <p class="muted" style="margin-bottom:12px">Selecione a plataforma de destino:</p>
       <div id="moveTargetList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- Modal Importação CPF -->
+  <div id="cpfModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Adicionar / Importar CPFs</h3>
+        <span class="close-modal" id="closeCpfModal">&times;</span>
+      </div>
+      <p class="muted" style="margin-bottom:10px">Cole abaixo os CPFs (um por linha):</p>
+      <textarea id="cpfImportArea" placeholder="123.456.789-00&#10;987.654.321-00" style="width:100%;min-height:150px;padding:10px;border:1px solid #e6edf6;border-radius:8px;font-family:monospace;resize:vertical;background:#fbfdff"></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+        <button class="btn ghost" id="cancelCpfImport">Cancelar</button>
+        <button class="btn" id="confirmCpfImport">Importar</button>
+      </div>
     </div>
   </div>
 
@@ -1413,13 +1411,6 @@ const tr = document.createElement('tr');
         state.fintechAccounts.forEach(acc => {
           const saque = Number(acc.saque) || 0;
           totalFintech += saque * 0.75;
-        });
-      }
-      if(state.fintechAccounts10){
-        state.fintechAccounts10.forEach(acc => {
-          const saque = Number(acc.saque) || 0;
-          const cpf = Number(acc.cpfCount) || 0;
-          totalFintech += (saque * 0.90) - (cpf * 0.49);
         });
       }
       totalLucro += totalFintech;
@@ -1945,9 +1936,8 @@ const tr = document.createElement('tr');
     }
 
     document.getElementById('addNotaBtn').onclick = ()=>{
-      state.notas.unshift({text:'', used: false, createdAt: new Date().toISOString()});
-      scheduleSave();
-      renderNotas();
+      document.getElementById('cpfModal').style.display = 'block';
+      setTimeout(() => document.getElementById('cpfImportArea').focus(), 100);
     };
 
     // --- Backup Logic
@@ -1969,7 +1959,17 @@ const tr = document.createElement('tr');
       const container = document.getElementById('notasList');
       if(!container) return;
       container.innerHTML = '';
-      (state.notas || []).forEach((nota, i)=>{
+
+      const searchTerm = document.getElementById('searchCpf') ? document.getElementById('searchCpf').value.toLowerCase() : '';
+      const filteredNotas = (state.notas || []).filter(n => !searchTerm || (n.text && n.text.toLowerCase().includes(searchTerm)));
+
+      const total = state.notas.length;
+      const available = state.notas.filter(n => !n.used).length;
+      const statsEl = document.getElementById('cpfStats');
+      if(statsEl) statsEl.textContent = `Disponíveis: ${available} / Total: ${total}`;
+
+      filteredNotas.forEach((nota)=>{
+        const i = state.notas.indexOf(nota);
         const card = document.createElement('div');
         card.className = 'note-card';
         if(nota.used) card.classList.add('used');
@@ -1990,17 +1990,27 @@ const tr = document.createElement('tr');
         copyBtn.onclick = () => {
           if(!nota.text) return;
           navigator.clipboard.writeText(nota.text).then(() => {
-            state.notas[i].used = true;
             copyBtn.textContent = 'Copiado!';
             setTimeout(() => { copyBtn.textContent = 'Copiar'; }, 1500);
-            
-            saveDataImmediate();
-            renderNotas();
-            renderSummary();
           }).catch(err => {
             console.error('Falha ao copiar:', err);
             showToast('Não foi possível copiar o texto.', 'error');
           });
+        };
+
+        const editBtn = document.createElement('button');
+        editBtn.innerHTML = '✏️';
+        editBtn.className = 'btn ghost';
+        editBtn.style.padding = '4px 8px';
+        editBtn.title = 'Editar CPF';
+        editBtn.onclick = () => {
+            showPrompt('Editar CPF:', (newVal) => {
+                if(newVal && newVal.trim() !== '') {
+                    state.notas[i].text = newVal.trim();
+                    saveDataImmediate();
+                    renderNotas();
+                }
+            }, nota.text);
         };
 
         const usedLabel = document.createElement('span');
@@ -2021,6 +2031,7 @@ const tr = document.createElement('tr');
         });
 
         rightSection.appendChild(copyBtn);
+        rightSection.appendChild(editBtn);
         rightSection.appendChild(usedLabel);
         rightSection.appendChild(checkbox);
         card.appendChild(cpfText);
@@ -2029,23 +2040,33 @@ const tr = document.createElement('tr');
       });
     }
 
-    document.getElementById('bulkImportBtn').addEventListener('click', async ()=>{
-      const textarea = document.getElementById('bulkImportArea');
+    document.getElementById('searchCpf')?.addEventListener('input', renderNotas);
+
+    document.getElementById('confirmCpfImport').addEventListener('click', async ()=>{
+      const textarea = document.getElementById('cpfImportArea');
       const text = textarea.value.trim();
-      if(!text) return showToast('Cole os CPFs no campo acima, um por linha.', 'error');
+      if(!text) return showToast('Cole os CPFs no campo.', 'error');
 
       const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
       if(lines.length === 0) return showToast('Nenhum CPF válido encontrado.', 'error');
 
+      let addedCount = 0;
+      const existing = new Set(state.notas.map(n => n.text));
+
       lines.forEach(cpf => {
-        state.notas.push({text: cpf, used: false, createdAt: new Date().toISOString()});
+        if(!existing.has(cpf)) {
+            state.notas.unshift({text: cpf, used: false, createdAt: new Date().toISOString()});
+            existing.add(cpf);
+            addedCount++;
+        }
       });
 
       textarea.value = '';
       saveData();
       renderSummary();
       renderNotas();
-      showToast(`${lines.length} CPF(s) importado(s) com sucesso!`, 'success');
+      document.getElementById('cpfModal').style.display = 'none';
+      showToast(`${addedCount} CPF(s) importado(s) com sucesso! (${lines.length - addedCount} duplicados ignorados)`, 'success');
     });
 
     document.getElementById('removeUsedBtn').addEventListener('click', ()=>{
@@ -2062,10 +2083,8 @@ const tr = document.createElement('tr');
 
     function renderFintech(){
       const tbody = document.querySelector('#fintechTable tbody');
-      const tbody10 = document.querySelector('#fintechTable10 tbody');
-      if(!tbody || !tbody10) return;
+      if(!tbody) return;
       tbody.innerHTML = '';
-      tbody10.innerHTML = '';
 
       let totalFinal = 0;
 
@@ -2113,68 +2132,6 @@ const tr = document.createElement('tr');
         tbody.appendChild(tr);
       });
 
-      // Render 10% Accounts
-      state.fintechAccounts10.forEach((acc, i) => {
-        const saque = Number(acc.saque) || 0;
-        const cpfCount = Number(acc.cpfCount) || 0;
-        const valorFinal = (saque * 0.90) - (cpfCount * 0.49);
-        totalFinal += valorFinal;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input type="text" class="inp-name" value="${acc.name || ''}" placeholder="Nome da conta" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
-          <td><input type="text" inputmode="decimal" class="inp-saque" value="${String(saque).replace('.',',')}" style="width:120px;padding:8px;border-radius:6px;border:1px solid #e6edf6" /></td>
-          <td><input type="number" class="inp-cpf" value="${cpfCount}" style="width:80px;padding:8px;border-radius:6px;border:1px solid #e6edf6" placeholder="Qtd" /></td>
-          <td class="valor-final lucro">R$ ${money(valorFinal)}</td>
-          <td class="actions"><button class="btn ghost del-fintech">X</button></td>
-        `;
-
-        tr.querySelector('.inp-name').addEventListener('input', (e) => {
-          state.fintechAccounts10[i].name = e.target.value;
-          scheduleSave();
-        });
-
-        tr.querySelector('.inp-saque').addEventListener('input', (e) => {
-          const newSaque = parseDecimal(e.target.value);
-          state.fintechAccounts10[i].saque = newSaque;
-
-          const currentCpf = Number(state.fintechAccounts10[i].cpfCount) || 0;
-          const newValorFinal = (newSaque * 0.90) - (currentCpf * 0.49);
-          const valorFinalCell = tr.querySelector('.valor-final');
-          valorFinalCell.textContent = `R$ ${money(newValorFinal)}`;
-
-          updateFintechTotal();
-          scheduleSave();
-          renderSummary();
-        });
-
-        tr.querySelector('.inp-cpf').addEventListener('input', (e) => {
-          const newCpf = Number(e.target.value) || 0;
-          state.fintechAccounts10[i].cpfCount = newCpf;
-          
-          const currentSaque = Number(state.fintechAccounts10[i].saque) || 0;
-          const newValorFinal = (currentSaque * 0.90) - (newCpf * 0.49);
-          
-          const valorFinalCell = tr.querySelector('.valor-final');
-          valorFinalCell.textContent = `R$ ${money(newValorFinal)}`;
-
-          updateFintechTotal();
-          scheduleSave();
-          renderSummary();
-        });
-
-        tr.querySelector('.del-fintech').addEventListener('click', () => {
-          showConfirm('Tem certeza que deseja remover esta conta Fintech (10%)?', () => {
-              state.fintechAccounts10.splice(i, 1);
-              scheduleSave();
-              renderFintech();
-              renderSummary();
-          }, { isDanger: true, title: 'Remover Conta Fintech' });
-        });
-
-        tbody10.appendChild(tr);
-      });
-
       const totalEl = document.getElementById('fintechTotal');
       if(totalEl) totalEl.textContent = `R$ ${money(totalFinal)}`;
     }
@@ -2182,23 +2139,12 @@ const tr = document.createElement('tr');
     function updateFintechTotal() {
         let total = 0;
         state.fintechAccounts.forEach(acc => total += (Number(acc.saque)||0) * 0.75);
-        state.fintechAccounts10.forEach(acc => {
-            const s = Number(acc.saque)||0;
-            const c = Number(acc.cpfCount)||0;
-            total += (s * 0.90) - (c * 0.49);
-        });
         const totalEl = document.getElementById('fintechTotal');
         if(totalEl) totalEl.textContent = `R$ ${money(total)}`;
     }
 
     document.getElementById('addFintechBtn').addEventListener('click', () => {
       state.fintechAccounts.push({ name: '', saque: 0 });
-      scheduleSave();
-      renderFintech();
-    });
-
-    document.getElementById('addFintech10Btn').addEventListener('click', () => {
-      state.fintechAccounts10.push({ name: '', saque: 0 });
       scheduleSave();
       renderFintech();
     });
@@ -2282,13 +2228,6 @@ const tr = document.createElement('tr');
           totalFintech += (Number(acc.saque) || 0) * 0.75;
         });
       }
-      if(state.fintechAccounts10){
-        state.fintechAccounts10.forEach(acc => {
-          const s = Number(acc.saque) || 0;
-          const c = Number(acc.cpfCount) || 0;
-          totalFintech += (s * 0.90) - (c * 0.49);
-        });
-      }
 
       const totalLucro = totalLucroPlataformas + totalFintech;
       const gastos = Number(state.gastoProxy||0) + Number(state.gastoNumeros||0) + Number(state.gastoBot||0) + Number(state.gastoChinaSms||0);
@@ -2333,7 +2272,6 @@ const tr = document.createElement('tr');
           state.platformOrder = [];
           state.selectedPlatform = null;
           state.fintechAccounts = [];
-          state.fintechAccounts10 = [];
           saveDataImmediate();
           updateUI();
       }, { isDanger: true, title: 'Fechar o Dia e Zerar Contas?', okText: 'Sim, Fechar o Dia' });
@@ -2469,6 +2407,11 @@ const tr = document.createElement('tr');
     document.getElementById('promptCancelBtn').addEventListener('click', hidePrompt);
     document.getElementById('closePromptModal').addEventListener('click', hidePrompt);
     
+    // CPF Modal Logic
+    const closeCpfModal = () => document.getElementById('cpfModal').style.display = 'none';
+    document.getElementById('closeCpfModal').addEventListener('click', closeCpfModal);
+    document.getElementById('cancelCpfImport').addEventListener('click', closeCpfModal);
+
     // Allow Enter key in prompt
     document.getElementById('promptInput').addEventListener('keydown', (e) => {
         if(e.key === 'Enter') document.getElementById('promptOkBtn').click();
@@ -2486,6 +2429,9 @@ const tr = document.createElement('tr');
       }
       if (event.target == document.getElementById('moveAccountModal')) {
         document.getElementById('moveAccountModal').style.display = 'none';
+      }
+      if (event.target == document.getElementById('cpfModal')) {
+        document.getElementById('cpfModal').style.display = 'none';
       }
     };
     // --- End Custom Modal Logic
