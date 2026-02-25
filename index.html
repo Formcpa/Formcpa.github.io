@@ -795,6 +795,9 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         <!-- Search and Stats -->
         <div style="display:flex; gap:16px; align-items:center; margin-bottom:16px; background:rgba(0,0,0,0.02); padding:12px; border-radius:8px; border:1px solid rgba(0,0,0,0.05)">
           <input type="text" id="searchCpf" placeholder="🔎 Buscar CPF..." style="flex:1;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:var(--muted);user-select:none;white-space:nowrap;">
+            <input type="checkbox" id="autoMarkCpfToggle" style="width:auto;margin:0"> Riscar ao copiar
+          </label>
           <div id="cpfStats" class="muted" style="font-weight:500; white-space:nowrap;">Disponíveis: 0 / Total: 0</div>
         </div>
 
@@ -1120,7 +1123,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
     const APP_VERSION = '1.2'; // Mude este número quando atualizar o site
 
     // --- App state (agora com dailyRecords)
-    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [], smsApiKey: null, smsActivations: [], favoriteSmsServices: [], smsHistory: [], chinaSmsToken: null, currentSmsProvider: 'sms24h', autoCopySms: false, soundEnabled: true, monthlyGoal: 5000 };
+    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [], smsApiKey: null, smsActivations: [], favoriteSmsServices: [], smsHistory: [], chinaSmsToken: null, currentSmsProvider: 'sms24h', autoCopySms: false, autoMarkCpf: false, soundEnabled: true, monthlyGoal: 5000 };
     let saveTimer = null;
 
     // --- Utils
@@ -1188,6 +1191,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             chinaSmsToken: null,
             smsHistory: [],
             currentSmsProvider: 'sms24h',
+            autoMarkCpf: false,
             soundEnabled: true,
             autoCopySms: false,
             monthlyGoal: 5000,
@@ -1236,6 +1240,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       if(!state.chinaSmsToken) state.chinaSmsToken = null;
       if(!state.currentSmsProvider) state.currentSmsProvider = 'sms24h';
       if(state.autoCopySms === undefined) state.autoCopySms = false;
+      if(state.autoMarkCpf === undefined) state.autoMarkCpf = false;
       if(state.soundEnabled === undefined) state.soundEnabled = true;
       if(!state.smsHistory) state.smsHistory = [];
       if(!state.monthlyGoal) state.monthlyGoal = 5000;
@@ -1728,6 +1733,10 @@ const tr = document.createElement('tr');
       if(gcs) gcs.value = String(state.gastoChinaSms || 0).replace('.',',');
 
       renderPlatformsList();
+      
+      const autoMarkCheck = document.getElementById('autoMarkCpfToggle');
+      if(autoMarkCheck) autoMarkCheck.checked = state.autoMarkCpf || false;
+
       renderSummary();
       renderContas();
       renderDiasTabela();
@@ -1955,6 +1964,11 @@ const tr = document.createElement('tr');
         document.getElementById('importFile').click();
     });
 
+    document.getElementById('autoMarkCpfToggle')?.addEventListener('change', (e) => {
+        state.autoMarkCpf = e.target.checked;
+        saveDataImmediate();
+    });
+
     function renderNotas(){
       const container = document.getElementById('notasList');
       if(!container) return;
@@ -1984,14 +1998,20 @@ const tr = document.createElement('tr');
         rightSection.style.gap = '8px';
 
         const copyBtn = document.createElement('button');
-        copyBtn.textContent = 'Copiar';
+        copyBtn.innerHTML = '📋';
+        copyBtn.title = 'Copiar CPF';
         copyBtn.className = 'btn ghost';
-        copyBtn.style.padding = '4px 8px';
+        copyBtn.style.padding = '6px 10px';
+        copyBtn.style.fontSize = '16px';
         copyBtn.onclick = () => {
           if(!nota.text) return;
           navigator.clipboard.writeText(nota.text).then(() => {
-            copyBtn.textContent = 'Copiado!';
-            setTimeout(() => { copyBtn.textContent = 'Copiar'; }, 1500);
+            copyBtn.innerHTML = '✅';
+            setTimeout(() => { copyBtn.innerHTML = '📋'; }, 1500);
+            if(state.autoMarkCpf && !nota.used) {
+                checkbox.click(); // Simula o clique para marcar e salvar
+                showToast('CPF copiado e marcado como usado!', 'success');
+            }
           }).catch(err => {
             console.error('Falha ao copiar:', err);
             showToast('Não foi possível copiar o texto.', 'error');
@@ -2001,7 +2021,7 @@ const tr = document.createElement('tr');
         const editBtn = document.createElement('button');
         editBtn.innerHTML = '✏️';
         editBtn.className = 'btn ghost';
-        editBtn.style.padding = '4px 8px';
+        editBtn.style.padding = '6px 10px';
         editBtn.title = 'Editar CPF';
         editBtn.onclick = () => {
             showPrompt('Editar CPF:', (newVal) => {
@@ -2016,13 +2036,14 @@ const tr = document.createElement('tr');
         const usedLabel = document.createElement('span');
         usedLabel.textContent = 'CPF usado';
         usedLabel.style.fontSize = '12px';
-        usedLabel.style.color = 'var(--success)';
+        usedLabel.style.color = 'var(--muted)';
         usedLabel.style.fontWeight = '500';
         usedLabel.style.display = nota.used ? 'block' : 'none';
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = nota.used || false;
+        checkbox.title = 'Marcar como usado';
         checkbox.addEventListener('change', ()=>{
           state.notas[i].used = checkbox.checked;
           saveDataImmediate();
