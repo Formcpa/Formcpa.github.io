@@ -902,7 +902,10 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
                             <button class="btn ghost" onclick="checkExpiredActivations()" style="padding: 4px 8px; font-size: 12px;" title="Sincronizar status e verificar expiração">🔄 Sincronizar</button>
                             <button class="btn ghost" id="checkSmsBalance" style="padding: 4px 8px; font-size: 12px;" title="Atualizar Saldo">🔄</button>
                         </div>
-                        <button id="sms24hBackBtn" class="btn ghost" style="display:none; font-size:12px; padding: 4px 8px;" onclick="renderSmsServices()">⬅ Voltar</button>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button class="btn ghost" id="repeatSms24hBtn" style="display:none; font-size:12px; padding: 4px 8px;" title="Repetir último serviço" onclick="window.repeatLastSmsService()">🔁 Repetir</button>
+                            <button id="sms24hBackBtn" class="btn ghost" style="display:none; font-size:12px; padding: 4px 8px;" onclick="renderSmsServices()">⬅ Voltar</button>
+                        </div>
                     </div>
                     <div id="sms24hSelectionArea">
                         <!-- Grid injected by JS -->
@@ -942,7 +945,10 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
                             <button class="btn ghost" onclick="checkExpiredActivations()" style="padding: 4px 8px; font-size: 12px;" title="Sincronizar status e verificar expiração">🔄 Sincronizar</button>
                             <button class="btn ghost" id="checkChinaSmsBalance" style="padding: 4px 8px; font-size: 12px;" title="Atualizar Saldo">🔄</button>
                         </div>
-                        <button id="chinaSmsBackBtn" class="btn ghost" style="display:none; font-size:12px; padding: 4px 8px;" onclick="renderChinaSmsServices()">⬅ Voltar</button>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button class="btn ghost" id="repeatChinaSmsBtn" style="display:none; font-size:12px; padding: 4px 8px;" title="Repetir último serviço" onclick="window.repeatLastSmsService()">🔁 Repetir</button>
+                            <button id="chinaSmsBackBtn" class="btn ghost" style="display:none; font-size:12px; padding: 4px 8px;" onclick="renderChinaSmsServices()">⬅ Voltar</button>
+                        </div>
                     </div>
                     <div id="chinaSmsSelectionArea">
                         <!-- Content injected by JS -->
@@ -1133,7 +1139,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
     const APP_VERSION = '1.2'; // Mude este número quando atualizar o site
 
     // --- App state (agora com dailyRecords)
-    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [], smsApiKey: null, smsActivations: [], favoriteSmsServices: [], smsHistory: [], chinaSmsToken: null, currentSmsProvider: 'sms24h', autoCopySms: false, autoMarkCpf: false, soundEnabled: true, monthlyGoal: 5000 };
+    let state = { platforms: {}, platformOrder: [], brandLogo: null, appTitle: 'Painel Financeiro', gastoProxy:0, gastoNumeros:0, gastoBot:0, selectedPlatform: null, dailyRecords: {}, notas: [], fintechAccounts: [], fintechAccounts10: [], pendingNotes: [], smsApiKey: null, smsActivations: [], favoriteSmsServices: [], smsHistory: [], chinaSmsToken: null, currentSmsProvider: 'sms24h', autoCopySms: false, autoMarkCpf: false, soundEnabled: true, monthlyGoal: 5000, lastSmsService: null };
     let saveTimer = null;
 
     // --- Utils
@@ -1254,6 +1260,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
       if(state.soundEnabled === undefined) state.soundEnabled = true;
       if(!state.smsHistory) state.smsHistory = [];
       if(!state.monthlyGoal) state.monthlyGoal = 5000;
+      if(!state.lastSmsService) state.lastSmsService = null;
       if(!state.pendingNotes) state.pendingNotes = [];
       if(!state.platformOrder || state.platformOrder.length !== Object.keys(state.platforms).length) {
         // Rebuild order if it's missing or out of sync
@@ -2881,6 +2888,27 @@ const tr = document.createElement('tr');
         }
     }
 
+    function renderRepeatButtons() {
+        const repeat24hBtn = document.getElementById('repeatSms24hBtn');
+        const repeatChinaBtn = document.getElementById('repeatChinaSmsBtn');
+
+        // Hide both by default
+        if (repeat24hBtn) repeat24hBtn.style.display = 'none';
+        if (repeatChinaBtn) repeatChinaBtn.style.display = 'none';
+
+        if (state.lastSmsService) {
+            const { provider, serviceName } = state.lastSmsService;
+            
+            if (provider === 'sms24h' && repeat24hBtn) {
+                repeat24hBtn.style.display = 'inline-flex';
+                repeat24hBtn.title = `Repetir último serviço: ${serviceName}`;
+            } else if (provider === 'chinasms' && repeatChinaBtn) {
+                repeatChinaBtn.style.display = 'inline-flex';
+                repeatChinaBtn.title = `Repetir último serviço: ${serviceName}`;
+            }
+        }
+    }
+
     function renderSmsPanel() {
         const apiKeyInput = document.getElementById('smsApiKey');
         const chinaSmsTokenInput = document.getElementById('chinaSmsToken');
@@ -2908,6 +2936,7 @@ const tr = document.createElement('tr');
             document.getElementById('btnEnableNotif').style.display = 'block';
         }
 
+        renderRepeatButtons();
         renderSmsActivations();
         renderSmsHistory();
     }
@@ -3337,7 +3366,20 @@ const tr = document.createElement('tr');
             // Para SMS24h, fazemos uma chamada direta
             const response = await smsApiCall({ action: 'getStatus', id: act.id });
             if (response && response.startsWith('STATUS_OK:')) {
-                // O polling normal vai pegar isso, mas podemos acelerar se quisermos
+                const code = response.substring(10);
+                const actIndex = state.smsActivations.findIndex(a => a.id === id);
+                if (actIndex !== -1) {
+                    state.smsActivations[actIndex].code = code;
+                    state.smsActivations[actIndex].status = 'received';
+                    
+                    if (!state.smsActivations[actIndex].costAdded) {
+                        const price = getServicePrice('sms24h', state.smsActivations[actIndex].service);
+                        state.gastoNumeros = (state.gastoNumeros || 0) + price;
+                        state.smsActivations[actIndex].costAdded = true;
+                    }
+                    saveDataImmediate();
+                    renderSmsActivations();
+                }
             }
         }
     };
@@ -3356,6 +3398,29 @@ const tr = document.createElement('tr');
         window.updateSmsBalance();
     });
 
+    async function executeSms24hBuy(serviceId, serviceName, operator) {
+        const response = await smsApiCall({ action: 'getNumber', service: serviceId, operator: operator, country: 73 });
+
+        if (response && response.startsWith('ACCESS_NUMBER:')) {
+            const [, id, number] = response.split(':');
+            const newActivation = { id, number, service: serviceId, serviceName, operator, startTime: new Date().toISOString(), status: 'waiting', code: null, provider: 'sms24h' };
+            state.smsActivations.push(newActivation);
+            
+            state.lastSmsService = { provider: 'sms24h', serviceId, serviceName, operator };
+
+            saveDataImmediate();
+            renderSmsActivations();
+            startSmsPolling(newActivation);
+            window.updateSmsBalance(); // Atualiza saldo
+            
+            showToast(`Número para ${serviceName} adquirido!`, 'success');
+            return true;
+        } else {
+            if(response) showToast(`Erro ao pedir número: ${response}`, 'error');
+            return false;
+        }
+    }
+
     async function buySms24hNumber(serviceId, serviceName) {
         const btn = document.getElementById('getNumberBtn');
         if(!btn) return;
@@ -3363,23 +3428,7 @@ const tr = document.createElement('tr');
         btn.disabled = true;
 
         const operator = document.getElementById('smsOperator').value;
-
-        const response = await smsApiCall({ action: 'getNumber', service: serviceId, operator: operator, country: 73 });
-
-        if (response && response.startsWith('ACCESS_NUMBER:')) {
-            const [, id, number] = response.split(':');
-            const newActivation = { id, number, service: serviceId, serviceName, operator, startTime: new Date().toISOString(), status: 'waiting', code: null, provider: 'sms24h' };
-            state.smsActivations.push(newActivation);
-            saveDataImmediate();
-            renderSmsActivations();
-            startSmsPolling(newActivation);
-            window.updateSmsBalance(); // Atualiza saldo
-            
-            // Volta para a grade ou avisa?
-            // alert('Número gerado!');
-        } else {
-            if(response) showToast(`Erro ao pedir número: ${response}`, 'error');
-        }
+        await executeSms24hBuy(serviceId, serviceName, operator);
 
         btn.textContent = `Pedir Número (${serviceName})`;
         btn.disabled = false;
@@ -3387,7 +3436,7 @@ const tr = document.createElement('tr');
 
     function startSmsPolling(activation) {
         if (smsPollingIntervals[activation.id]) clearInterval(smsPollingIntervals[activation.id]);
-
+        
         const intervalId = setInterval(async () => {
             const actIndex = state.smsActivations.findIndex(a => a.id === activation.id);
             if (actIndex === -1) { clearInterval(intervalId); delete smsPollingIntervals[activation.id]; return; }
@@ -3400,7 +3449,7 @@ const tr = document.createElement('tr');
             } else {
                 const response = await smsApiCall({ action: 'getStatus', id: activation.id });
                 if (response && response.startsWith('STATUS_OK:')) {
-                    const code = response.split(':')[1];
+                    const code = response.substring(10); // Pega tudo após STATUS_OK: para não cortar mensagens com ":"
                     state.smsActivations[actIndex].code = code;
                     state.smsActivations[actIndex].status = 'received';
                     
@@ -3678,6 +3727,42 @@ const tr = document.createElement('tr');
         }, { isDanger: true, title: 'Limpar Histórico SMS' });
     };
 
+    window.repeatLastSmsService = async function() {
+        if (!state.lastSmsService) {
+            showToast('Nenhum serviço usado recentemente.', 'info');
+            return;
+        }
+
+        const { provider, serviceId, serviceName, operator } = state.lastSmsService;
+
+        if (provider !== state.currentSmsProvider) {
+            showToast(`O último serviço foi do provedor ${provider}. Mude para ele para repetir.`, 'info');
+            return;
+        }
+
+        if (provider === 'sms24h') {
+            showConfirm(`Repetir o último serviço?<br><br><strong>Serviço:</strong> ${serviceName}<br><strong>Operadora:</strong> ${operator === 'any' ? 'Qualquer' : operator}`, async () => {
+                const btn = document.getElementById('repeatSms24hBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '...';
+                btn.disabled = true;
+
+                await executeSms24hBuy(serviceId, serviceName, operator);
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, { title: 'Repetir Serviço SMS24h' });
+        } else if (provider === 'chinasms') {
+            const svc = CHINA_SMS_SERVICES.find(s => s.id === serviceId);
+            const price = svc ? `R$ ${svc.price.toFixed(2)}` : 'Preço desconhecido';
+
+            showConfirm(`Repetir o último serviço?<br><br><strong>Serviço:</strong> ${serviceName}<br><strong>Preço:</strong> ${price}`, async () => {
+                const btn = document.getElementById('repeatChinaSmsBtn');
+                await buyChinaSmsNumber(serviceId, serviceName, btn);
+            }, { title: 'Repetir Serviço ChinaSMS' });
+        }
+    };
+
     window.selectSmsProvider = (provider) => {
         state.currentSmsProvider = provider;
         saveDataImmediate();
@@ -3857,6 +3942,9 @@ const tr = document.createElement('tr');
         if (response && response.status === 'success') {
             const newActivation = { id: response.aid, number: response.number, service: serviceId, serviceName, startTime: new Date().toISOString(), status: 'waiting', code: null, provider: 'chinasms' };
             state.smsActivations.push(newActivation);
+            
+            state.lastSmsService = { provider: 'chinasms', serviceId, serviceName };
+
             saveDataImmediate();
             renderSmsActivations();
             startChinaSmsPolling(newActivation);
