@@ -93,6 +93,15 @@
     .btn.ghost.success:hover {
       background: rgba(23, 177, 105, 0.1);
     }
+
+    .btn.ghost.cleanup {
+      color: var(--muted);
+      border-color: rgba(107, 118, 132, 0.2);
+    }
+    .btn.ghost.cleanup:hover {
+      background: rgba(107, 118, 132, 0.1);
+      color: var(--text);
+    }
     
     .btn.success {
       background: var(--success);
@@ -566,8 +575,8 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         <div class="header-right">
           <div class="header-actions">
             <div class="muted">Lucro Total</div>
-            <button id="importDataHeaderBtn" class="btn ghost" style="padding:6px 10px">Importar dados</button>
-            <button id="toggleTheme" class="btn ghost" style="padding:6px 10px">Tema</button>
+            <button id="importDataHeaderBtn" class="btn ghost" style="padding:6px 10px">📂 Importar</button>
+            <button id="toggleTheme" class="btn ghost" style="padding:6px 10px">🌓 Tema</button>
           </div>
           <div style="font-size:20px;font-weight:700" id="lucroTotalDisplay">R$ 0,00</div>
         </div>
@@ -700,7 +709,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             </select>
 
             <button class="btn" id="fecharDiaBtn">Fechar Dia</button>
-            <button class="btn ghost danger" id="limparHistoricoBtn">Limpar Histórico</button>
+            <button class="btn ghost cleanup" id="limparHistoricoBtn" title="Apagar todo o histórico">🗑️ Limpar Histórico</button>
           </div>
 
           <h4 style="margin-top:16px">Histórico Diário</h4>
@@ -787,7 +796,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             <div class="muted">Armazene e gerencie CPFs para as contas</div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="btn ghost" id="removeUsedBtn" title="Remover CPFs riscados">Limpar Usados</button>
+            <button class="btn ghost cleanup" id="removeUsedBtn" title="Remover CPFs riscados">🧹 Limpar Usados</button>
             <button class="btn" id="addNotaBtn">+ Adicionar CPFs</button>
           </div>
         </div>
@@ -970,7 +979,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
             <div id="smsHistoryContainer" style="display:none;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
                     <input type="text" id="searchSmsHistory" placeholder="🔍 Buscar número..." style="padding:6px; font-size:12px; width:150px; border-radius:6px; border:1px solid #e6edf6;">
-                    <button class="btn ghost" onclick="clearSmsHistory()" style="font-size:11px">Limpar Histórico</button>
+                    <button class="btn ghost cleanup" onclick="clearSmsHistory()" style="font-size:11px">🗑️ Limpar Histórico</button>
                 </div>
                 <div id="smsHistoryList" style="max-height: 400px; overflow-y: auto; background: var(--card); border-radius: 8px; border: 1px solid #e6edf6;"></div>
             </div>
@@ -991,7 +1000,7 @@ body.dark #lucroTotalDisplay.negative { color: #ff4d4f !important; }
         <h4 style="margin-top:24px">📜 Log de Atividades</h4>
         <div class="muted" style="margin-bottom:8px">Histórico de acessos recentes ao painel</div>
         <div id="activityLogsList" style="max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 8px; border: 1px solid var(--muted);"></div>
-        <button class="btn ghost" style="margin-top:8px;font-size:12px" onclick="clearActivityLogs()">Limpar Histórico</button>
+        <button class="btn ghost cleanup" style="margin-top:8px;font-size:12px" onclick="clearActivityLogs()">🗑️ Limpar Log</button>
       </div>
 
       <!-- Notas Pendentes -->
@@ -1998,16 +2007,16 @@ const tr = document.createElement('tr');
         rightSection.style.gap = '8px';
 
         const copyBtn = document.createElement('button');
-        copyBtn.innerHTML = '📋';
+        copyBtn.innerHTML = '📋 Copiar';
         copyBtn.title = 'Copiar CPF';
         copyBtn.className = 'btn ghost';
         copyBtn.style.padding = '6px 10px';
-        copyBtn.style.fontSize = '16px';
+        copyBtn.style.fontSize = '13px';
         copyBtn.onclick = () => {
           if(!nota.text) return;
           navigator.clipboard.writeText(nota.text).then(() => {
-            copyBtn.innerHTML = '✅';
-            setTimeout(() => { copyBtn.innerHTML = '📋'; }, 1500);
+            copyBtn.innerHTML = '✅ Copiado';
+            setTimeout(() => { copyBtn.innerHTML = '📋 Copiar'; }, 1500);
             if(state.autoMarkCpf && !nota.used) {
                 checkbox.click(); // Simula o clique para marcar e salvar
                 showToast('CPF copiado e marcado como usado!', 'success');
