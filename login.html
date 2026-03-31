@@ -1,0 +1,311 @@
+<!-- c:\Users\Administrator\Documents\Planilha cpa\login.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Login - Painel Financeiro</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#eef1f6; --card:#ffffff; --text:#17233b; --accent:#2b7be4; --muted:#6b7684; --success:#17b169; --danger:#ff4d4f;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body { background:var(--bg); color:var(--text); display:flex; align-items:center; justify-content:center; min-height:100vh; -webkit-font-smoothing:antialiased; }
+
+    .login-wrap { width:100%; max-width:380px; padding:20px; }
+
+    .login-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 2px 8px rgba(30,50,80,0.07), 0 0 0 0.5px rgba(30,50,80,0.07);
+    }
+
+    .login-logo {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 16px;
+    }
+
+    .login-title { text-align:center; font-size:20px; font-weight:600; color:var(--text); letter-spacing:-0.02em; }
+    .login-sub { text-align:center; font-size:13px; color:var(--muted); margin-top:4px; margin-bottom:28px; }
+
+    .field-label { font-size:12px; font-weight:500; color:var(--muted); margin-bottom:5px; }
+    .input-group { margin-bottom:14px; }
+    input {
+      width:100%; padding:10px 13px;
+      border:0.5px solid rgba(30,50,80,0.18);
+      border-radius:9px;
+      background:#f8fafc;
+      font-size:14px; font-family:inherit; color:var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    input:focus { outline:none; border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px rgba(43,123,228,0.1); }
+
+    button {
+      width:100%; padding:11px;
+      background:var(--accent); color:white;
+      border:none; border-radius:9px;
+      font-size:14px; font-weight:500; font-family:inherit;
+      cursor:pointer; letter-spacing:-0.01em;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top:6px;
+    }
+    button:hover { opacity:0.93; }
+    button:active { transform: scale(0.99); }
+
+    .divider { display:flex; align-items:center; gap:10px; margin:18px 0 4px; }
+    .divider hr { flex:1; border:none; border-top:0.5px solid rgba(30,50,80,0.1); }
+    .divider span { font-size:11px; color:var(--muted); }
+
+    .toggle-link { text-align:center; margin-top:16px; font-size:13px; color:var(--accent); cursor:pointer; }
+    .toggle-link span { color:var(--muted); }
+    #forgotPassword { text-align:center; margin-top:8px; font-size:12px; color:var(--muted); cursor:pointer; opacity:0.8; }
+    #forgotPassword:hover { color:var(--accent); }
+    .error { color:var(--danger); font-size:12px; text-align:center; margin-top:10px; display:none; background:rgba(255,77,79,0.07); border-radius:8px; padding:8px 12px; }
+
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0d0f12; --card:#141719; --text:#e6eef8; --muted:#9ca3af; }
+      input { background:#0f1215; border-color:#2a2d33; color:#e6eef8; }
+      input:focus { background:#111519; }
+    }
+
+    .toast { position:fixed; bottom:20px; right:20px; padding:12px 18px 12px 14px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.12); opacity:0; transform:translateY(10px); transition:all 0.3s; z-index:1000; font-size:13px; display:flex; align-items:center; gap:10px; min-width:260px; border-left:3px solid; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .toast.error { background:var(--card); border-left-color:var(--danger); color:var(--danger); }
+    .toast.success { background:var(--card); border-left-color:var(--success); color:var(--text); }
+    .toast.info { background:var(--card); border-left-color:var(--accent); color:var(--text); }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">💰</div>
+      <div class="login-title" id="formTitle">Bem-vindo de volta</div>
+      <div class="login-sub" id="formSubtitle">Entre na sua conta para continuar</div>
+
+      <form id="loginForm">
+        <div class="input-group">
+          <div class="field-label">E-mail</div>
+          <input type="text" id="email" placeholder="seu@email.com" required>
+        </div>
+        <div class="input-group" id="passwordGroup">
+          <div class="field-label">Senha</div>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" id="submitBtn">Entrar</button>
+        <div class="error" id="errorMsg"></div>
+      </form>
+
+      <div class="divider"><hr><span>ou</span><hr></div>
+      <div class="toggle-link" id="toggleMode"><span>Não tem conta?</span> Cadastre-se</div>
+      <div id="forgotPassword">Esqueci minha senha</div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('load', function() {
+      // --- CONFIGURAÇÃO DO SUPABASE ---
+      const SUPABASE_URL = 'https://jljufumckmhfohnanaot.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsanVmdW1ja21oZm9obmFuYW90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4MDg3MTUsImV4cCI6MjA4NzM4NDcxNX0.2Vod5MSgHIZToDVKmE1Pk1tE9itn2VRaqOHezDjl5Z4';
+      
+      let supabase;
+      try {
+        if (!window.supabase) throw new Error('A biblioteca do sistema (Supabase) não foi carregada.');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      } catch (err) {
+        document.body.innerHTML = `<div style="color:#e74c3c;text-align:center;padding:40px;font-family:sans-serif"><h3>Erro Crítico de Conexão</h3><p>${err.message}</p><p>Verifique sua conexão com a internet, desative bloqueadores de anúncio e recarregue a página.</p><button onclick="location.reload()" style="padding:10px 20px;cursor:pointer">Recarregar</button></div>`;
+        console.error(err);
+        return;
+      }
+
+      let isRegistering = false;
+      let isResetting = false;
+
+      const formTitle     = document.getElementById('formTitle');
+      const formSubtitle  = document.getElementById('formSubtitle');
+      const submitBtn     = document.getElementById('submitBtn');
+      const toggleLink    = document.getElementById('toggleMode');
+      const forgotLink    = document.getElementById('forgotPassword');
+      const errorMsg      = document.getElementById('errorMsg');
+      const passwordInput = document.getElementById('password');
+      const passwordGroup = document.getElementById('passwordGroup');
+
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          isResetting = false;
+          isRegistering = false;
+
+          formTitle.textContent = 'Criar nova senha';
+          if(formSubtitle) formSubtitle.textContent = 'Digite e confirme sua nova senha';
+          submitBtn.textContent = 'Salvar nova senha';
+          
+          document.getElementById('email').closest('.input-group').style.display = 'none';
+          passwordGroup.style.display = 'block';
+          passwordInput.required = true;
+          passwordInput.placeholder = 'Digite a nova senha';
+
+          toggleLink.style.display = 'none';
+          forgotLink.style.display = 'none';
+          errorMsg.style.display = 'none';
+
+          document.getElementById('loginForm').onsubmit = async (e) => {
+              e.preventDefault();
+              const newPassword = passwordInput.value;
+              if (newPassword.length < 6) {
+                  errorMsg.textContent = 'A senha precisa ter no mínimo 6 caracteres.';
+                  errorMsg.style.display = 'block';
+                  return;
+              }
+              submitBtn.textContent = 'Salvando...';
+              submitBtn.disabled = true;
+              const { error } = await supabase.auth.updateUser({ password: newPassword });
+              if (error) {
+                  errorMsg.textContent = 'Erro ao atualizar a senha: ' + error.message;
+                  errorMsg.style.display = 'block';
+                  submitBtn.textContent = 'Salvar nova senha';
+                  submitBtn.disabled = false;
+              } else {
+                  showToast('Senha atualizada! Redirecionando...', 'success');
+                  setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+              }
+          };
+        }
+      });
+
+      // Verifica se já está logado e redireciona
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          window.location.href = 'index.html';
+        }
+      });
+
+      function showToast(msg, type='info') {
+        const t = document.createElement('div');
+        t.className = 'toast ' + type;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(()=>t.classList.add('show'), 10);
+        setTimeout(()=>{
+            t.classList.remove('show');
+            setTimeout(()=>t.remove(), 300);
+        }, 4000);
+      }
+
+      toggleLink.addEventListener('click', () => {
+        isRegistering = !isRegistering;
+        if(isRegistering) {
+          formTitle.textContent = 'Criar nova conta';
+          formSubtitle.textContent = 'Preencha os dados para se cadastrar';
+          submitBtn.textContent = 'Cadastrar';
+          toggleLink.innerHTML = '<span>Já tem conta?</span> Entrar';
+          errorMsg.style.display = 'none';
+          forgotLink.style.display = 'none';
+        } else {
+          formTitle.textContent = 'Bem-vindo de volta';
+          formSubtitle.textContent = 'Entre na sua conta para continuar';
+          submitBtn.textContent = 'Entrar';
+          toggleLink.innerHTML = '<span>Não tem conta?</span> Cadastre-se';
+          errorMsg.style.display = 'none';
+          forgotLink.style.display = 'block';
+        }
+      });
+
+      forgotLink.addEventListener('click', () => {
+        isResetting = !isResetting;
+        if(isResetting) {
+          isRegistering = false;
+          formTitle.textContent = 'Recuperar senha';
+          formSubtitle.textContent = 'Enviaremos um link para seu e-mail';
+          submitBtn.textContent = 'Enviar link';
+          passwordGroup.style.display = 'none';
+          passwordInput.required = false;
+          toggleLink.style.display = 'none';
+          forgotLink.textContent = '← Voltar para login';
+          errorMsg.style.display = 'none';
+        } else {
+          formTitle.textContent = 'Bem-vindo de volta';
+          formSubtitle.textContent = 'Entre na sua conta para continuar';
+          submitBtn.textContent = 'Entrar';
+          passwordGroup.style.display = 'block';
+          passwordInput.required = true;
+          toggleLink.style.display = 'block';
+          toggleLink.innerHTML = '<span>Não tem conta?</span> Cadastre-se';
+          forgotLink.textContent = 'Esqueci minha senha';
+          errorMsg.style.display = 'none';
+        }
+      });
+
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+          const email = document.getElementById('email').value.trim();
+          const pass = document.getElementById('password').value;
+          
+          if(!email) return;
+          if(!isResetting && !pass) return;
+          
+          submitBtn.textContent = 'Aguarde...';
+          submitBtn.disabled = true;
+          errorMsg.style.display = 'none';
+
+          let result;
+          if (isResetting) {
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            if (error) result = { error };
+            else {
+              showToast('Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.', 'success');
+              setTimeout(() => window.location.reload(), 3000);
+              return;
+            }
+          } else if (isRegistering) {
+            // Criar conta no Supabase
+            result = await supabase.auth.signUp({ email: email, password: pass });
+          } else {
+            // Login no Supabase
+            result = await supabase.auth.signInWithPassword({ email: email, password: pass });
+          }
+
+          if (result.error) {
+            let msg = result.error.message;
+            // Tradução de erros comuns
+            if (msg === 'Invalid login credentials') msg = 'Usuário ou senha incorretos.';
+            if (msg.includes('Password should be at least')) msg = 'A senha precisa ter no mínimo 6 caracteres.';
+            if (msg.includes('User already registered')) msg = 'Usuário já cadastrado. Tente entrar.';
+            
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+            submitBtn.textContent = isResetting ? 'Enviar Email' : (isRegistering ? 'Cadastrar' : 'Entrar');
+            submitBtn.disabled = false;
+          } else {
+            // Sucesso! O Supabase salva a sessão automaticamente.
+            
+            // Verificação extra: Se cadastrou mas não veio sessão, é porque precisa confirmar email
+            if (isRegistering && !result.data.session) {
+                showToast('Conta criada! Se o login falhar, verifique se a confirmação de e-mail está desativada no Supabase.', 'info');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Cadastrar';
+            } else {
+                window.location.href = 'index.html';
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Erro inesperado ao conectar: ' + err.message, 'error');
+          submitBtn.textContent = isResetting ? 'Enviar Email' : (isRegistering ? 'Cadastrar' : 'Entrar');
+          submitBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
