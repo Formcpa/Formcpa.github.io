@@ -871,6 +871,128 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
 
     .goal-bar-bg { background: rgba(0,0,0,0.05); height: 14px; border-radius: 7px; overflow: hidden; margin-top: 8px; position: relative; }
     .goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--success)); width: 0%; transition: width 1s ease; border-radius: 7px; }
+
+    /* ── PROXYS ── */
+    .proxy-tab-row{display:flex;gap:4px;background:rgba(30,50,80,0.05);border-radius:10px;padding:4px;margin-bottom:14px}
+    .proxy-tab-btn{flex:1;border:none;background:transparent;padding:7px 10px;border-radius:7px;cursor:pointer;font-weight:600;color:#3d5a80;transition:all 0.2s;font-size:13px;font-family:inherit}
+    .proxy-tab-btn:hover{background:rgba(43,123,228,0.07);color:#1a3560}
+    .proxy-tab-btn.active{background:var(--card);color:#1a3560;box-shadow:0 1px 4px rgba(30,50,80,0.12);border:0.5px solid rgba(43,123,228,0.18)}
+    body.dark .proxy-tab-btn{color:#7eb3f5}
+    body.dark .proxy-tab-btn:hover{color:#a8cff8;background:rgba(126,179,245,0.08)}
+    body.dark .proxy-tab-btn.active{background:#1a1e24;color:#a8cff8;border-color:rgba(126,179,245,0.2)}
+    .proxy-stats-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:0.5px solid rgba(30,50,80,0.08);border-radius:10px;margin-bottom:12px;flex-wrap:wrap}
+    .proxy-stat-chip{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+    .proxy-stat-num{font-weight:600;font-size:15px;color:var(--text)}
+    .proxy-stat-num.green{color:var(--success)}.proxy-stat-num.red{color:var(--danger)}.proxy-stat-num.blue{color:var(--accent)}.proxy-stat-num.orange{color:#f59e0b}
+    .proxy-stat-divider{width:1px;height:14px;background:rgba(30,50,80,0.1)}
+    .proxy-card{background:var(--card);border:0.5px solid rgba(30,50,80,0.1);border-radius:10px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:all 0.15s}
+    .proxy-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(43,123,228,0.07)}
+    .proxy-card.active-proxy{border-left:3px solid var(--success)}
+    .proxy-card.inactive-proxy{border-left:3px solid var(--danger);opacity:0.7}
+    .proxy-card.used-proxy{border-left:3px solid #9ca3af;opacity:0.55;background:rgba(30,50,80,0.03)}
+    .proxy-card.used-proxy .proxy-addr{text-decoration:line-through;color:var(--muted)}
+    .proxy-used-tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0;background:rgba(156,163,175,0.2);color:#9ca3af}
+    body.dark .proxy-card.used-proxy{background:rgba(255,255,255,0.02)}
+    .proxy-card-clickable{cursor:pointer}
+    .proxy-card-clickable:hover .proxy-addr{color:var(--accent)}
+    .proxy-addr{flex:1;font-family:monospace;font-size:13px;font-weight:500;color:var(--text);word-break:break-all}
+    .proxy-type-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0}
+    .proxy-type-badge.rotativa{background:rgba(124,58,237,0.15);color:#7c3aed}
+    .proxy-type-badge.fixa{background:rgba(43,123,228,0.15);color:var(--accent)}
+    .proxy-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .proxy-status-dot.ok{background:var(--success)}
+    .proxy-status-dot.fail{background:var(--danger)}
+    .proxy-status-dot.unknown{background:#9ca3af}
+    .proxy-status-dot.testing{background:#f59e0b;animation:pulseDot 0.8s ease infinite}
+    .proxy-actions{display:flex;gap:5px;flex-shrink:0}
+    .proxy-act-btn{padding:4px 9px;border-radius:6px;font-size:11px;font-weight:500;border:0.5px solid rgba(30,50,80,0.12);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap}
+    .proxy-act-btn:hover{color:var(--text);border-color:rgba(30,50,80,0.25)}
+    .proxy-act-btn.copy{color:var(--accent);border-color:rgba(43,123,228,0.2);background:rgba(43,123,228,0.05)}
+    .proxy-act-btn.test{color:#7c3aed;border-color:rgba(124,58,237,0.2);background:rgba(124,58,237,0.05)}
+    .proxy-act-btn.del{color:var(--danger);border-color:rgba(255,77,79,0.2);background:rgba(255,77,79,0.05)}
+    .proxy-add-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap}
+    .proxy-add-row input{flex:1;min-width:200px}
+    .proxy-add-row select{padding:8px 10px;border-radius:8px;border:0.5px solid rgba(30,50,80,0.15);background:var(--card);color:var(--text);font-family:inherit;font-size:13px;cursor:pointer}
+    body.dark .proxy-card{border-color:#2a2d33}
+    body.dark .proxy-card.active-proxy{border-left-color:var(--success)}
+    body.dark .proxy-card.inactive-proxy{border-left-color:var(--danger)}
+    body.dark .proxy-addr{color:#e6eef8}
+    body.dark .proxy-add-row select{background:#1a1e24;border-color:#2a2d33;color:#e6eef8}
+    .proxy-validator-box{background:rgba(43,123,228,0.04);border:0.5px solid rgba(43,123,228,0.18);border-radius:10px;padding:14px 16px;margin-top:18px}
+    body.dark .proxy-validator-box{background:rgba(43,123,228,0.06);border-color:rgba(126,179,245,0.18)}
+
+    /* ── PLATAFORMAS GRID ── */
+    .plat-grid-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:4px}
+    .plat-grid-card{background:var(--card);border-radius:14px;padding:20px 18px;cursor:pointer;border:0.5px solid rgba(30,50,80,0.1);transition:all 0.2s;position:relative;display:flex;flex-direction:column;gap:10px}
+    .plat-grid-card:hover{box-shadow:0 4px 20px rgba(43,123,228,0.13);border-color:var(--accent);transform:translateY(-2px)}
+    .plat-grid-card.lucro-pos{border-left:3px solid var(--success)}
+    .plat-grid-card.lucro-neg{border-left:3px solid var(--danger)}
+    .plat-grid-name{font-size:15px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .plat-grid-profit{font-size:18px;font-weight:700;margin-top:2px}
+    .plat-grid-profit.pos{color:var(--success)}.plat-grid-profit.neg{color:var(--danger)}
+    .plat-grid-meta{font-size:11px;color:#64748b;font-weight:500}
+    .plat-grid-btns{display:flex;gap:5px;margin-top:auto;padding-top:6px;border-top:0.5px solid rgba(30,50,80,0.07)}
+    .plat-grid-btn{padding:4px 9px;border-radius:6px;font-size:11px;font-weight:500;border:0.5px solid rgba(30,50,80,0.12);background:transparent;color:#64748b;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .plat-grid-btn:hover{color:#1e293b;border-color:rgba(30,50,80,0.25)}
+    .plat-grid-btn.del:hover{color:var(--danger);border-color:rgba(255,77,79,0.25)}
+    /* card de adicionar */
+    .plat-grid-add{border:1.5px dashed rgba(43,123,228,0.3);background:rgba(43,123,228,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:130px;color:var(--accent);transition:all 0.2s}
+    .plat-grid-add:hover{border-color:var(--accent);background:rgba(43,123,228,0.07);box-shadow:none;transform:none}
+    .plat-grid-add-icon{width:38px;height:38px;border-radius:50%;background:rgba(43,123,228,0.12);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300}
+    .plat-grid-add-label{font-size:13px;font-weight:500}
+    /* empty state centralizado */
+    .plat-grid-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px;gap:16px}
+    .plat-grid-empty-icon{width:64px;height:64px;border-radius:18px;background:rgba(43,123,228,0.08);display:flex;align-items:center;justify-content:center;font-size:28px}
+    .plat-grid-empty h3{font-size:16px;color:#1e293b;margin:0}
+    .plat-grid-empty p{font-size:13px;color:#64748b;margin:0;text-align:center;max-width:240px}
+    /* modal nova plataforma */
+    .plat-new-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+    .plat-new-overlay.open{display:flex}
+    .plat-new-modal{background:var(--card);border-radius:16px;padding:28px 24px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;gap:16px}
+    .plat-new-modal h3{margin:0;font-size:17px;font-weight:700;color:#1e293b}
+    .plat-new-modal .modal-sub{font-size:12px;color:#64748b;margin-bottom:4px}
+    /* dark mode cards */
+    body.dark .plat-new-modal h3{color:#e6eef8}
+    body.dark .plat-new-modal .modal-sub{color:#8f9aa3}
+    body.dark .plat-new-modal{background:#161a1f}
+    body.dark .plat-grid-card{background:#13171c;border-color:#2a2d33}
+    body.dark .plat-grid-name{color:#e6eef8}
+    body.dark .plat-grid-meta{color:#8f9aa3}
+    body.dark .plat-grid-btn{color:#8f9aa3;border-color:#2a2d33}
+    body.dark .plat-grid-btn:hover{color:#e6eef8}
+    body.dark .plat-grid-btns{border-color:#2a2d33}
+    body.dark .plat-grid-add{border-color:rgba(126,179,245,0.2);background:rgba(126,179,245,0.04)}
+    body.dark .plat-grid-empty h3{color:#e6eef8}
+    body.dark .plat-grid-empty p{color:#8f9aa3}
+    /* botão voltar */
+    .plat-back-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;border:1.5px solid rgba(43,123,228,0.25);background:rgba(43,123,228,0.06);color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.18s;white-space:nowrap}
+    .plat-back-btn:hover{background:rgba(43,123,228,0.14);border-color:var(--accent);box-shadow:0 2px 8px rgba(43,123,228,0.15)}
+    body.dark .plat-back-btn{background:rgba(126,179,245,0.08);border-color:rgba(126,179,245,0.25);color:#7eb3f5}
+    body.dark .plat-back-btn:hover{background:rgba(126,179,245,0.15);border-color:#7eb3f5}
+    .proxy-validator-title{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:10px;display:flex;align-items:center;gap:6px;letter-spacing:-0.01em}
+    body.dark .proxy-validator-title{color:#e6eef8}
+    .proxy-test-result{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:500;display:none}
+    .proxy-test-result.ok{background:rgba(23,177,105,0.1);color:var(--success);border:0.5px solid rgba(23,177,105,0.2)}
+    .proxy-test-result.fail{background:rgba(255,77,79,0.08);color:var(--danger);border:0.5px solid rgba(255,77,79,0.2)}
+    .proxy-test-result.testing{background:rgba(245,158,11,0.1);color:#f59e0b;border:0.5px solid rgba(245,158,11,0.2)}
+    .proxy-latency{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0}
+    .proxy-latency.fast{background:rgba(23,177,105,0.15);color:var(--success)}
+    .proxy-latency.medium{background:rgba(245,158,11,0.15);color:#f59e0b}
+    .proxy-latency.slow{background:rgba(255,77,79,0.12);color:var(--danger)}
+    .proxy-country{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:3px}
+    /* Modal de adicionar em lote */
+    .proxy-bulk-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+    .proxy-bulk-overlay.open{display:flex}
+    .proxy-bulk-modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;gap:14px}
+    .proxy-bulk-modal h3{margin:0;font-size:16px;color:#1e293b;font-weight:700}
+    body.dark .proxy-bulk-modal h3{color:#e6eef8}
+    .proxy-bulk-modal .muted{font-size:12px;color:var(--muted);margin:0}
+    .proxy-bulk-textarea{width:100%;min-height:180px;border-radius:10px;border:0.5px solid rgba(30,50,80,0.15);background:var(--bg);color:var(--text);font-family:monospace;font-size:12px;padding:10px 12px;resize:vertical;line-height:1.6}
+    .proxy-bulk-textarea::placeholder{color:var(--muted)}
+    body.dark .proxy-bulk-textarea{border-color:#2a2d33;background:#0f1215;color:#e6eef8}
+    body.dark .proxy-bulk-modal{background:#161a1f}
+    .proxy-bulk-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .proxy-bulk-count{font-size:12px;color:var(--muted);font-weight:500}
 </style>
 </head>
 <body>
@@ -912,6 +1034,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         <div class="nav-item" data-view="dados"><div class="nav-icon">👤</div>CPFs</div>
         <div class="nav-item" data-view="sms"><div class="nav-icon">📱</div>SMS</div>
         <div class="nav-item" data-view="fintech"><div class="nav-icon">🏦</div>Fintech</div>
+        <div class="nav-item" data-view="proxys"><div class="nav-icon">🔗</div>Proxys</div>
         <div class="nav-item" data-view="notasPendentes">
           <div class="nav-icon">📝</div>
           <span>Notas Pendentes</span>
@@ -1181,11 +1304,42 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
       </div>
 
       <!-- Plataformas -->
+      <!-- Grid de todas as plataformas -->
+      <div class="panel" id="platGridPanel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div>
+            <h3>Plataformas</h3>
+            <div class="muted">Gerencie todas as suas plataformas</div>
+          </div>
+          <button class="btn" onclick="openPlatNewModal()">+ Nova Plataforma</button>
+        </div>
+        <div id="platGrid"></div>
+
+        <!-- Modal nova plataforma -->
+        <div class="plat-new-overlay" id="platNewOverlay" onclick="if(event.target===this)closePlatNewModal()">
+          <div class="plat-new-modal">
+            <h3>🖥️ Nova Plataforma</h3>
+            <div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Nome da plataforma</div>
+              <input type="text" id="platNewInput" placeholder="Ex: Nubank, Mercado Pago..." style="width:100%" onkeydown="if(event.key==='Enter')confirmPlatNew()" />
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+              <button class="btn ghost" onclick="closePlatNewModal()">Cancelar</button>
+              <button class="btn" onclick="confirmPlatNew()">✅ Criar Plataforma</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalhe de uma plataforma -->
       <div class="panel" id="plataformasPanel" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div>
-            <h3 id="plataformaTitle">Plataformas</h3>
-            <div class="muted">Selecione uma plataforma na lateral ou crie uma nova.</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onclick="selectView('plataformas')" class="plat-back-btn" title="Voltar para Plataformas">‹ Plataformas</button>
+            <div>
+              <h3 id="plataformaTitle">Plataformas</h3>
+              <div class="muted" style="font-size:11px">Contas da plataforma</div>
+            </div>
           </div>
           <div style="display:flex;gap:8px">
             <input type="text" id="searchAccounts" placeholder="🔍 Buscar conta..." style="padding:8px;width:200px;border-radius:8px;border:1px solid #e6edf6">
@@ -1480,6 +1634,91 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
                 </div>
                 <div id="smsHistoryList" style="max-height: 400px; overflow-y: auto; background: var(--card); border-radius: 8px; border: 0.5px solid rgba(30,50,80,0.1);"></div>
             </div>
+        </div>
+      </div>
+
+      <!-- Proxys Panel -->
+      <div class="panel" id="proxysPanel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <h3>Gerenciador de Proxys</h3>
+            <div class="muted">Armazene e valide suas proxys fixas e rotativas</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn ghost" id="proxyRemoveInactiveBtn" title="Remover proxys inativas" onclick="proxyRemoveInactive()">🧹 Remover inativas</button>
+            <button class="btn ghost" id="proxyRemoveUsedBtn" title="Remover proxys marcadas como usadas" onclick="proxyRemoveUsed()">✂️ Remover usadas</button>
+            <button class="btn ghost" id="proxyCopyAllBtn" title="Copiar todas visíveis" onclick="proxyCopyAll()">📋 Copiar todas</button>
+            <button class="btn" id="proxyTestAllBtn" onclick="proxyTestAll()">⚡ Testar todas</button>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="proxy-stats-bar" id="proxyStatsBar">
+          <div class="proxy-stat-chip"><span class="proxy-stat-num green" id="proxyActiveCount">0</span> ativas</div>
+          <div class="proxy-stat-divider"></div>
+          <div class="proxy-stat-chip"><span class="proxy-stat-num red" id="proxyInactiveCount">0</span> inativas</div>
+          <div class="proxy-stat-divider"></div>
+          <div class="proxy-stat-chip"><span class="proxy-stat-num orange" id="proxyUntestedCount">0</span> não testadas</div>
+          <div class="proxy-stat-divider"></div>
+          <div class="proxy-stat-chip"><span class="proxy-stat-num" style="color:#9ca3af" id="proxyUsedCount">0</span> usadas</div>
+          <div class="proxy-stat-divider"></div>
+          <div class="proxy-stat-chip"><span class="proxy-stat-num blue" id="proxyTotalCount">0</span> total</div>
+        </div>
+
+        <!-- Tipo tabs -->
+        <div class="proxy-tab-row">
+          <button class="proxy-tab-btn active" id="proxyTabAll" onclick="setProxyTab('all',this)">Todas</button>
+          <button class="proxy-tab-btn" id="proxyTabFixa" onclick="setProxyTab('fixa',this)">🔒 Fixas</button>
+          <button class="proxy-tab-btn" id="proxyTabRotativa" onclick="setProxyTab('rotativa',this)">🔄 Rotativas</button>
+        </div>
+
+        <!-- Adicionar proxy -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+          <input type="text" id="proxySearch" placeholder="🔎 Buscar proxy..." style="flex:1;min-width:160px;font-size:12px;padding:7px 10px" oninput="renderProxies()" />
+          <button class="btn ghost" style="font-size:12px;padding:6px 10px" onclick="proxyImportClick()" title="Importar lista de proxys (uma por linha)">⬆ Importar arquivo</button>
+          <input type="file" id="proxyImportFile" style="display:none" accept=".txt,.csv" onchange="proxyImportFile(event)" />
+          <button class="btn" onclick="proxyBulkOpenModal()" style="white-space:nowrap;font-size:13px;padding:8px 16px">+ Adicionar Proxy</button>
+        </div>
+
+        <!-- Modal adicionar em lote -->
+        <div class="proxy-bulk-overlay" id="proxyBulkOverlay" onclick="if(event.target===this)proxyBulkCloseModal()">
+          <div class="proxy-bulk-modal">
+            <div>
+              <h3>📋 Adicionar Proxys em Lote</h3>
+              <p class="muted">Cole suas proxys abaixo — uma por linha. Formatos aceitos: <code style="font-size:11px;background:rgba(0,0,0,0.05);padding:1px 5px;border-radius:4px">ip:porta</code> ou <code style="font-size:11px;background:rgba(0,0,0,0.05);padding:1px 5px;border-radius:4px">ip:porta:usuario:senha</code></p>
+            </div>
+            <textarea class="proxy-bulk-textarea" id="proxyBulkTextarea" placeholder="192.168.1.1:8080&#10;10.0.0.1:3128:user:pass&#10;..." oninput="proxyBulkCount()"></textarea>
+            <div class="proxy-bulk-footer">
+              <div>
+                <span class="proxy-bulk-count" id="proxyBulkCounter">0 proxys detectadas</span>
+                <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
+                  <span style="font-size:12px;color:var(--muted)">Tipo:</span>
+                  <select id="proxyBulkType" style="padding:5px 8px;border-radius:7px;border:0.5px solid rgba(30,50,80,0.15);background:var(--card);color:var(--text);font-size:12px;font-family:inherit">
+                    <option value="fixa">🔒 Fixa</option>
+                    <option value="rotativa">🔄 Rotativa</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn ghost" onclick="proxyBulkCloseModal()">Cancelar</button>
+                <button class="btn" onclick="proxyBulkConfirm()" id="proxyBulkConfirmBtn">✅ Adicionar todas</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de proxys -->
+        <div id="proxyList"></div>
+
+        <!-- Validador rápido -->
+        <div class="proxy-validator-box">
+          <div class="proxy-validator-title">🧪 Validador Rápido</div>
+          <div class="muted" style="font-size:12px;margin-bottom:10px">Teste uma proxy avulsa sem salvar na lista</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input type="text" id="proxyValidateInput" placeholder="ip:porta  ou  ip:porta:usuario:senha" style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')proxySingleTest()" />
+            <button class="btn" onclick="proxySingleTest()" id="proxyValidateBtn">Testar</button>
+          </div>
+          <div id="proxyTestResult" class="proxy-test-result"></div>
         </div>
       </div>
 
@@ -2318,6 +2557,11 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         };
         container.appendChild(el);
       });
+      // Sincroniza o grid do painel principal se estiver visível
+      if (typeof renderPlatGrid === 'function') {
+        const gridPanel = document.getElementById('platGridPanel');
+        if (gridPanel && gridPanel.style.display !== 'none') renderPlatGrid();
+      }
     }
 
     function renderSummary(){
@@ -2948,15 +3192,31 @@ platformsData.forEach(data => {
 
     // --- Actions
     function selectView(view){
-      let title = view.charAt(0).toUpperCase()+view.slice(1);
-      if (view === 'dados') title = 'CPFs';
-      if (view === 'notasPendentes') title = 'Notas Pendentes';
-      if (view === 'fintech') title = 'Fintech';
-      document.getElementById('pageTitle').textContent = title;
+      // Mapa view → panelId
+      const panelMap = {
+        'dashboard':         'dashboardPanel',
+        'gastos':            'gastosPanel',
+        'plataformas':       'platGridPanel',       // grade de plataformas
+        'plataformaDetalhe': 'plataformasPanel',    // detalhe de uma plataforma
+        'dados':             'dadosPanel',
+        'fintech':           'fintechPanel',
+        'notasPendentes':    'notasPendentesPanel',
+        'sms':               'smsPanel',
+        'admin':             'adminPanel',
+        'proxys':            'proxysPanel',
+      };
 
-      // Atualiza estado ativo do nav
+      // Título da página
+      const titles = { dashboard:'Dashboard', gastos:'Gastos', plataformas:'Plataformas',
+        plataformaDetalhe: state.selectedPlatform || 'Plataforma',
+        dados:'CPFs', fintech:'Fintech', notasPendentes:'Notas Pendentes',
+        sms:'SMS', admin:'Admin', proxys:'Proxys' };
+      document.getElementById('pageTitle').textContent = titles[view] || (view.charAt(0).toUpperCase()+view.slice(1));
+
+      // Nav item ativo — "plataformaDetalhe" mantém "plataformas" ativo
+      const navActive = view === 'plataformaDetalhe' ? 'plataformas' : view;
       document.querySelectorAll('nav .nav-item[data-view]').forEach(el => {
-        el.classList.toggle('active', el.dataset.view === view);
+        el.classList.toggle('active', el.dataset.view === navActive);
       });
 
       const skelCards = document.getElementById('cardsContainer');
@@ -2965,12 +3225,9 @@ platformsData.forEach(data => {
       if(skelCards) skelCards.style.display = 'none';
       if(realCards) realCards.style.display = showCards ? 'flex' : 'none';
 
-      const panels = ['dashboardPanel','gastosPanel','plataformasPanel','dadosPanel','fintechPanel','notasPendentesPanel','smsPanel','adminPanel'];
-      panels.forEach(id => {
-        const el = document.getElementById(id);
-        if(!el) return;
-        const shouldShow = el.id === view+'Panel' || (view==='dashboard' && id==='dashboardPanel') || (view==='gastos' && id==='gastosPanel') || (view==='plataformas' && id==='plataformasPanel') || (view==='dados' && id==='dadosPanel') || (view==='fintech' && id==='fintechPanel') || (view==='notasPendentes' && id==='notasPendentesPanel') || (view==='sms' && id==='smsPanel') || (view==='admin' && id==='adminPanel');
-        if(shouldShow){
+      const targetPanel = panelMap[view];
+      document.querySelectorAll('.panel').forEach(el => {
+        if(el.id === targetPanel){
           el.style.display = 'block';
           el.classList.remove('panel-enter');
           void el.offsetWidth;
@@ -2981,6 +3238,8 @@ platformsData.forEach(data => {
       });
 
       if (view === 'admin' && typeof renderAdminPanel === 'function') renderAdminPanel();
+      if (view === 'proxys') renderProxies();
+      if (view === 'plataformas') renderPlatGrid();
 
       if (view === 'sms') {
         fetchAndDisplaySmsPrices();
@@ -3001,8 +3260,8 @@ platformsData.forEach(data => {
 
     function selectPlatform(name){
       state.selectedPlatform = name; scheduleSave();
-      // switch to platforms view
-      selectView('plataformas');
+      // switch to platform detail view
+      selectView('plataformaDetalhe');
       document.getElementById('plataformaTitle').textContent = name;
       updateUI();
       // Fecha sidebar no mobile
@@ -5692,7 +5951,545 @@ window.exportXlsx = () => {
   }
 })();
 
+    // ══════════════════════════════════════════════
+    //  PLATAFORMAS GRID
+    // ══════════════════════════════════════════════
+    function renderPlatGrid() {
+      const container = document.getElementById('platGrid');
+      if (!container) return;
+
+      const platforms = state.platformOrder
+        ? state.platformOrder.filter(k => state.platforms[k])
+        : Object.keys(state.platforms);
+
+      if (platforms.length === 0) {
+        container.className = '';
+        container.innerHTML = `
+          <div class="plat-grid-empty">
+            <div class="plat-grid-empty-icon">🖥️</div>
+            <h3>Nenhuma plataforma ainda</h3>
+            <p>Crie sua primeira plataforma para começar a registrar suas contas</p>
+            <button class="btn" onclick="openPlatNewModal()" style="margin-top:4px">+ Criar primeira plataforma</button>
+          </div>`;
+        return;
+      }
+
+      const cards = platforms.map(pName => {
+        const p = state.platforms[pName];
+        if (!p) return null;
+        const lucro = p.accounts.reduce((s, a) =>
+          s + (((a.saque||0)+(a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+        const lucroClass = lucro >= 0 ? 'pos' : 'neg';
+        const cardClass = lucro >= 0 ? 'lucro-pos' : 'lucro-neg';
+        const contas = p.accounts.length;
+
+        const el = document.createElement('div');
+        el.className = `plat-grid-card ${cardClass}`;
+        el.innerHTML = `
+          <div class="plat-grid-name"></div>
+          <div class="plat-grid-profit ${lucroClass}">R$ ${money(lucro)}</div>
+          <div class="plat-grid-meta">${contas} conta${contas !== 1 ? 's' : ''}</div>
+          <div class="plat-grid-btns">
+            <button class="plat-grid-btn" data-action="edit" title="Renomear">✏️ Renomear</button>
+            <button class="plat-grid-btn del" data-action="del" title="Excluir">🗑️</button>
+          </div>`;
+        el.querySelector('.plat-grid-name').textContent = p.name;
+
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('.plat-grid-btns')) return;
+          selectPlatform(pName);
+        });
+        el.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          showPrompt('Novo nome para a plataforma:', (newName) => {
+            if (!newName || !newName.trim() || newName === pName) return;
+            if (state.platforms[newName]) return showToast('Já existe uma plataforma com este nome.', 'error');
+            const data = state.platforms[pName];
+            data.name = newName;
+            state.platforms[newName] = data;
+            delete state.platforms[pName];
+            if (state.platformOrder) {
+              const idx = state.platformOrder.indexOf(pName);
+              if (idx >= 0) state.platformOrder[idx] = newName;
+            }
+            if (state.selectedPlatform === pName) state.selectedPlatform = newName;
+            scheduleSave(); renderPlatformsList(); renderPlatGrid();
+          }, pName);
+        });
+        el.querySelector('[data-action="del"]').addEventListener('click', (e) => {
+          e.stopPropagation();
+          showConfirm(`Excluir a plataforma "${pName}" e todas as suas contas?`, () => {
+            delete state.platforms[pName];
+            if (state.platformOrder) state.platformOrder = state.platformOrder.filter(k => k !== pName);
+            if (state.selectedPlatform === pName) state.selectedPlatform = null;
+            scheduleSave(); renderPlatformsList(); renderPlatGrid(); renderSummary();
+          });
+        });
+        return el;
+      }).filter(Boolean);
+
+      // card de adicionar nova
+      const addCard = document.createElement('div');
+      addCard.className = 'plat-grid-card plat-grid-add';
+      addCard.innerHTML = `<div class="plat-grid-add-icon">+</div><div class="plat-grid-add-label">Nova Plataforma</div>`;
+      addCard.onclick = openPlatNewModal;
+
+      container.className = 'plat-grid-wrap';
+      container.innerHTML = '';
+      cards.forEach(c => { if (c) container.appendChild(c); });
+      container.appendChild(addCard);
+    }
+    window.renderPlatGrid = renderPlatGrid;
+
+    /* ---------- modal nova plataforma ---------- */
+    function openPlatNewModal() {
+      const overlay = document.getElementById('platNewOverlay');
+      if (overlay) { overlay.classList.add('open'); setTimeout(() => document.getElementById('platNewInput')?.focus(), 50); }
+    }
+    function closePlatNewModal() {
+      const overlay = document.getElementById('platNewOverlay');
+      if (overlay) overlay.classList.remove('open');
+    }
+    function confirmPlatNew() {
+      const input = document.getElementById('platNewInput');
+      const v = (input?.value || '').trim();
+      if (!v) { input?.focus(); return; }
+      if (state.platforms[v]) { showToast('Plataforma já existe', 'error'); return; }
+      state.platforms[v] = { name: v, accounts: [], createdAt: new Date().toISOString() };
+      if (!state.platformOrder) state.platformOrder = [];
+      state.platformOrder.push(v);
+      if (input) input.value = '';
+      closePlatNewModal();
+      scheduleSave(); renderPlatformsList(); renderPlatGrid();
+      selectPlatform(v);
+    }
+    window.openPlatNewModal  = openPlatNewModal;
+    window.closePlatNewModal = closePlatNewModal;
+    window.confirmPlatNew    = confirmPlatNew;
+
     }); // Fim do window.addEventListener('load')
+
+    // ══════════════════════════════════════════════
+    //  PROXYS — Gerenciamento completo v2
+    // ══════════════════════════════════════════════
+    (function(){
+      const STORAGE_KEY = 'proxys_data_v1';
+      let proxyCurrentTab = 'all'; // 'all' | 'fixa' | 'rotativa'
+
+      /* ---------- persistência local ---------- */
+      function loadProxies() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){ return []; }
+      }
+      function saveProxies(list) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      }
+
+      /* ---------- helpers ---------- */
+      function countryFlag(code) {
+        if (!code || code.length !== 2) return '';
+        return code.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
+      }
+      function latencyClass(ms) {
+        if (ms === null || ms === undefined) return '';
+        if (ms < 500) return 'fast';
+        if (ms < 1500) return 'medium';
+        return 'slow';
+      }
+      function latencyLabel(ms) {
+        if (ms === null || ms === undefined) return '';
+        return ms < 1000 ? `${ms}ms` : `${(ms/1000).toFixed(1)}s`;
+      }
+      function extractIp(address) {
+        return address.split(':')[0];
+      }
+
+      /* ---------- render ---------- */
+      window.renderProxies = function() {
+        const list = loadProxies();
+        const search = (document.getElementById('proxySearch')?.value || '').toLowerCase();
+        const container = document.getElementById('proxyList');
+        if (!container) return;
+
+        const filtered = list.filter(p => {
+          const matchTab = proxyCurrentTab === 'all' || p.type === proxyCurrentTab;
+          const matchSearch = !search || p.address.toLowerCase().includes(search);
+          return matchTab && matchSearch;
+        });
+
+        // stats
+        document.getElementById('proxyActiveCount').textContent = list.filter(p => p.status === 'ok' && !p.used).length;
+        document.getElementById('proxyInactiveCount').textContent = list.filter(p => p.status === 'fail').length;
+        document.getElementById('proxyUntestedCount').textContent = list.filter(p => p.status === 'unknown' && !p.used).length;
+        document.getElementById('proxyUsedCount').textContent = list.filter(p => p.used).length;
+        document.getElementById('proxyTotalCount').textContent = list.length;
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<div class="empty-state">
+            <div class="empty-state-icon">🔗</div>
+            <div class="empty-state-title">${list.length === 0 ? 'Nenhuma proxy ainda' : 'Nenhuma proxy encontrada'}</div>
+            <div class="empty-state-sub">${list.length === 0 ? 'Clique em "Em lote" para adicionar várias de uma vez' : 'Tente mudar o filtro ou a busca'}</div>
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map(p => {
+          const dotClass = p.status === 'ok' ? 'ok' : p.status === 'fail' ? 'fail' : p.status === 'testing' ? 'testing' : 'unknown';
+          const cardClass = p.used ? 'used-proxy' : p.status === 'ok' ? 'active-proxy' : p.status === 'fail' ? 'inactive-proxy' : '';
+          const statusLabel = p.status === 'ok' ? 'Ativa' : p.status === 'fail' ? 'Inativa' : p.status === 'testing' ? 'Testando...' : 'Não testada';
+
+          // Latência
+          const latBadge = (p.status === 'ok' && p.latency != null)
+            ? `<span class="proxy-latency ${latencyClass(p.latency)}">${latencyLabel(p.latency)}</span>`
+            : '';
+
+          // País
+          const geoStr = p.country
+            ? `<span class="proxy-country">${countryFlag(p.countryCode)} ${p.country}</span>`
+            : '';
+
+          // Tag usada
+          const usedTag = p.used
+            ? `<span class="proxy-used-tag">✓ Usada</span>`
+            : '';
+
+          return `<div class="proxy-card ${cardClass} proxy-card-clickable" id="proxy-card-${p.id}" onclick="proxyCopyAndMark('${p.id}', event)" title="Clique para copiar e marcar como usada">
+            <div class="proxy-status-dot ${dotClass}" title="${statusLabel}"></div>
+            <div class="proxy-addr">${p.address}</div>
+            ${geoStr}
+            ${latBadge}
+            ${usedTag}
+            <span class="proxy-type-badge ${p.type}">${p.type === 'fixa' ? '🔒 Fixa' : '🔄 Rotativa'}</span>
+            <div style="font-size:10px;color:var(--muted);white-space:nowrap">${statusLabel}</div>
+            <div class="proxy-actions">
+              <button class="proxy-act-btn copy" onclick="proxyCopyOne('${p.id}')" title="Copiar sem marcar">📋</button>
+              <button class="proxy-act-btn test" onclick="proxyTestOne('${p.id}')" title="Testar">⚡</button>
+              <button class="proxy-act-btn del" onclick="proxyDelete('${p.id}')" title="Remover">🗑</button>
+            </div>
+          </div>`;
+        }).join('');
+      };
+
+      /* ---------- geolocalização via ip-api.com (via corsproxy) ---------- */
+      async function fetchProxyGeo(address) {
+        const ip = extractIp(address);
+        if (!ip || ip === 'localhost' || ip.startsWith('192.') || ip.startsWith('10.') || ip.startsWith('172.')) return null;
+        try {
+          const res = await fetch(`https://corsproxy.io/?https://ip-api.com/json/${ip}?fields=status,country,countryCode,city`, { signal: AbortSignal.timeout(5000) });
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (data.status !== 'success') return null;
+          return { country: data.country, countryCode: data.countryCode, city: data.city };
+        } catch { return null; }
+      }
+
+      /* ---------- testar proxy com latência ---------- */
+      async function testProxyAddress(address) {
+        const parts = address.split(':');
+        const ip = parts[0];
+        const port = parts[1] || '80';
+        const testUrl = `https://corsproxy.io/?http://${ip}:${port}/`;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const t0 = Date.now();
+        try {
+          const res = await fetch(testUrl, { signal: controller.signal, mode: 'cors' });
+          clearTimeout(timeout);
+          const latency = Date.now() - t0;
+          return { ok: true, code: res.status, latency };
+        } catch (err) {
+          clearTimeout(timeout);
+          if (err.name === 'AbortError') return { ok: false, reason: 'timeout' };
+          if (err.message && (err.message.includes('NetworkError') || err.message.includes('Failed to fetch'))) {
+            return { ok: false, reason: 'unreachable' };
+          }
+          return { ok: false, reason: err.message };
+        }
+      }
+
+      /* ---------- adicionar ---------- */
+      window.proxyAdd = function() {
+        const input = document.getElementById('proxyInput');
+        const typeSelect = document.getElementById('proxyTypeSelect');
+        const raw = (input?.value || '').trim();
+        if (!raw) return;
+
+        const list = loadProxies();
+        const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+        let added = 0;
+        lines.forEach(addr => {
+          if (list.some(p => p.address === addr)) return;
+          list.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2), address: addr, type: typeSelect?.value || 'fixa', status: 'unknown', addedAt: Date.now() });
+          added++;
+        });
+        saveProxies(list);
+        if (input) input.value = '';
+        renderProxies();
+        if (added > 0) proxyShowToast(`${added} prox${added > 1 ? 'ys adicionadas' : 'y adicionada'}!`, 'success');
+      };
+
+      /* ---------- deletar ---------- */
+      window.proxyDelete = function(id) {
+        const list = loadProxies().filter(p => p.id !== id);
+        saveProxies(list);
+        renderProxies();
+      };
+
+      /* ---------- copiar uma (sem marcar) ---------- */
+      window.proxyCopyOne = function(id) {
+        const p = loadProxies().find(x => x.id === id);
+        if (!p) return;
+        navigator.clipboard.writeText(p.address).then(() => {
+          const card = document.getElementById('proxy-card-' + id);
+          if (card) { card.style.outline = '2px solid var(--success)'; setTimeout(() => card.style.outline = '', 800); }
+        });
+      };
+
+      /* ---------- clicar no card: copia e marca como usada ---------- */
+      window.proxyCopyAndMark = function(id, event) {
+        // ignora cliques nos botões de ação
+        if (event && event.target.closest('.proxy-actions')) return;
+
+        const list = loadProxies();
+        const idx = list.findIndex(p => p.id === id);
+        if (idx < 0) return;
+
+        const addr = list[idx].address;
+
+        // toggle: se já usada, desmarca ao clicar novamente
+        list[idx].used = !list[idx].used;
+        if (list[idx].used) list[idx].usedAt = Date.now();
+        else delete list[idx].usedAt;
+        saveProxies(list);
+
+        // copia somente ao marcar (não ao desmarcar)
+        if (list[idx].used) {
+          navigator.clipboard.writeText(addr).catch(() => {});
+          // feedback visual rápido no card
+          const card = document.getElementById('proxy-card-' + id);
+          if (card) {
+            card.style.transition = 'outline 0s';
+            card.style.outline = '2px solid var(--success)';
+            setTimeout(() => { card.style.outline = ''; renderProxies(); }, 600);
+          }
+          proxyShowToast(`📋 Copiada e marcada como usada!`);
+        } else {
+          renderProxies();
+        }
+      };
+
+      /* ---------- copiar todas visíveis ---------- */
+      window.proxyCopyAll = function() {
+        const list = loadProxies();
+        const search = (document.getElementById('proxySearch')?.value || '').toLowerCase();
+        const visible = list.filter(p => {
+          const matchTab = proxyCurrentTab === 'all' || p.type === proxyCurrentTab;
+          const matchSearch = !search || p.address.toLowerCase().includes(search);
+          return matchTab && matchSearch;
+        });
+        if (!visible.length) return;
+        navigator.clipboard.writeText(visible.map(p => p.address).join('\n')).then(() => {
+          proxyShowToast(`${visible.length} proxys copiadas!`, 'success');
+        });
+      };
+
+      /* ---------- remover inativas ---------- */
+      window.proxyRemoveInactive = function() {
+        const list = loadProxies().filter(p => p.status !== 'fail');
+        saveProxies(list);
+        renderProxies();
+      };
+
+      window.proxyRemoveUsed = function() {
+        const all = loadProxies();
+        const removed = all.filter(p => p.used).length;
+        if (!removed) { proxyShowToast('Nenhuma proxy marcada como usada.'); return; }
+        saveProxies(all.filter(p => !p.used));
+        renderProxies();
+        proxyShowToast(`${removed} prox${removed !== 1 ? 'ys removidas' : 'y removida'}!`);
+      };
+
+      /* ---------- tab ---------- */
+      window.setProxyTab = function(tab, btn) {
+        proxyCurrentTab = tab;
+        document.querySelectorAll('.proxy-tab-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderProxies();
+      };
+
+      /* ---------- importar arquivo ---------- */
+      window.proxyImportClick = function() { document.getElementById('proxyImportFile')?.click(); };
+      window.proxyImportFile = function(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const lines = (ev.target.result || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+          const list = loadProxies();
+          const type = document.getElementById('proxyTypeSelect')?.value || 'fixa';
+          let added = 0;
+          lines.forEach(addr => {
+            if (list.some(p => p.address === addr)) return;
+            list.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2), address: addr, type, status: 'unknown', addedAt: Date.now() });
+            added++;
+          });
+          saveProxies(list);
+          renderProxies();
+          proxyShowToast(`${added} proxys importadas!`, 'success');
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      };
+
+      /* ---------- modal em lote ---------- */
+      window.proxyBulkOpenModal = function() {
+        const overlay = document.getElementById('proxyBulkOverlay');
+        if (overlay) { overlay.classList.add('open'); document.getElementById('proxyBulkTextarea')?.focus(); }
+      };
+      window.proxyBulkCloseModal = function() {
+        const overlay = document.getElementById('proxyBulkOverlay');
+        if (overlay) overlay.classList.remove('open');
+      };
+      window.proxyBulkCount = function() {
+        const val = document.getElementById('proxyBulkTextarea')?.value || '';
+        const lines = val.split(/\n/).map(s => s.trim()).filter(Boolean);
+        const counter = document.getElementById('proxyBulkCounter');
+        if (counter) counter.textContent = `${lines.length} prox${lines.length !== 1 ? 'ys' : 'y'} detectada${lines.length !== 1 ? 's' : ''}`;
+      };
+      window.proxyBulkConfirm = function() {
+        const val = document.getElementById('proxyBulkTextarea')?.value || '';
+        const type = document.getElementById('proxyBulkType')?.value || 'fixa';
+        const lines = val.split(/\n/).map(s => s.trim()).filter(Boolean);
+        if (!lines.length) return;
+
+        const list = loadProxies();
+        let added = 0;
+        lines.forEach(addr => {
+          if (list.some(p => p.address === addr)) return;
+          list.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2), address: addr, type, status: 'unknown', addedAt: Date.now() });
+          added++;
+        });
+        saveProxies(list);
+        renderProxies();
+        proxyBulkCloseModal();
+        if (document.getElementById('proxyBulkTextarea')) document.getElementById('proxyBulkTextarea').value = '';
+        proxyBulkCount();
+        proxyShowToast(`${added} prox${added !== 1 ? 'ys adicionadas' : 'y adicionada'}! (${lines.length - added} duplicatas ignoradas)`, 'success');
+      };
+
+      /* ---------- testar uma da lista ---------- */
+      window.proxyTestOne = async function(id) {
+        let list = loadProxies();
+        const idx = list.findIndex(p => p.id === id);
+        if (idx < 0) return;
+        list[idx].status = 'testing';
+        saveProxies(list); renderProxies();
+
+        const [result, geo] = await Promise.all([
+          testProxyAddress(list[idx].address),
+          fetchProxyGeo(list[idx].address)
+        ]);
+
+        list = loadProxies();
+        const idx2 = list.findIndex(p => p.id === id);
+        if (idx2 < 0) return;
+        list[idx2].status = result.ok ? 'ok' : 'fail';
+        list[idx2].testedAt = Date.now();
+        if (result.ok && result.latency != null) list[idx2].latency = result.latency;
+        if (geo) { list[idx2].country = geo.country; list[idx2].countryCode = geo.countryCode; list[idx2].city = geo.city; }
+        saveProxies(list); renderProxies();
+      };
+
+      /* ---------- testar todas ---------- */
+      window.proxyTestAll = async function() {
+        const list = loadProxies();
+        const search = (document.getElementById('proxySearch')?.value || '').toLowerCase();
+        const toTest = list.filter(p => {
+          const matchTab = proxyCurrentTab === 'all' || p.type === proxyCurrentTab;
+          const matchSearch = !search || p.address.toLowerCase().includes(search);
+          return matchTab && matchSearch;
+        });
+        if (!toTest.length) return;
+
+        const btn = document.getElementById('proxyTestAllBtn');
+        if (btn) { btn.disabled = true; btn.textContent = `⏳ Testando (0/${toTest.length})...`; }
+
+        let done = 0;
+        await Promise.all(toTest.map(async (p) => {
+          let l = loadProxies();
+          const i = l.findIndex(x => x.id === p.id);
+          if (i >= 0) { l[i].status = 'testing'; saveProxies(l); }
+
+          const [result, geo] = await Promise.all([testProxyAddress(p.address), fetchProxyGeo(p.address)]);
+
+          l = loadProxies();
+          const i2 = l.findIndex(x => x.id === p.id);
+          if (i2 >= 0) {
+            l[i2].status = result.ok ? 'ok' : 'fail';
+            l[i2].testedAt = Date.now();
+            if (result.ok && result.latency != null) l[i2].latency = result.latency;
+            if (geo) { l[i2].country = geo.country; l[i2].countryCode = geo.countryCode; l[i2].city = geo.city; }
+            saveProxies(l);
+          }
+          done++;
+          if (btn) btn.textContent = `⏳ Testando (${done}/${toTest.length})...`;
+          renderProxies();
+        }));
+
+        if (btn) { btn.disabled = false; btn.textContent = '⚡ Testar todas'; }
+        renderProxies();
+      };
+
+      /* ---------- validador rápido avulso ---------- */
+      window.proxySingleTest = async function() {
+        const input = document.getElementById('proxyValidateInput');
+        const resultBox = document.getElementById('proxyTestResult');
+        const btn = document.getElementById('proxyValidateBtn');
+        const addr = (input?.value || '').trim();
+        if (!addr) return;
+
+        if (resultBox) { resultBox.style.display = 'block'; resultBox.className = 'proxy-test-result testing'; resultBox.textContent = `⏳ Testando ${addr}...`; }
+        if (btn) btn.disabled = true;
+
+        const [result, geo] = await Promise.all([testProxyAddress(addr), fetchProxyGeo(addr)]);
+
+        if (resultBox) {
+          if (result.ok) {
+            const geoInfo = geo ? ` · ${countryFlag(geo.countryCode)} ${geo.country}${geo.city ? ', ' + geo.city : ''}` : '';
+            const latInfo = result.latency != null ? ` · ${latencyLabel(result.latency)}` : '';
+            resultBox.className = 'proxy-test-result ok';
+            resultBox.innerHTML = `✅ Proxy ativa! HTTP ${result.code}${latInfo}${geoInfo}`;
+          } else {
+            resultBox.className = 'proxy-test-result fail';
+            const reason = result.reason === 'timeout' ? 'Timeout — sem resposta em 8s.' : result.reason === 'unreachable' ? 'Inacessível — sem resposta.' : `Erro: ${result.reason}`;
+            resultBox.textContent = `❌ Proxy inativa. ${reason}`;
+          }
+        }
+        if (btn) btn.disabled = false;
+      };
+
+      /* ---------- helper toast ---------- */
+      function proxyShowToast(msg) {
+        if (typeof window.showToastNotif === 'function') { window.showToastNotif(msg); return; }
+        const el = document.createElement('div');
+        el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1a1e24;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2)';
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2800);
+      }
+
+      function countryFlag(code) {
+        if (!code || code.length !== 2) return '';
+        return code.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
+      }
+      function latencyClass(ms) {
+        if (ms == null) return '';
+        return ms < 500 ? 'fast' : ms < 1500 ? 'medium' : 'slow';
+      }
+      function latencyLabel(ms) {
+        if (ms == null) return '';
+        return ms < 1000 ? `${ms}ms` : `${(ms/1000).toFixed(1)}s`;
+      }
+    })();
 </script>
 </body>
 </html>
