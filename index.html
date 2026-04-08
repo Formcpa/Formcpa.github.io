@@ -59,15 +59,29 @@
 
     /* Platform summary cards */
     .plat-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-    .plat-stat-card{background:var(--bg);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;border:0.5px solid rgba(30,50,80,0.08)}
-    .plat-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0}
+    .plat-stat-card{background:var(--card);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;border:0.5px solid rgba(30,50,80,0.08);box-shadow:0 1px 4px rgba(30,50,80,0.05)}
+    .plat-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
     .plat-stat-card.blue::before{background:var(--accent)}
     .plat-stat-card.green::before{background:var(--success)}
     .plat-stat-card.red::before{background:var(--danger)}
     .plat-stat-card.purple::before{background:#7c3aed}
-    .plat-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;font-weight:500}
-    .plat-stat-val{font-size:18px;font-weight:600;color:var(--text)}
+    .plat-stat-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+    .plat-stat-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .plat-stat-icon.blue{background:rgba(43,123,228,0.1)}
+    .plat-stat-icon.green{background:rgba(23,177,105,0.1)}
+    .plat-stat-icon.red{background:rgba(255,77,79,0.1)}
+    .plat-stat-icon.purple{background:rgba(124,58,237,0.1)}
+    .plat-stat-chip{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px}
+    .plat-stat-chip.up{background:rgba(23,177,105,0.12);color:var(--success)}
+    .plat-stat-chip.down{background:rgba(255,77,79,0.12);color:var(--danger)}
+    .plat-stat-chip.neu{background:rgba(30,50,80,0.07);color:var(--muted)}
+    .plat-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;font-weight:500}
+    .plat-stat-val{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
     .plat-stat-val.green{color:var(--success)}.plat-stat-val.red{color:var(--danger)}
+    .plat-stat-bar{height:2px;border-radius:2px;margin-top:8px;background:rgba(30,50,80,0.06);overflow:hidden}
+    .plat-stat-bar-fill{height:100%;border-radius:2px;transition:width 0.5s ease}
+    body.dark .plat-stat-card{background:#13171c;border-color:#2a2d33}
+    body.dark .plat-stat-chip.neu{background:rgba(255,255,255,0.06);color:#5a7080}
 
     /* Success rate bar */
     .plat-rate-wrap{margin-bottom:16px}
@@ -198,6 +212,14 @@
     body.dark .hist-total-cell{border-color:#1f2326}
     #contasTable tbody td:first-child{cursor:grab;user-select:none}
     #contasTable tbody td:first-child:active{cursor:grabbing}
+    #contasTable tbody tr{border-left:3px solid transparent;transition:border-color 0.2s,background 0.15s}
+    #contasTable tbody tr.row-pos{border-left-color:var(--success)}
+    #contasTable tbody tr.row-neg{border-left-color:var(--danger)}
+    #contasTable tbody tr.row-zero{border-left-color:rgba(30,50,80,0.15)}
+    #contasTable tbody tr:hover td{background:rgba(43,123,228,0.04)!important}
+    body.dark #contasTable tbody tr:hover td{background:rgba(43,123,228,0.08)!important}
+    body.dark #contasTable tbody tr.row-pos{border-left-color:rgba(23,177,105,0.7)}
+    body.dark #contasTable tbody tr.row-neg{border-left-color:rgba(255,77,79,0.7)}
     .undo-toast{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:0.5px solid rgba(30,50,80,0.1);border-left:3px solid var(--danger);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.1);margin-top:10px;animation:slideIn 0.3s ease;font-size:13px}
     .undo-toast-body{flex:1}
     .undo-toast-title{font-weight:500;font-size:13px;color:var(--text)}
@@ -345,7 +367,7 @@
     header.top h2{font-size:20px;font-weight:600;margin:0;letter-spacing:-0.02em}
 
     /* Cards */
-    .cards{display:flex;gap:14px;margin-top:20px;flex-wrap:wrap}
+    .cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:20px}
     .card{background:var(--card);padding:18px 20px;border-radius:var(--radius);box-shadow:var(--shadow);min-width:180px;flex:1;position:relative;overflow:hidden;border:none}
     .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);border-radius:var(--radius) var(--radius) 0 0}
     .card.card-green::before{background:var(--success)}
@@ -562,7 +584,7 @@
       .header-actions .btn { font-size: 12px; padding: 5px 8px; }
 
       /* Cards de resumo: 2 por linha */
-      .cards { gap: 10px; margin-top: 10px; }
+      .cards { grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 10px; }
       .card { flex: 1 1 calc(50% - 5px); min-width: 0; padding: 14px; }
       .card p { font-size: 17px; }
 
@@ -993,6 +1015,129 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
     body.dark .proxy-bulk-modal{background:#161a1f}
     .proxy-bulk-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
     .proxy-bulk-count{font-size:12px;color:var(--muted);font-weight:500}
+
+    /* ── MELHORIAS VISUAIS ── */
+
+    /* M7 — Nav badge para proxys */
+    .nav-proxy-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;line-height:18px;min-width:18px;text-align:center}
+    body.dark .nav-proxy-badge{background:#2b5fa8}
+
+    /* M4 — Action cards */
+    .action-cards-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+    .action-card-btn{background:var(--card);border:0.5px solid rgba(30,50,80,0.1);border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;font-family:inherit;transition:all 0.15s;box-shadow:0 1px 3px rgba(30,50,80,0.05)}
+    .action-card-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(30,50,80,0.1);border-color:rgba(43,123,228,0.2)}
+    .action-card-btn:active{transform:translateY(0)}
+    .acb-icon{width:24px;height:24px;border-radius:7px;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:12px}
+    .acb-icon.blue{background:rgba(43,123,228,0.1)}
+    .acb-icon.green{background:rgba(23,177,105,0.1)}
+    .acb-icon.purple{background:rgba(124,58,237,0.1)}
+    .acb-icon.orange{background:rgba(245,158,11,0.1)}
+    .acb-icon.teal{background:rgba(20,184,166,0.1)}
+    .acb-label{font-size:9px;font-weight:600;color:var(--text);line-height:1.3}
+    body.dark .action-card-btn{background:#0f1316;border-color:#2a2d33}
+    body.dark .action-card-btn:hover{border-color:rgba(126,179,245,0.25)}
+    body.dark .acb-label{color:#c8d8e8}
+    @media(max-width:540px){.action-cards-grid{grid-template-columns:repeat(3,1fr)}}
+
+    /* M2 — KPI cards com ícone */
+    .kpi-v2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+    .kpi-v2{background:var(--card);padding:14px 16px;border-radius:12px;border:0.5px solid rgba(30,50,80,0.07);box-shadow:0 1px 4px rgba(30,50,80,0.05);position:relative;overflow:hidden}
+    .kpi-v2-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+    .kpi-v2-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .kpi-v2-icon.blue{background:rgba(43,123,228,0.1)}
+    .kpi-v2-icon.green{background:rgba(23,177,105,0.1)}
+    .kpi-v2-icon.orange{background:rgba(245,158,11,0.1)}
+    .kpi-v2-icon.red{background:rgba(255,77,79,0.1)}
+    .kpi-v2-icon.purple{background:rgba(124,58,237,0.1)}
+    .kpi-v2-icon.grey{background:rgba(30,50,80,0.07)}
+    .kpi-v2-chip{font-size:10px;font-weight:600;padding:3px 7px;border-radius:20px;white-space:nowrap}
+    .kpi-v2-chip.up{background:rgba(23,177,105,0.12);color:var(--success)}
+    .kpi-v2-chip.down{background:rgba(255,77,79,0.12);color:var(--danger)}
+    .kpi-v2-chip.neutral{background:rgba(30,50,80,0.07);color:var(--muted)}
+    .kpi-v2-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;font-weight:500}
+    .kpi-v2-val{font-size:21px;font-weight:700;letter-spacing:-0.02em;color:var(--text);line-height:1.1}
+    .kpi-v2-sub{font-size:11px;color:var(--muted);margin-top:4px}
+    .kpi-v2-bar{height:3px;border-radius:2px;margin-top:10px;background:rgba(30,50,80,0.06);overflow:hidden}
+    .kpi-v2-bar-fill{height:100%;border-radius:2px}
+    body.dark .kpi-v2{background:#13171c;border-color:#2a2d33}
+    body.dark .kpi-v2-val{color:#e6eef8}
+    body.dark .kpi-v2-icon.grey{background:rgba(255,255,255,0.06)}
+
+    /* M3 — Goal ring */
+    .goal-ring-wrap{background:var(--card);padding:18px 20px;border-radius:12px;border:0.5px solid rgba(30,50,80,0.08);margin-bottom:16px;display:flex;gap:20px;align-items:center}
+    .goal-ring-svg-wrap{flex-shrink:0;position:relative;width:88px;height:88px}
+    .goal-ring-svg-wrap svg{width:88px;height:88px;transform:rotate(-90deg)}
+    .goal-ring-center-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+    .goal-ring-pct-text{font-size:19px;font-weight:700;color:var(--text);line-height:1}
+    .goal-ring-pct-sub{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.04em}
+    .goal-ring-details{flex:1;min-width:0}
+    .goal-ring-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .goal-ring-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid rgba(30,50,80,0.06)}
+    .goal-ring-row:last-child{border-bottom:none}
+    .goal-ring-row-lbl{font-size:11px;color:var(--muted)}
+    .goal-ring-row-val{font-size:13px;font-weight:600;color:var(--text)}
+    .goal-ring-row-val.green{color:var(--success)}
+    .goal-ring-row-val.red{color:var(--danger)}
+    .goal-ring-row-val.blue{color:var(--accent)}
+    body.dark .goal-ring-wrap{background:#13171c;border-color:#2a2d33}
+    body.dark .goal-ring-pct-text{color:#e6eef8}
+    body.dark .goal-ring-pct-sub{color:#7a8b99}
+    body.dark .goal-ring-row{border-color:#1f2326}
+    body.dark .goal-ring-row-lbl{color:#7a8b99}
+    body.dark .goal-ring-row-val{color:#e6eef8}
+    body.dark .goal-ring-title{color:#c8d8e8}
+    @media(max-width:480px){.goal-ring-wrap{flex-direction:column;align-items:flex-start;gap:14px}}
+
+    /* M6 — Tabela com avatar */
+    .plat-avatar-cell{display:flex;align-items:center;gap:10px}
+    .plat-tbl-avatar{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;letter-spacing:0}
+    .plat-tbl-name{font-size:13px;font-weight:600;color:var(--text)}
+    .plat-tbl-sub{font-size:11px;color:var(--muted)}
+    .part-mini-bar{height:5px;border-radius:3px;background:rgba(30,50,80,0.07);overflow:hidden;width:70px;margin-top:3px}
+    .part-mini-fill{height:100%;border-radius:3px;transition:width 0.5s ease}
+    body.dark .plat-tbl-name{color:#c8d8e8}
+
+    /* ── Melhoria C: sidebar platform mini-cards ── */
+    .sb-plat-header{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+    body.dark .sb-plat-header{color:#3d5060}
+    .sb-plat-card{background:transparent;border:0.5px solid rgba(30,50,80,0.08);border-radius:9px;padding:7px 10px;margin-bottom:5px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;user-select:none}
+    .sb-plat-card:hover{background:rgba(43,123,228,0.05);border-color:rgba(43,123,228,0.2)}
+    .sb-plat-card.selected{background:rgba(43,123,228,0.08);border-color:rgba(43,123,228,0.3)}
+    body.dark .sb-plat-card{border-color:rgba(255,255,255,0.06)}
+    body.dark .sb-plat-card:hover{background:rgba(43,123,228,0.12);border-color:rgba(126,179,245,0.25)}
+    body.dark .sb-plat-card.selected{background:rgba(43,123,228,0.18);border-color:rgba(126,179,245,0.35)}
+    .sb-plat-avatar{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+    .sb-plat-info{flex:1;min-width:0}
+    .sb-plat-name{font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    body.dark .sb-plat-name{color:#c8d8e8}
+    .sb-plat-sub{font-size:10px;color:var(--muted);margin-top:1px}
+    .sb-plat-profit{font-size:11px;font-weight:700;flex-shrink:0}
+    .sb-plat-profit.pos{color:var(--success)}.sb-plat-profit.neg{color:var(--danger)}
+    .sb-plat-actions{display:flex;gap:2px;flex-shrink:0}
+    .sb-plat-btn{background:transparent;border:none;padding:3px 5px;border-radius:5px;cursor:pointer;font-size:12px;color:var(--muted);opacity:0;transition:opacity .15s}
+    .sb-plat-card:hover .sb-plat-btn{opacity:1}
+    .sb-plat-btn:hover{background:rgba(30,50,80,0.07);color:var(--text)}
+    body.dark .sb-plat-btn:hover{background:rgba(255,255,255,0.08);color:#e6eef8}
+
+    /* ── Melhoria E: top summary cards v2 ── */
+    .card-v2{position:relative;overflow:hidden;padding:18px 20px;border-radius:12px;background:var(--card);border:0.5px solid rgba(30,50,80,0.07);box-shadow:0 1px 4px rgba(30,50,80,0.05);width:100%}
+    .card-v2::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+    .card-v2.blue::before{background:var(--accent)}
+    .card-v2.green::before{background:var(--success)}
+    .card-v2.red::before{background:var(--danger)}
+    .card-v2.purple::before{background:#7c3aed}
+    .card-v2.orange::before{background:#f59e0b}
+    .card-v2-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+    .card-v2-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .card-v2-icon.blue{background:rgba(43,123,228,0.1)}
+    .card-v2-icon.green{background:rgba(23,177,105,0.1)}
+    .card-v2-icon.red{background:rgba(255,77,79,0.1)}
+    .card-v2-icon.purple{background:rgba(124,58,237,0.1)}
+    .card-v2-icon.orange{background:rgba(245,158,11,0.1)}
+    .card-v2-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:500;margin-bottom:4px}
+    .card-v2-val{font-size:clamp(16px,1.8vw,26px);font-weight:700;letter-spacing:-.02em;line-height:1}
+    .card-v2-val.blue{color:var(--accent)}.card-v2-val.green{color:var(--success)}.card-v2-val.red{color:var(--danger)}.card-v2-val.purple{color:#7c3aed}.card-v2-val.orange{color:#f59e0b}
+    body.dark .card-v2{background:#13171c;border-color:#2a2d33}
 </style>
 </head>
 <body>
@@ -1028,26 +1173,24 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
       <nav>
         <div class="nav-section-title">Principal</div>
         <div class="nav-item" data-view="dashboard"><div class="nav-icon">🏠</div>Dashboard</div>
-        <div class="nav-item" data-view="gastos"><div class="nav-icon">💸</div>Gastos</div>
         <div class="nav-item" data-view="plataformas"><div class="nav-icon">🖥️</div>Plataformas</div>
         <div class="nav-section-title">Ferramentas</div>
         <div class="nav-item" data-view="dados"><div class="nav-icon">👤</div>CPFs</div>
         <div class="nav-item" data-view="sms"><div class="nav-icon">📱</div>SMS</div>
         <div class="nav-item" data-view="fintech"><div class="nav-icon">🏦</div>Fintech</div>
-        <div class="nav-item" data-view="proxys"><div class="nav-icon">🔗</div>Proxys</div>
+        <div class="nav-item" data-view="proxys">
+          <div class="nav-icon">🔗</div>Proxys
+          <span id="navProxyBadge" class="nav-proxy-badge" style="display:none">0</span>
+        </div>
         <div class="nav-item" data-view="notasPendentes">
           <div class="nav-icon">📝</div>
           <span>Notas Pendentes</span>
-          <span id="navPendingBadge" class="notes-badge" style="position:static;display:none;margin-left:auto">0</span>
+          <span id="navPendingBadge" class="nav-proxy-badge" style="background:var(--danger);display:none">0</span>
         </div>
+        <div class="nav-section-title">Config</div>
+        <div class="nav-item" data-view="gastos"><div class="nav-icon">💸</div>Gastos</div>
         <div class="nav-item" data-view="admin" id="navAdmin" style="display:none"><div class="nav-icon">🛡️</div>Admin</div>
       </nav>
-
-      <div class="section-title">Nova Plataforma</div>
-      <div class="add-platform-wrapper" style="margin-top:0;margin-bottom:10px">
-        <input id="newPlatformName" placeholder="Nome da plataforma..." />
-        <button class="btn" id="addPlatformBtn" title="Adicionar">+</button>
-      </div>
 
       <div class="section-title">Plataformas</div>
       <input type="text" id="searchPlatforms" placeholder="🔎 Buscar plataforma..." style="width:100%;margin-bottom:10px;padding:8px 10px;border-radius:8px;border:0.5px solid rgba(30,50,80,0.15);background:#f8fafc;font-size:12px;font-family:inherit">
@@ -1086,25 +1229,40 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         <div class="card-skeleton"><div class="skeleton" style="height:11px;width:58%;margin-bottom:12px;border-radius:4px"></div><div class="skeleton" style="height:26px;width:50%;border-radius:4px"></div></div>
       </div>
       <div class="cards" id="realCards" style="display:none">
-        <div class="card">
-          <h3>Total de Contas</h3>
-          <p id="totalContas">0</p>
+        <div class="card-v2 blue">
+          <div class="card-v2-top">
+            <div class="card-v2-icon blue">🖥️</div>
+          </div>
+          <div class="card-v2-lbl">Total de Contas</div>
+          <div class="card-v2-val blue" id="totalContas">0</div>
         </div>
-        <div class="card card-green">
-          <h3>Lucro Bruto (R$)</h3>
-          <p id="lucroBruto">0.00</p>
+        <div class="card-v2 green">
+          <div class="card-v2-top">
+            <div class="card-v2-icon green">💰</div>
+          </div>
+          <div class="card-v2-lbl">Lucro Bruto (R$)</div>
+          <div class="card-v2-val green" id="lucroBruto">0.00</div>
         </div>
-        <div class="card card-red">
-          <h3>Gastos (Proxy + Números)</h3>
-          <p id="gastosTotal">0.00</p>
+        <div class="card-v2 red">
+          <div class="card-v2-top">
+            <div class="card-v2-icon red">💸</div>
+          </div>
+          <div class="card-v2-lbl">Gastos (Proxy + Nº)</div>
+          <div class="card-v2-val red" id="gastosTotal">0.00</div>
         </div>
-        <div class="card card-purple">
-          <h3 id="lucroMesTitle">Lucro do Mês</h3>
-          <p id="lucroTotalDias">0.00</p>
+        <div class="card-v2 purple">
+          <div class="card-v2-top">
+            <div class="card-v2-icon purple">📅</div>
+          </div>
+          <div class="card-v2-lbl" id="lucroMesTitle">Lucro do Mês</div>
+          <div class="card-v2-val purple" id="lucroTotalDias">0.00</div>
         </div>
-        <div class="card card-orange">
-          <h3>CPFs Disponíveis</h3>
-          <p id="cpfsDisponiveis">0</p>
+        <div class="card-v2 orange">
+          <div class="card-v2-top">
+            <div class="card-v2-icon orange">👤</div>
+          </div>
+          <div class="card-v2-lbl">CPFs Disponíveis</div>
+          <div class="card-v2-val orange" id="cpfsDisponiveis">0</div>
         </div>
       </div>
 
@@ -1112,14 +1270,29 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
       <div class="panel" id="dashboardPanel">
 
         <!-- Ações rápidas -->
-        <div style="margin-bottom:16px">
-          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:8px">Ações rápidas</div>
-          <div class="shortcut-row">
-            <button class="shortcut-btn" onclick="selectView('plataformas');setTimeout(()=>document.getElementById('addContaBtn')?.click(),100)">➕ Nova conta</button>
-            <button class="shortcut-btn" onclick="selectView('sms')">📱 Novo SMS</button>
-            <button class="shortcut-btn" onclick="document.getElementById('addNotaBtn')?.click();selectView('dados')">👤 Adicionar CPF</button>
-            <button class="shortcut-btn" onclick="selectView('dashboard');setTimeout(()=>document.getElementById('fecharHojeBtn')?.click(),100)">📅 Fechar dia</button>
-            <button class="shortcut-btn" onclick="window.exportXlsx()">⬇ Exportar</button>
+        <div style="margin-bottom:18px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:10px">Ações rápidas</div>
+          <div class="action-cards-grid">
+            <button class="action-card-btn" onclick="selectView('plataformas');setTimeout(()=>openPlatNewModal(),80)">
+              <div class="acb-icon blue">🖥️</div>
+              <div class="acb-label">Nova Plataforma</div>
+            </button>
+            <button class="action-card-btn" onclick="selectView('sms')">
+              <div class="acb-icon green">📱</div>
+              <div class="acb-label">Novo SMS</div>
+            </button>
+            <button class="action-card-btn" onclick="document.getElementById('addNotaBtn')?.click();selectView('dados')">
+              <div class="acb-icon purple">👤</div>
+              <div class="acb-label">Add CPF</div>
+            </button>
+            <button class="action-card-btn" onclick="selectView('dashboard');setTimeout(()=>document.getElementById('fecharHojeBtn')?.click(),100)">
+              <div class="acb-icon orange">📅</div>
+              <div class="acb-label">Fechar Dia</div>
+            </button>
+            <button class="action-card-btn" onclick="window.exportXlsx()">
+              <div class="acb-icon teal">⬇</div>
+              <div class="acb-label">Exportar</div>
+            </button>
           </div>
         </div>
 
@@ -1154,64 +1327,117 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
             </div>
           </div>
 
-          <!-- Monthly Goal Widget -->
-          <div style="background:var(--card);padding:16px;border-radius:10px;border:0.5px solid rgba(30,50,80,0.08);margin-bottom:16px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <h4 style="margin:0;font-size:13px;font-weight:500;">🎯 Meta Mensal: <span id="goalTargetDisplay" style="color:var(--accent);cursor:pointer;font-weight:600" title="Clique para alterar">R$ 0,00</span></h4>
-              <div style="text-align:right">
-                <span id="goalPercentDisplay" style="font-weight:700;font-size:14px;color:var(--accent)">0%</span>
-                <div style="font-size:10px;color:var(--muted);margin-top:1px" id="goalDaysLeft"></div>
+          <!-- Monthly Goal Widget — Anel Radial -->
+          <div class="goal-ring-wrap">
+            <!-- SVG ring -->
+            <div class="goal-ring-svg-wrap">
+              <svg viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="goalRingGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#2b7be4"/>
+                    <stop offset="100%" stop-color="#17b169"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="44" cy="44" r="34" fill="none" stroke="rgba(43,123,228,0.12)" stroke-width="8"/>
+                <circle id="goalRingCircle" cx="44" cy="44" r="34" fill="none"
+                  stroke="url(#goalRingGrad)" stroke-width="8"
+                  stroke-linecap="round"
+                  stroke-dasharray="213.6"
+                  stroke-dashoffset="213.6"
+                  style="transition:stroke-dashoffset 1s ease"/>
+              </svg>
+              <div class="goal-ring-center-text">
+                <div class="goal-ring-pct-text" id="goalPercentDisplay">0%</div>
+                <div class="goal-ring-pct-sub">da meta</div>
               </div>
             </div>
-            <div class="goal-bar-bg" style="margin-bottom:10px"><div id="goalBarFill" class="goal-bar-fill"></div></div>
-            <div class="goal-projection">
-              <div class="goal-proj-cell">
-                <div class="goal-proj-label">Atual</div>
-                <div class="goal-proj-val green" id="goalCurrentDisplay">R$ 0,00</div>
+            <!-- Detalhes -->
+            <div class="goal-ring-details">
+              <div class="goal-ring-title">
+                🎯 Meta: <span id="goalTargetDisplay" style="color:var(--accent);cursor:pointer;font-weight:700" title="Clique para alterar">R$ 0,00</span>
               </div>
-              <div class="goal-proj-cell">
-                <div class="goal-proj-label">Falta</div>
-                <div class="goal-proj-val red" id="goalRemainingDisplay">R$ 0,00</div>
+              <div class="goal-ring-row">
+                <span class="goal-ring-row-lbl">Lucro atual</span>
+                <span class="goal-ring-row-val green" id="goalCurrentDisplay">R$ 0,00</span>
               </div>
-              <div class="goal-proj-cell">
-                <div class="goal-proj-label">Projeção</div>
-                <div class="goal-proj-val blue" id="goalProjection">R$ 0,00</div>
+              <div class="goal-ring-row">
+                <span class="goal-ring-row-lbl">Falta atingir</span>
+                <span class="goal-ring-row-val red" id="goalRemainingDisplay">R$ 0,00</span>
+              </div>
+              <div class="goal-ring-row">
+                <span class="goal-ring-row-lbl">Projeção</span>
+                <span class="goal-ring-row-val blue" id="goalProjection">R$ 0,00</span>
+              </div>
+              <div class="goal-ring-row">
+                <span class="goal-ring-row-lbl" id="goalDaysLeft">— dias restantes</span>
+                <span class="goal-status-msg" id="goalStatusMsg" style="font-size:11px;font-weight:500;color:var(--muted)"></span>
               </div>
             </div>
-            <div class="goal-status-msg" id="goalStatusMsg" style="color:var(--muted)"></div>
+            <!-- Hidden bar fill — kept for JS compatibility -->
+            <div style="display:none"><div id="goalBarFill"></div></div>
           </div>
 
           <div id="kpiContainer">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
-              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--accent);">
-                <div class="muted" style="font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Média Diária</div>
-                <div style="font-size:22px;font-weight:600;letter-spacing:-0.02em" id="kpiMediaDiaria">R$ 0,00</div>
-                <div class="kpi-delta" id="kpiMediaDiariaDelta"></div>
+            <div class="kpi-v2-grid">
+              <!-- Média Diária -->
+              <div class="kpi-v2">
+                <div class="kpi-v2-top">
+                  <div class="kpi-v2-icon blue">📈</div>
+                  <span class="kpi-v2-chip neutral" id="kpiMediaDiariaDelta">—</span>
+                </div>
+                <div class="kpi-v2-label">Média Diária</div>
+                <div class="kpi-v2-val" id="kpiMediaDiaria">R$ 0,00</div>
+                <div class="kpi-v2-bar"><div class="kpi-v2-bar-fill" id="kpiMediaBar" style="width:0%;background:var(--accent)"></div></div>
               </div>
-              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--success);">
-                <div class="muted" style="font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Melhor Dia</div>
-                <div style="font-size:13px;font-weight:500;color:var(--success)" id="kpiMelhorDia">-</div>
-                <div style="font-size:18px;font-weight:600;margin-top:2px;letter-spacing:-0.02em" id="kpiMelhorDiaValor">R$ 0,00</div>
+              <!-- Melhor Dia -->
+              <div class="kpi-v2">
+                <div class="kpi-v2-top">
+                  <div class="kpi-v2-icon green">🏆</div>
+                  <span class="kpi-v2-chip neutral" id="kpiMelhorDia">—</span>
+                </div>
+                <div class="kpi-v2-label">Melhor Dia</div>
+                <div class="kpi-v2-val" style="color:var(--success)" id="kpiMelhorDiaValor">R$ 0,00</div>
+                <div class="kpi-v2-bar"><div class="kpi-v2-bar-fill" style="width:100%;background:var(--success)"></div></div>
               </div>
-              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--danger);">
-                <div class="muted" style="font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Pior Dia</div>
-                <div style="font-size:13px;font-weight:500;color:var(--danger)" id="kpiPiorDia">-</div>
-                <div style="font-size:18px;font-weight:600;margin-top:2px;letter-spacing:-0.02em" id="kpiPiorDiaValor">R$ 0,00</div>
+              <!-- Pior Dia -->
+              <div class="kpi-v2">
+                <div class="kpi-v2-top">
+                  <div class="kpi-v2-icon red">📉</div>
+                  <span class="kpi-v2-chip neutral" id="kpiPiorDia">—</span>
+                </div>
+                <div class="kpi-v2-label">Pior Dia</div>
+                <div class="kpi-v2-val" style="color:var(--danger)" id="kpiPiorDiaValor">R$ 0,00</div>
+                <div class="kpi-v2-bar"><div class="kpi-v2-bar-fill" style="width:100%;background:var(--danger)"></div></div>
               </div>
-              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid #9ca3af;">
-                <div class="muted" style="font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Total de Dias</div>
-                <div style="font-size:22px;font-weight:600;letter-spacing:-0.02em" id="kpiTotalDias">0</div>
-                <div class="kpi-delta" id="kpiTotalDiasDelta"></div>
+              <!-- Total de Dias -->
+              <div class="kpi-v2">
+                <div class="kpi-v2-top">
+                  <div class="kpi-v2-icon grey">📅</div>
+                  <span class="kpi-v2-chip neutral" id="kpiTotalDiasDelta">—</span>
+                </div>
+                <div class="kpi-v2-label">Total de Dias</div>
+                <div class="kpi-v2-val" id="kpiTotalDias">0</div>
+                <div class="kpi-v2-bar"><div class="kpi-v2-bar-fill" id="kpiDiasBar" style="width:0%;background:var(--accent)"></div></div>
               </div>
-              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid var(--accent);">
-                <div class="muted" style="font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Taxa de Sucesso</div>
-                <div style="font-size:22px;font-weight:600;letter-spacing:-0.02em" id="kpiTaxaSucesso">0%</div>
-                <div class="kpi-delta" id="kpiTaxaDelta" style="font-size:11px;margin-top:2px;color:var(--muted)">dias com lucro positivo</div>
+              <!-- Taxa de Sucesso -->
+              <div class="kpi-v2">
+                <div class="kpi-v2-top">
+                  <div class="kpi-v2-icon orange">🎯</div>
+                  <span class="kpi-v2-chip up" id="kpiTaxaDelta">—</span>
+                </div>
+                <div class="kpi-v2-label">Taxa de Sucesso</div>
+                <div class="kpi-v2-val" id="kpiTaxaSucesso">0%</div>
+                <div class="kpi-v2-bar"><div class="kpi-v2-bar-fill" id="kpiTaxaBar" style="width:0%;background:#f59e0b"></div></div>
               </div>
-              <div style="background:var(--card);padding:16px;border-radius:10px;border-left:4px solid #9ca3af;">
-                <div class="muted" style="font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Lucro Médio/Conta</div>
-                <div style="font-size:22px;font-weight:600;letter-spacing:-0.02em" id="kpiLucroMedioConta">R$ 0,00</div>
-                <div class="kpi-delta" id="kpiLucroContaDelta"></div>
+              <!-- Lucro Médio/Conta -->
+              <div class="kpi-v2">
+                <div class="kpi-v2-top">
+                  <div class="kpi-v2-icon purple">💰</div>
+                  <span class="kpi-v2-chip neutral" id="kpiLucroContaDelta">por conta</span>
+                </div>
+                <div class="kpi-v2-label">Lucro Médio/Conta</div>
+                <div class="kpi-v2-val" id="kpiLucroMedioConta">R$ 0,00</div>
+                <div class="kpi-v2-bar"><div class="kpi-v2-bar-fill" id="kpiLucroContaBar" style="width:0%;background:#7c3aed"></div></div>
               </div>
             </div>
           </div>
@@ -2011,14 +2237,72 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
       
       try {
         updateUI();
-        selectView('dashboard');
+        // Restaura a última aba visitada (persistida no localStorage)
+        let restored = false;
+        try {
+          const saved = JSON.parse(localStorage.getItem('lastView_v1') || 'null');
+          if (saved && saved.view) {
+            const validViews = ['dashboard','gastos','plataformas','plataformaDetalhe','dados','fintech','notasPendentes','sms','proxys'];
+            if (validViews.includes(saved.view)) {
+              if (saved.view === 'plataformaDetalhe' && saved.platform && state.platforms[saved.platform]) {
+                selectPlatform(saved.platform);
+              } else if (saved.view !== 'plataformaDetalhe') {
+                selectView(saved.view);
+              } else {
+                selectView('plataformas');
+              }
+              restored = true;
+            }
+          }
+        } catch(e2) {}
+        if (!restored) selectView('dashboard');
       } catch(e) {
         console.error('Erro ao renderizar UI:', e);
-        // Mesmo com erro, tenta mostrar o painel
+        selectView('dashboard');
       }
+
+      // Inicializa badge de proxys na sidebar
+      setTimeout(() => {
+        try {
+          const proxyList = JSON.parse(localStorage.getItem('proxys_data_v1') || '[]');
+          const unusedQty = proxyList.filter(p => !p.used).length;
+          const badge = document.getElementById('navProxyBadge');
+          if(badge){ badge.textContent = unusedQty; badge.style.display = unusedQty > 0 ? 'inline-block' : 'none'; }
+        } catch(e){}
+      }, 100);
 
       // Verifica SMS expirados e reinicia polls ao carregar (setTimeout garante que as funções já foram definidas)
       setTimeout(() => { checkExpiredSmsOnLoad(); restartSmsPolls(); }, 0);
+
+      // ── SUPABASE REALTIME ─────────────────────────────────
+      // Escuta alterações no banco feitas por outras sessões/abas
+      setTimeout(async () => {
+        try {
+          const { data: { session: rtSession } } = await supabase.auth.getSession();
+          if (!rtSession) return;
+          const rtUserId = rtSession.user.id;
+
+          supabase.channel('realtime-userdata')
+            .on('postgres_changes', {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'user_data',
+              filter: `user_id=eq.${rtUserId}`
+            }, (payload) => {
+              const incoming = payload.new?.content;
+              if (!incoming || !incoming._savedAt) return;
+              // Só aplica se for mais recente E não gerado por esta sessão
+              if (incoming._savedAt > (state._savedAt || 0) && incoming.savedBy !== (state.savedBy)) {
+                state = incoming;
+                updateUI();
+                showToast('🔄 Dados sincronizados em tempo real', 'info');
+              }
+            })
+            .subscribe((status) => {
+              if (status === 'SUBSCRIBED') setSaveStatus('synced', 'Sincronizado • Realtime ativo');
+            });
+        } catch(e) { console.warn('Realtime não disponível:', e); }
+      }, 1500);
 
       // Verifica conflito de dados a cada 30s
       setTimeout(() => checkForConflict(), 15000);
@@ -2475,39 +2759,47 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
 
       const platformOrder = state.platformOrder || Object.keys(state.platforms);
 
-      const filteredOrder = platformOrder.filter(pName => 
+      const filteredOrder = platformOrder.filter(pName =>
         state.platforms[pName] && state.platforms[pName].name.toLowerCase().includes(searchTerm)
       );
 
-      filteredOrder.forEach(pName => {
+      // Avatar palette
+      const avatarPalettes = [
+        'linear-gradient(135deg,#2b7be4,#1e9fc8)',
+        'linear-gradient(135deg,#7c3aed,#c026d3)',
+        'linear-gradient(135deg,#f59e0b,#ef4444)',
+        'linear-gradient(135deg,#17b169,#0ea5e9)',
+        'linear-gradient(135deg,#ec4899,#f43f5e)',
+        'linear-gradient(135deg,#14b8a6,#2b7be4)',
+      ];
+
+      filteredOrder.forEach((pName, idx) => {
         const p = state.platforms[pName];
         if (!p) return;
 
         const lucroPlat = p.accounts.reduce((s,a)=>
           s + (((a.saque||0)+(a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
-        const lucroColor = lucroPlat >= 0 ? 'var(--success)' : 'var(--danger)';
+        const avatarBg = avatarPalettes[idx % avatarPalettes.length];
+        const initial = (p.name || '?').charAt(0).toUpperCase();
+        const lucroFmt = (lucroPlat >= 0 ? '+' : '') + 'R$' + money(Math.abs(lucroPlat));
 
         const el = document.createElement('div');
-        el.className = 'platform-card ' + (lucroPlat >= 0 ? 'lucro-pos' : 'lucro-neg');
+        el.className = 'sb-plat-card' + (p.name === state.selectedPlatform ? ' selected' : '');
         el.dataset.platformName = p.name;
-        if (p.name === state.selectedPlatform) {
-          el.classList.add('selected');
-        }
+
         el.innerHTML = `
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div class="name" style="margin-bottom:0"></div>
-            <div style="font-size:12px;font-weight:600;color:${lucroColor};flex-shrink:0;margin-left:6px">R$ ${money(lucroPlat)}</div>
+          <div class="sb-plat-avatar" style="background:${avatarBg}">${initial}</div>
+          <div class="sb-plat-info">
+            <div class="sb-plat-name"></div>
+            <div class="sb-plat-sub">${p.accounts.length} conta${p.accounts.length!==1?'s':''}</div>
           </div>
-          <div class="details">
-            <div class="count">${p.accounts.length} conta${p.accounts.length !== 1 ? 's' : ''}</div>
-            <div class="actions">
-              <button class="btn ghost btn-edit-plat" title="Renomear">✏️</button>
-              <button class="btn ghost btn-delete" title="Remover plataforma">🗑️</button>
-            </div>
+          <div class="sb-plat-profit ${lucroPlat>=0?'pos':'neg'}">${lucroFmt}</div>
+          <div class="sb-plat-actions">
+            <button class="sb-plat-btn btn-edit-plat" title="Renomear">✏️</button>
+            <button class="sb-plat-btn btn-delete" title="Remover">🗑️</button>
           </div>
         `;
-        // Set name via textContent (XSS safe — never interpolate user data in innerHTML)
-        el.querySelector('.name').textContent = p.name;
+        el.querySelector('.sb-plat-name').textContent = p.name;
         
         el.onclick = (e) => {
           if (e.target.closest('button')) return;
@@ -2605,19 +2897,38 @@ platformsData.forEach(data => {
       tr.onclick = () => selectPlatform(p.name);
       const lucroChipClass = lucroPlat >= 0 ? 'pos' : 'neg';
       const lucroSign = lucroPlat >= 0 ? '+' : '';
+      // Avatar colors cycling
+      const avatarPalettes = [
+        'linear-gradient(135deg,#2b7be4,#1e9fc8)',
+        'linear-gradient(135deg,#7c3aed,#c026d3)',
+        'linear-gradient(135deg,#f59e0b,#ef4444)',
+        'linear-gradient(135deg,#17b169,#0ea5e9)',
+        'linear-gradient(135deg,#ec4899,#f43f5e)',
+        'linear-gradient(135deg,#14b8a6,#2b7be4)',
+      ];
+      const avatarIdx = Object.keys(state.platforms).indexOf(p.name) % avatarPalettes.length;
+      const avatarBg = avatarPalettes[Math.max(0, avatarIdx)];
+      const initial = (p.name || '?').charAt(0).toUpperCase();
       tr.innerHTML = `
-        <td></td>
-        <td>${p.accounts.length}</td>
+        <td><div class="plat-avatar-cell">
+          <div class="plat-tbl-avatar" style="background:${avatarBg}">${initial}</div>
+          <div>
+            <div class="plat-tbl-name">${escapeHtml(p.name)}</div>
+            <div class="plat-tbl-sub">${p.accounts.length} conta${p.accounts.length !== 1 ? 's' : ''}</div>
+          </div>
+        </div></td>
+        <td style="font-size:13px;font-weight:600">${p.accounts.length}</td>
         <td><span class="lucro-chip ${lucroChipClass}">${lucroSign}R$ ${money(lucroPlat)}</span></td>
-        <td class="summary-bar-wrap"><div class="summary-bar-track"><div class="summary-bar-fill" data-lucro="${lucroPlat}" style="width:0%;background:${lucroPlat>=0?'var(--success)':'var(--danger)'}"></div></div></td>
+        <td class="summary-bar-wrap">
+          <div class="part-mini-bar"><div class="part-mini-fill" data-lucro="${lucroPlat}" style="width:0%;background:${lucroPlat>=0?'var(--success)':'var(--danger)'}"></div></div>
+        </td>
       `;
-      tr.querySelector('td:first-child').textContent = p.name;
       tbody.appendChild(tr);
       });
 
       // Fill participation bars relative to max lucro
       const maxLucro = Math.max(...platformsData.map(d => Math.abs(d.lucro)), 1);
-      tbody.querySelectorAll('.summary-bar-fill').forEach(bar => {
+      tbody.querySelectorAll('.part-mini-fill').forEach(bar => {
         const val = Math.abs(parseFloat(bar.dataset.lucro) || 0);
         setTimeout(() => { bar.style.width = Math.round((val / maxLucro) * 100) + '%'; }, 50);
       });
@@ -2694,11 +3005,37 @@ platformsData.forEach(data => {
         const gridEl = document.getElementById('platStatGrid');
         if(gridEl) {
             const lucroClass = totalLucro >= 0 ? 'green' : 'red';
+            const investTotal = totalDep + totalRedep;
+            const retornoTotal = totalSaque + totalBau;
+            const roi = investTotal > 0 ? ((retornoTotal - investTotal) / investTotal * 100) : 0;
+            const roiSign = roi >= 0 ? '+' : '';
+            const roiChip = `<span class="plat-stat-chip ${roi>=0?'up':'down'}">${roiSign}${roi.toFixed(0)}% ROI</span>`;
+            const successChip = `<span class="plat-stat-chip ${successRate>=50?'up':'down'}">${successRate}% pos.</span>`;
             gridEl.innerHTML = `
-              <div class="plat-stat-card blue"><div class="plat-stat-label">Investimento</div><div class="plat-stat-val red">R$ ${money(totalDep + totalRedep)}</div></div>
-              <div class="plat-stat-card green"><div class="plat-stat-label">Retorno</div><div class="plat-stat-val green">R$ ${money(totalSaque + totalBau)}</div></div>
-              <div class="plat-stat-card purple"><div class="plat-stat-label">Lucro líquido</div><div class="plat-stat-val ${lucroClass}">R$ ${money(totalLucro)}</div></div>
-              <div class="plat-stat-card blue"><div class="plat-stat-label">Contas</div><div class="plat-stat-val">${visibleCount}</div></div>
+              <div class="plat-stat-card red">
+                <div class="plat-stat-top"><div class="plat-stat-icon red">💸</div><span class="plat-stat-chip neu">invest.</span></div>
+                <div class="plat-stat-label">Investimento</div>
+                <div class="plat-stat-val red">R$ ${money(investTotal)}</div>
+                <div class="plat-stat-bar"><div class="plat-stat-bar-fill" style="width:80%;background:var(--danger)"></div></div>
+              </div>
+              <div class="plat-stat-card green">
+                <div class="plat-stat-top"><div class="plat-stat-icon green">📈</div>${roiChip}</div>
+                <div class="plat-stat-label">Retorno</div>
+                <div class="plat-stat-val green">R$ ${money(retornoTotal)}</div>
+                <div class="plat-stat-bar"><div class="plat-stat-bar-fill" style="width:100%;background:var(--success)"></div></div>
+              </div>
+              <div class="plat-stat-card purple">
+                <div class="plat-stat-top"><div class="plat-stat-icon purple">💰</div><span class="plat-stat-chip ${lucroClass==='green'?'up':'down'}">${lucroClass==='green'?'lucro':'prejuízo'}</span></div>
+                <div class="plat-stat-label">Lucro Líquido</div>
+                <div class="plat-stat-val ${lucroClass}">R$ ${money(totalLucro)}</div>
+                <div class="plat-stat-bar"><div class="plat-stat-bar-fill" style="width:${Math.min(100,Math.abs(roi))}%;background:#7c3aed"></div></div>
+              </div>
+              <div class="plat-stat-card blue">
+                <div class="plat-stat-top"><div class="plat-stat-icon blue">🖥️</div>${successChip}</div>
+                <div class="plat-stat-label">Contas</div>
+                <div class="plat-stat-val" style="color:var(--accent)">${visibleCount}</div>
+                <div class="plat-stat-bar"><div class="plat-stat-bar-fill" style="width:${successRate}%;background:var(--accent)"></div></div>
+              </div>
             `;
         }
 
@@ -2763,7 +3100,7 @@ platformsData.forEach(data => {
 
         const tr = document.createElement('tr');
         const lucro = ((acc.saque||0) + (acc.bau||0)) - ((acc.deposito||0) + (acc.redeposito||0));
-        
+        tr.className = lucro > 0 ? 'row-pos' : lucro < 0 ? 'row-neg' : 'row-zero';
         const lucroChipClass = lucro >= 0 ? 'pos' : 'neg';
         const lucroSign = lucro >= 0 ? '+' : '';
         tr.innerHTML = `
@@ -2801,6 +3138,7 @@ platformsData.forEach(data => {
             const newSign = newLucro >= 0 ? '+' : '';
             lucroCell.textContent = `${newSign}R$ ${money(newLucro)}`;
             lucroCell.className = `lucro-chip ${newLucro >= 0 ? 'pos' : 'neg'} lucro-cell`;
+            tr.className = newLucro > 0 ? 'row-pos' : newLucro < 0 ? 'row-neg' : 'row-zero';
             scheduleSave();
             updatePlatformTotals();
         });
@@ -3079,37 +3417,54 @@ platformsData.forEach(data => {
       const lucroMedioConta = totalContas > 0 ? totalLucro / totalContas : 0;
 
       document.getElementById('kpiMediaDiaria').textContent = `R$ ${money(mediaDiaria)}`;
-      document.getElementById('kpiMelhorDia').textContent = melhorDia || '-';
+      document.getElementById('kpiMelhorDia').textContent = melhorDia || '—';
       document.getElementById('kpiMelhorDiaValor').textContent = `R$ ${money(melhorValor === -Infinity ? 0 : melhorValor)}`;
-      document.getElementById('kpiPiorDia').textContent = piorDia || '-';
+      document.getElementById('kpiPiorDia').textContent = piorDia || '—';
       document.getElementById('kpiPiorDiaValor').textContent = `R$ ${money(piorValor === Infinity ? 0 : piorValor)}`;
       document.getElementById('kpiTotalDias').textContent = records.length;
       document.getElementById('kpiTaxaSucesso').textContent = `${Math.round(taxaSucesso)}%`;
       document.getElementById('kpiLucroMedioConta').textContent = `R$ ${money(lucroMedioConta)}`;
 
-      // Delta context
+      // Taxa de sucesso — chip com % e barra
       const taxaEl = document.getElementById('kpiTaxaDelta');
-      if(taxaEl) taxaEl.textContent = `${diasPositivos} de ${records.length} dias com lucro`;
+      if(taxaEl){ taxaEl.textContent = `${diasPositivos}/${records.length} dias`; taxaEl.className = 'kpi-v2-chip ' + (taxaSucesso >= 70 ? 'up' : taxaSucesso >= 40 ? 'neutral' : 'down'); }
+      const taxaBar = document.getElementById('kpiTaxaBar');
+      if(taxaBar) setTimeout(() => { taxaBar.style.width = Math.round(taxaSucesso) + '%'; }, 60);
 
+      // Média diária — chip de tendência
       const mediaDelta = document.getElementById('kpiMediaDiariaDelta');
-      if(mediaDelta && records.length >= 7) {
-        const lastWeek = records.slice(-7);
-        const prevWeek = records.slice(-14, -7);
-        if(prevWeek.length > 0) {
-          const lastAvg = lastWeek.reduce((s,r)=>s+(r.lucroLiquido||0),0)/lastWeek.length;
-          const prevAvg = prevWeek.reduce((s,r)=>s+(r.lucroLiquido||0),0)/prevWeek.length;
-          const diff = lastAvg - prevAvg;
-          mediaDelta.textContent = (diff >= 0 ? '↑ +' : '↓ ') + `R$ ${money(Math.abs(diff))} vs sem. anterior`;
-          mediaDelta.className = 'kpi-delta ' + (diff >= 0 ? 'up' : 'down');
-        }
+      if(mediaDelta) {
+        if(records.length >= 7) {
+          const lastWeek = records.slice(-7);
+          const prevWeek = records.slice(-14, -7);
+          if(prevWeek.length > 0) {
+            const lastAvg = lastWeek.reduce((s,r)=>s+(r.lucroLiquido||0),0)/lastWeek.length;
+            const prevAvg = prevWeek.reduce((s,r)=>s+(r.lucroLiquido||0),0)/prevWeek.length;
+            const diff = lastAvg - prevAvg;
+            const pct = prevAvg !== 0 ? Math.round(Math.abs(diff/prevAvg)*100) : 0;
+            mediaDelta.textContent = (diff >= 0 ? '↑ +' : '↓ -') + pct + '% 7d';
+            mediaDelta.className = 'kpi-v2-chip ' + (diff >= 0 ? 'up' : 'down');
+          } else { mediaDelta.textContent = '7 dias'; mediaDelta.className = 'kpi-v2-chip neutral'; }
+        } else { mediaDelta.textContent = records.length + ' dias'; mediaDelta.className = 'kpi-v2-chip neutral'; }
       }
+      // Média diária barra: relativo ao melhor dia
+      const mediaBar = document.getElementById('kpiMediaBar');
+      if(mediaBar && melhorValor > 0) setTimeout(() => { mediaBar.style.width = Math.min(100, Math.round((mediaDiaria/melhorValor)*100)) + '%'; }, 60);
 
+      // Total dias barra: relativo a dias no mês
       const diasDelta = document.getElementById('kpiTotalDiasDelta');
       if(diasDelta) {
         const now2 = new Date();
-        diasDelta.textContent = `de ${new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate()} dias no mês`;
-        diasDelta.className = 'kpi-delta';
+        const daysInMth = new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
+        diasDelta.textContent = `/${daysInMth} dias`;
+        diasDelta.className = 'kpi-v2-chip neutral';
+        const diasBar = document.getElementById('kpiDiasBar');
+        if(diasBar) setTimeout(() => { diasBar.style.width = Math.round((records.length/daysInMth)*100) + '%'; }, 60);
       }
+
+      // Lucro médio/conta barra: relativo à média diária
+      const contaBar = document.getElementById('kpiLucroContaBar');
+      if(contaBar && mediaDiaria > 0) setTimeout(() => { contaBar.style.width = Math.min(100, Math.round((lucroMedioConta/Math.max(mediaDiaria,1))*100)) + '%'; }, 60);
       
       renderMonthlyGoal(totalLucro);
     }
@@ -3133,9 +3488,12 @@ platformsData.forEach(data => {
 
         document.getElementById('goalTargetDisplay') && (document.getElementById('goalTargetDisplay').textContent = `R$ ${money(goal)}`);
         document.getElementById('goalPercentDisplay') && (document.getElementById('goalPercentDisplay').textContent = `${percent.toFixed(1)}%`);
-        document.getElementById('goalPercentDisplay') && (document.getElementById('goalPercentDisplay').style.color = percent >= 100 ? 'var(--success)' : 'var(--accent)');
+        document.getElementById('goalPercentDisplay') && (document.getElementById('goalPercentDisplay').style.color = percent >= 100 ? 'var(--success)' : '');
         document.getElementById('goalBarFill') && (document.getElementById('goalBarFill').style.width = `${percent}%`);
         document.getElementById('goalDaysLeft') && (document.getElementById('goalDaysLeft').textContent = daysLeft > 0 ? `${daysLeft} dias restantes` : 'Último dia do mês');
+        // Animate SVG ring: circumference = 2π*34 ≈ 213.6
+        const ring = document.getElementById('goalRingCircle');
+        if(ring){ const circ = 213.6; ring.style.strokeDashoffset = (circ * (1 - percent/100)).toFixed(2); ring.style.stroke = percent >= 100 ? 'var(--success)' : 'url(#goalRingGrad)'; }
         document.getElementById('goalCurrentDisplay') && (document.getElementById('goalCurrentDisplay').textContent = `R$ ${money(currentProfit)}`);
         document.getElementById('goalRemainingDisplay') && (document.getElementById('goalRemainingDisplay').textContent = remaining > 0 ? `R$ ${money(remaining)}` : 'R$ 0,00');
         document.getElementById('goalProjection') && (document.getElementById('goalProjection').textContent = `R$ ${money(projection)}`);
@@ -3192,6 +3550,13 @@ platformsData.forEach(data => {
 
     // --- Actions
     function selectView(view){
+      // Persiste a aba atual para restaurar no F5
+      try {
+        const snapshot = { view };
+        if (view === 'plataformaDetalhe') snapshot.platform = state.selectedPlatform || null;
+        localStorage.setItem('lastView_v1', JSON.stringify(snapshot));
+      } catch(e) {}
+
       // Mapa view → panelId
       const panelMap = {
         'dashboard':         'dashboardPanel',
@@ -3274,20 +3639,7 @@ platformsData.forEach(data => {
     }
 
     // --- Event listeners (buttons, inputs)
-    document.getElementById('addPlatformBtn').onclick = ()=>{
-      const v = document.getElementById('newPlatformName').value.trim();
-      if(!v) return showToast('Digite o nome da plataforma', 'error');
-      if(state.platforms[v]) return showToast('Plataforma já existe', 'error');
-      state.platforms[v] = {name:v, accounts:[], createdAt: new Date().toISOString()};
-      if(!state.platformOrder) state.platformOrder = [];
-      state.platformOrder.push(v);
-      document.getElementById('newPlatformName').value='';
-      scheduleSave(); updateUI();
-      setTimeout(() => {
-        const inp = document.getElementById('newPlatformName');
-        if(inp) inp.focus();
-      }, 100);
-    };
+    // Criação de plataforma movida para a aba de Plataformas (openPlatNewModal)
 
     document.getElementById('addContaBtn').onclick = ()=>{
       const p = state.selectedPlatform || Object.keys(state.platforms)[0];
@@ -5770,12 +6122,30 @@ platformsData.forEach(data => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const dataUrl = e.target.result;
-            document.getElementById('brandLogo').src = dataUrl;
-            state.brandLogo = dataUrl;
-            saveDataImmediate();
+            // Comprime a imagem para max 120x120px antes de salvar
+            const img = new Image();
+            img.onload = () => {
+                const MAX = 120;
+                const canvas = document.createElement('canvas');
+                const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+                canvas.width  = Math.round(img.width  * ratio);
+                canvas.height = Math.round(img.height * ratio);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                // Mostra o logo imediatamente
+                const logoEl = document.getElementById('brandLogo');
+                if (logoEl) { logoEl.style.display = ''; logoEl.src = dataUrl; }
+                state.brandLogo = dataUrl;
+                saveDataImmediate();
+                showToast('Logo atualizada!', 'success');
+            };
+            img.onerror = () => showToast('Erro ao carregar a imagem. Tente outro arquivo.', 'error');
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
+        // Limpa o input para permitir selecionar o mesmo arquivo novamente
+        event.target.value = '';
     });
 
     document.getElementById('editAppTitleBtn').addEventListener('click', () => {
@@ -6122,6 +6492,10 @@ window.exportXlsx = () => {
         document.getElementById('proxyUntestedCount').textContent = list.filter(p => p.status === 'unknown' && !p.used).length;
         document.getElementById('proxyUsedCount').textContent = list.filter(p => p.used).length;
         document.getElementById('proxyTotalCount').textContent = list.length;
+        // Atualiza badge no menu lateral
+        const unusedCount = list.filter(p => !p.used).length;
+        const proxyNavBadge = document.getElementById('navProxyBadge');
+        if(proxyNavBadge){ proxyNavBadge.textContent = unusedCount; proxyNavBadge.style.display = unusedCount > 0 ? 'inline-block' : 'none'; }
 
         if (filtered.length === 0) {
           container.innerHTML = `<div class="empty-state">
