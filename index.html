@@ -6561,29 +6561,49 @@ window.exportXlsx = () => {
         const parts = address.split(':');
         const ip = parts[0];
         const port = parts[1] || '80';
-        // corsproxy.io retorna 502/503/504 quando não consegue conectar no alvo — proxy morta
-        // Se fetch lança exceção (NetworkError) também está morta
-        // 2xx/3xx/4xx = proxy respondeu (viva, mesmo que seja 407 auth ou 400)
-        const testUrl = `https://corsproxy.io/?http://${ip}:${port}/`;
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
         const t0 = Date.now();
+
+        // --- Método 1: fetch direto no-cors (testa da máquina do usuário, ideal para file://) ---
+        // Se a porta responde, fetch resolve com opaque response (status 0)
+        // Se a porta está fechada/inacessível, fetch lança TypeError imediatamente
+        const ctrl1 = new AbortController();
+        const tmr1 = setTimeout(() => ctrl1.abort(), 7000);
         try {
-          const res = await fetch(testUrl, { signal: controller.signal, mode: 'cors' });
-          clearTimeout(timeout);
+          await fetch(`http://${ip}:${port}/`, {
+            mode: 'no-cors',
+            cache: 'no-store',
+            signal: ctrl1.signal
+          });
+          clearTimeout(tmr1);
+          // Chegou aqui = conexão estabelecida = proxy ativa
+          return { ok: true, latency: Date.now() - t0, code: 0 };
+        } catch (err1) {
+          clearTimeout(tmr1);
+          // Timeout = porta aberta mas não respondeu em tempo = considera inativa
+          if (err1.name === 'AbortError') return { ok: false, reason: 'timeout' };
+          // TypeError "Failed to fetch" pode ser: porta fechada OU mixed-content block (HTTPS)
+          // Tenta fallback via corsproxy para cobrir o caso de página HTTPS
+        }
+
+        // --- Método 2: fallback via corsproxy.io (para páginas HTTPS onde no-cors é bloqueado) ---
+        const ctrl2 = new AbortController();
+        const tmr2 = setTimeout(() => ctrl2.abort(), 7000);
+        try {
+          const res = await fetch(`https://corsproxy.io/?http://${ip}:${port}/`, {
+            mode: 'cors',
+            cache: 'no-store',
+            signal: ctrl2.signal
+          });
+          clearTimeout(tmr2);
           const latency = Date.now() - t0;
-          // 5xx = corsproxy não alcançou o servidor proxy (morta/inacessível)
-          if (res.status >= 500) {
-            return { ok: false, reason: `HTTP ${res.status} — proxy inacessível` };
-          }
+          // 502/503/504 = corsproxy não conseguiu conectar = proxy inacessível pelos servidores deles
+          // (pode ser falso negativo se proxy é residencial/IP-restrito, mas é o melhor que conseguimos via HTTPS)
+          if (res.status >= 500) return { ok: false, reason: `HTTP ${res.status} — inacessível` };
           return { ok: true, code: res.status, latency };
-        } catch (err) {
-          clearTimeout(timeout);
-          if (err.name === 'AbortError') return { ok: false, reason: 'timeout' };
-          if (err.message && (err.message.includes('NetworkError') || err.message.includes('Failed to fetch'))) {
-            return { ok: false, reason: 'unreachable' };
-          }
-          return { ok: false, reason: err.message };
+        } catch (err2) {
+          clearTimeout(tmr2);
+          if (err2.name === 'AbortError') return { ok: false, reason: 'timeout' };
+          return { ok: false, reason: 'unreachable' };
         }
       }
 
