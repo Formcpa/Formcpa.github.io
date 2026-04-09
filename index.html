@@ -6564,19 +6564,19 @@ window.exportXlsx = () => {
         const t0 = Date.now();
 
         // Estratégia de timing para detectar porta aberta:
-        // • Porta FECHADA  → TCP RST instantâneo → TypeError em < 200ms
-        // • Porta ABERTA, proxy segura conexão → sem erro até nosso timer de 5s → AbortError (= VIVA)
+        // • Porta FECHADA  → TCP RST instantâneo → TypeError em < 400ms
+        // • Porta ABERTA, proxy segura conexão → sem erro até nosso timer de 3s → AbortError (= VIVA)
         // • Porta ABERTA, proxy responde HTTP  → fetch resolve com opaque response (= VIVA)
-        // • Porta ABERTA, proxy fecha rápido  → TypeError após 200ms+ (= VIVA)
+        // • Porta ABERTA, proxy fecha rápido  → TypeError após 400ms+ (= VIVA)
         let timerFired = false;
         const directResult = await new Promise(resolve => {
           const ctrl = new AbortController();
           const timer = setTimeout(() => {
             timerFired = true;
             ctrl.abort();
-            // 5s sem erro = conexão TCP foi aceita = proxy definitivamente ativa
+            // 3s sem erro = conexão TCP foi aceita = proxy definitivamente ativa
             resolve({ alive: true, latency: Date.now() - t0 });
-          }, 5000);
+          }, 3000);
 
           fetch(`http://${ip}:${port}/`, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal })
             .then(() => {
@@ -6585,18 +6585,19 @@ window.exportXlsx = () => {
               resolve({ alive: true, latency: Date.now() - t0 });
             })
             .catch(err => {
-              if (timerFired) return; // timer já resolveu
+              if (timerFired) return; // timer já resolveu, evita double-resolve
               clearTimeout(timer);
               const elapsed = Date.now() - t0;
               if (err.name === 'AbortError') {
                 resolve({ alive: true, latency: elapsed });
                 return;
               }
-              if (elapsed > 250) {
-                // Demorou para dar erro = servidor estava lá e respondeu algo = proxy ativa
+              if (elapsed > 400) {
+                // Demorou >400ms para dar erro = servidor estava lá e respondeu algo = proxy ativa
+                // (threshold 400ms é seguro mesmo em redes lentas/VPN onde RST pode demorar)
                 resolve({ alive: true, latency: elapsed });
               } else {
-                // Erro instantâneo = porta fechada OU mixed-content bloqueado (página HTTPS)
+                // Erro rápido = porta fechada OU mixed-content bloqueado (página HTTPS)
                 resolve({ alive: false, reason: 'quick-fail' });
               }
             });
@@ -6830,15 +6831,22 @@ window.exportXlsx = () => {
         const btn = document.getElementById('proxyTestAllBtn');
         if (btn) { btn.disabled = true; btn.textContent = `⏳ Testando (0/${toTest.length})...`; }
 
+        // Marca todas como "testing" antes de começar
+        let l0 = loadProxies();
+        toTest.forEach(p => { const i = l0.findIndex(x => x.id === p.id); if (i >= 0) l0[i].status = 'testing'; });
+        saveProxies(l0); renderProxies();
+
+        // Fila com concorrência limitada (máx 10 simultâneos) — evita sobrecarregar o event loop
+        const CONCURRENCY = 10;
         let done = 0;
-        await Promise.all(toTest.map(async (p) => {
-          let l = loadProxies();
-          const i = l.findIndex(x => x.id === p.id);
-          if (i >= 0) { l[i].status = 'testing'; saveProxies(l); }
+        let idx = 0;
+        const runNext = async () => {
+          if (idx >= toTest.length) return;
+          const p = toTest[idx++];
 
           const [result, geo] = await Promise.all([testProxyAddress(p.address), fetchProxyGeo(p.address)]);
 
-          l = loadProxies();
+          let l = loadProxies();
           const i2 = l.findIndex(x => x.id === p.id);
           if (i2 >= 0) {
             l[i2].status = result.ok ? 'ok' : 'fail';
@@ -6850,7 +6858,9 @@ window.exportXlsx = () => {
           done++;
           if (btn) btn.textContent = `⏳ Testando (${done}/${toTest.length})...`;
           renderProxies();
-        }));
+          await runNext(); // pega próximo da fila
+        };
+        await Promise.all(Array.from({ length: Math.min(CONCURRENCY, toTest.length) }, runNext));
 
         if (btn) { btn.disabled = false; btn.textContent = '⚡ Testar todas'; }
         renderProxies();
@@ -6874,7 +6884,8 @@ window.exportXlsx = () => {
             const geoInfo = geo ? ` · ${countryFlag(geo.countryCode)} ${geo.country}${geo.city ? ', ' + geo.city : ''}` : '';
             const latInfo = result.latency != null ? ` · ${latencyLabel(result.latency)}` : '';
             resultBox.className = 'proxy-test-result ok';
-            resultBox.innerHTML = `✅ Proxy ativa! HTTP ${result.code}${latInfo}${geoInfo}`;
+            const codeLabel = result.code === 0 ? 'Porta aberta' : `HTTP ${result.code}`;
+            resultBox.innerHTML = `✅ Proxy ativa! ${codeLabel}${latInfo}${geoInfo}`;
           } else {
             resultBox.className = 'proxy-test-result fail';
             const reason = result.reason === 'timeout' ? 'Timeout — sem resposta em 8s.' : result.reason === 'unreachable' ? 'Inacessível — sem resposta.' : `Erro: ${result.reason}`;
