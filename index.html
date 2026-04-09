@@ -6561,8 +6561,9 @@ window.exportXlsx = () => {
         const parts = address.split(':');
         const ip = parts[0];
         const port = parts[1] || '80';
-        // Testa fazendo fetch de uma URL conhecida passando pelo proxy como destino
-        // corsproxy.io retorna 502/504 quando não consegue conectar no alvo — isso indica proxy morta
+        // corsproxy.io retorna 502/503/504 quando não consegue conectar no alvo — proxy morta
+        // Se fetch lança exceção (NetworkError) também está morta
+        // 2xx/3xx/4xx = proxy respondeu (viva, mesmo que seja 407 auth ou 400)
         const testUrl = `https://corsproxy.io/?http://${ip}:${port}/`;
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
@@ -6571,24 +6572,9 @@ window.exportXlsx = () => {
           const res = await fetch(testUrl, { signal: controller.signal, mode: 'cors' });
           clearTimeout(timeout);
           const latency = Date.now() - t0;
-          // 5xx = corsproxy não conseguiu conectar no alvo (proxy morta ou inacessível)
-          // 2xx/3xx/4xx = proxy respondeu (pode ser 407 auth, 400 bad request, etc — mas está viva)
+          // 5xx = corsproxy não alcançou o servidor proxy (morta/inacessível)
           if (res.status >= 500) {
-            return { ok: false, reason: `HTTP ${res.status} — servidor inacessível` };
-          }
-          // Verificação extra: lê um pedaço da resposta para garantir que não é página de erro do corsproxy
-          let bodyText = '';
-          try {
-            const clone = res.clone();
-            bodyText = (await Promise.race([
-              clone.text(),
-              new Promise(r => setTimeout(() => r(''), 1500))
-            ])).toLowerCase().slice(0, 400);
-          } catch {}
-          // Mensagens típicas de erro do corsproxy.io mesmo com status 200
-          const corsproxyErrors = ['could not connect', 'connection refused', 'no response', 'error connecting', 'failed to connect', 'unable to connect', 'econnrefused', 'etimedout', 'enotfound', 'bad gateway'];
-          if (corsproxyErrors.some(e => bodyText.includes(e))) {
-            return { ok: false, reason: 'Sem resposta do servidor proxy' };
+            return { ok: false, reason: `HTTP ${res.status} — proxy inacessível` };
           }
           return { ok: true, code: res.status, latency };
         } catch (err) {
