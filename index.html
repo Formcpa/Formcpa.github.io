@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light dark">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://corsproxy.io https://api.sms-activate.org https://cheapactivate.com wss://*.supabase.co https://cdn.jsdelivr.net; img-src 'self' data: https: blob: file:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://corsproxy.io https://api.allorigins.win https://api.sms-activate.org https://cheapactivate.com wss://*.supabase.co https://cdn.jsdelivr.net; img-src 'self' data: https: blob: file:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;">
   <title>Dashboard Financeiro - Painel</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232b7be4'/><text y='.9em' font-size='72' x='12'>💰</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4051,9 +4051,35 @@ platformsData.forEach(data => {
           }, nota.text);
         };
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.className = 'btn ghost';
+        deleteBtn.style.cssText = 'padding:4px 8px;font-size:12px;flex-shrink:0;color:var(--danger);border-color:transparent';
+        deleteBtn.title = 'Excluir CPF';
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          const insertIdx = i;
+          const cpfLabel = escapeHtml(nota.text || 'este CPF');
+          showConfirm(`Remover permanentemente o CPF <strong>${cpfLabel}</strong> da lista de CPFs solos?`, () => {
+            const removed = { ...state.notas[insertIdx] };
+            state.notas.splice(insertIdx, 1);
+            saveDataImmediate();
+            renderNotas();
+            renderSummary();
+            showUndoToast('CPF removido', removed.text || '', () => {
+              state.notas.splice(insertIdx, 0, removed);
+              saveDataImmediate();
+              renderNotas();
+              renderSummary();
+            });
+          }, { isDanger: true, title: 'Excluir CPF', okText: 'Excluir' });
+        };
+
         card.appendChild(cpfText);
         card.appendChild(tag);
         card.appendChild(editBtn);
+        card.appendChild(deleteBtn);
         card.appendChild(checkbox);
         container.appendChild(card);
       });
@@ -6473,6 +6499,115 @@ window.exportXlsx = () => {
         return address.split(':')[0];
       }
 
+      /** host:port ou host:port:user:senha (senha pode conter ':') — retorna URL http:// para teste */
+      function parseProxyForTest(address) {
+        const raw = (address || '').trim();
+        if (!raw) return null;
+        const low = raw.toLowerCase();
+        if (low.startsWith('socks4://') || low.startsWith('socks5://') || low.startsWith('socks://')) {
+          return { kind: 'socks', httpUrl: null };
+        }
+        let rest = raw.replace(/^https?:\/\//i, '');
+        const at = rest.lastIndexOf('@');
+        if (at !== -1) rest = rest.slice(at + 1);
+        const parts = rest.split(':');
+        if (parts.length < 2) return null;
+        const host = parts[0].replace(/^\[|\]$/g, '');
+        const port = parts[1];
+        if (!host || !port || !/^\d{1,5}$/.test(port)) return null;
+        let user = '';
+        let pass = '';
+        if (parts.length >= 4) {
+          user = parts[2];
+          pass = parts.slice(3).join(':');
+        } else if (parts.length === 3) {
+          user = parts[2];
+          pass = '';
+        }
+        const auth = user ? `${encodeURIComponent(user)}:${encodeURIComponent(pass)}@` : '';
+        const httpUrl = `http://${auth}${host}:${port}/`;
+        return { kind: 'http', host, port, httpUrl };
+      }
+
+      const PROXY_DIRECT_TIMEOUT_MS = 7000;
+      const PROXY_CORS_TIMEOUT_MS = 14000;
+      const PROXY_CORS_ATTEMPTS = 2;
+
+      async function probeDirectHttpProxy(httpUrl) {
+        const t0 = Date.now();
+        try {
+          const signal = AbortSignal.timeout(PROXY_DIRECT_TIMEOUT_MS);
+          await fetch(httpUrl, { method: 'GET', mode: 'no-cors', cache: 'no-store', signal });
+          return { ok: true, latency: Date.now() - t0 };
+        } catch (e) {
+          const name = e && e.name;
+          if (name === 'TimeoutError' || name === 'AbortError') {
+            return { ok: false, reason: 'timeout' };
+          }
+          return { ok: false, reason: 'direct-fail' };
+        }
+      }
+
+      function proxyCorsBodyFailureReason(text, res) {
+        if (!res.ok) return 'http-' + res.status;
+        let body = text == null ? '' : String(text);
+        const trimmed = body.trim();
+        if (trimmed.startsWith('{') && trimmed.includes('"contents"')) {
+          try {
+            const j = JSON.parse(trimmed);
+            if (j && Object.prototype.hasOwnProperty.call(j, 'contents')) {
+              if (j.contents == null || j.contents === '') return 'allorigins-empty';
+              body = String(j.contents);
+            }
+          } catch (_) { /* mantém body */ }
+        }
+        if (body.length < 1) return 'empty-body';
+        const head = body.slice(0, 800).toLowerCase();
+        if (head.includes('err_tunnel_connection_failed') || head.includes('tunnel connection failed')) return 'tunnel-fail';
+        if (head.includes('connection refused') || head.includes('econnrefused')) return 'refused';
+        if (head.includes('could not resolve host') || head.includes('name or service not known')) return 'dns-fail';
+        if (head.includes('502 bad gateway') || head.includes('503 service unavailable') || head.includes('504 gateway time')) {
+          return head.includes('504') ? 'gateway-504' : 'gateway-502';
+        }
+        return null;
+      }
+
+      async function probeProxyOneCorsBackend(fetchUrl) {
+        const t0 = Date.now();
+        const signal = AbortSignal.timeout(PROXY_CORS_TIMEOUT_MS);
+        const res = await fetch(fetchUrl, { method: 'GET', mode: 'cors', cache: 'no-store', signal });
+        const text = await res.text().catch(() => '');
+        const fail = proxyCorsBodyFailureReason(text, res);
+        if (fail) throw new Error(fail);
+        return { ok: true, latency: Date.now() - t0, code: res.status };
+      }
+
+      async function probeProxyViaCors(httpUrl) {
+        let lastReason = 'unreachable';
+        for (let attempt = 0; attempt < PROXY_CORS_ATTEMPTS; attempt++) {
+          const bust = (httpUrl.includes('?') ? '&' : '?') + '_t=' + Date.now() + '_' + attempt;
+          const target = httpUrl + bust;
+          const urlCorsIo = 'https://corsproxy.io/?' + encodeURIComponent(target);
+          const urlAllOrigins = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(target);
+          try {
+            const winner = await Promise.any([
+              probeProxyOneCorsBackend(urlCorsIo),
+              probeProxyOneCorsBackend(urlAllOrigins)
+            ]);
+            return winner;
+          } catch (e) {
+            if (e && e.name === 'AggregateError' && Array.isArray(e.errors) && e.errors.length) {
+              const msgs = e.errors.map(x => (x && x.message) || String(x)).filter(Boolean);
+              lastReason = msgs[0] || 'all-cors-failed';
+            } else {
+              const name = e && e.name;
+              lastReason = name === 'TimeoutError' || name === 'AbortError' ? 'timeout' : (e && e.message) || 'cors-error';
+            }
+          }
+        }
+        return { ok: false, reason: lastReason };
+      }
+
       /* ---------- render ---------- */
       window.renderProxies = function() {
         const list = loadProxies();
@@ -6558,70 +6693,21 @@ window.exportXlsx = () => {
 
       /* ---------- testar proxy com latência ---------- */
       async function testProxyAddress(address) {
-        const parts = address.split(':');
-        const ip = parts[0];
-        const port = parts[1] || '80';
-        const t0 = Date.now();
-
-        // Estratégia de timing para detectar porta aberta:
-        // • Porta FECHADA  → TCP RST instantâneo → TypeError em < 400ms
-        // • Porta ABERTA, proxy segura conexão → sem erro até nosso timer de 3s → AbortError (= VIVA)
-        // • Porta ABERTA, proxy responde HTTP  → fetch resolve com opaque response (= VIVA)
-        // • Porta ABERTA, proxy fecha rápido  → TypeError após 400ms+ (= VIVA)
-        let timerFired = false;
-        const directResult = await new Promise(resolve => {
-          const ctrl = new AbortController();
-          const timer = setTimeout(() => {
-            timerFired = true;
-            ctrl.abort();
-            // 3s sem erro = conexão TCP foi aceita = proxy definitivamente ativa
-            resolve({ alive: true, latency: Date.now() - t0 });
-          }, 3000);
-
-          fetch(`http://${ip}:${port}/`, { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal })
-            .then(() => {
-              clearTimeout(timer);
-              // Resposta opaque recebida = proxy respondeu = ativa
-              resolve({ alive: true, latency: Date.now() - t0 });
-            })
-            .catch(err => {
-              if (timerFired) return; // timer já resolveu, evita double-resolve
-              clearTimeout(timer);
-              const elapsed = Date.now() - t0;
-              if (err.name === 'AbortError') {
-                resolve({ alive: true, latency: elapsed });
-                return;
-              }
-              if (elapsed > 400) {
-                // Demorou >400ms para dar erro = servidor estava lá e respondeu algo = proxy ativa
-                // (threshold 400ms é seguro mesmo em redes lentas/VPN onde RST pode demorar)
-                resolve({ alive: true, latency: elapsed });
-              } else {
-                // Erro rápido = porta fechada OU mixed-content bloqueado (página HTTPS)
-                resolve({ alive: false, reason: 'quick-fail' });
-              }
-            });
-        });
-
-        if (directResult.alive) {
-          return { ok: true, latency: directResult.latency, code: 0 };
+        const parsed = parseProxyForTest(address);
+        if (!parsed) return { ok: false, reason: 'formato-inválido' };
+        if (parsed.kind === 'socks') {
+          return { ok: false, reason: 'socks-não-testável-no-navegador' };
         }
-
-        // Fallback: corsproxy.io — cobre páginas abertas via HTTPS onde fetch direto http:// é bloqueado
-        const ctrl2 = new AbortController();
-        const tmr2 = setTimeout(() => ctrl2.abort(), 8000);
-        try {
-          const res = await fetch(`https://corsproxy.io/?http://${ip}:${port}/`, {
-            mode: 'cors', cache: 'no-store', signal: ctrl2.signal
-          });
-          clearTimeout(tmr2);
-          if (res.status >= 500) return { ok: false, reason: `HTTP ${res.status} — inacessível` };
-          return { ok: true, code: res.status, latency: Date.now() - t0 };
-        } catch (err2) {
-          clearTimeout(tmr2);
-          if (err2.name === 'AbortError') return { ok: false, reason: 'timeout' };
-          return { ok: false, reason: 'unreachable' };
+        const httpUrl = parsed.httpUrl;
+        const viaCors = await probeProxyViaCors(httpUrl);
+        if (viaCors.ok) {
+          return { ok: true, latency: viaCors.latency, code: viaCors.code || 200 };
         }
+        const direct = await probeDirectHttpProxy(httpUrl);
+        if (direct.ok) {
+          return { ok: true, latency: direct.latency, code: 0 };
+        }
+        return { ok: false, reason: viaCors.reason || direct.reason || 'unreachable' };
       }
 
       /* ---------- adicionar ---------- */
@@ -6884,12 +6970,29 @@ window.exportXlsx = () => {
             const geoInfo = geo ? ` · ${countryFlag(geo.countryCode)} ${geo.country}${geo.city ? ', ' + geo.city : ''}` : '';
             const latInfo = result.latency != null ? ` · ${latencyLabel(result.latency)}` : '';
             resultBox.className = 'proxy-test-result ok';
-            const codeLabel = result.code === 0 ? 'Porta aberta' : `HTTP ${result.code}`;
+            const codeLabel = result.code === 0 ? 'Conexão direta OK' : `HTTP ${result.code}`;
             resultBox.innerHTML = `✅ Proxy ativa! ${codeLabel}${latInfo}${geoInfo}`;
           } else {
             resultBox.className = 'proxy-test-result fail';
-            const reason = result.reason === 'timeout' ? 'Timeout — sem resposta em 8s.' : result.reason === 'unreachable' ? 'Inacessível — sem resposta.' : `Erro: ${result.reason}`;
-            resultBox.textContent = `❌ Proxy inativa. ${reason}`;
+            const r = result.reason || '';
+            const reasonMap = {
+              timeout: 'Timeout — sem resposta HTTP válida no prazo.',
+              unreachable: 'Inacessível (internet + navegador).',
+              'formato-inválido': 'Formato inválido (ip:porta ou ip:porta:user:senha).',
+              'socks-não-testável-no-navegador': 'SOCKS não é testável neste painel (use HTTP ou teste fora do navegador).',
+              'direct-fail': 'Falha na conexão direta.',
+              'empty-body': 'Resposta vazia — tratada como inativa.',
+              refused: 'Conexão recusada na origem.',
+              'dns-fail': 'Host não resolvido.',
+              'tunnel-fail': 'Falha de túnel / conexão.',
+              'gateway-502': 'Gateway intermediário retornou erro (502/503).',
+              'gateway-504': 'Timeout no gateway intermediário (504).',
+              'cors-error': 'Falha ao consultar o verificador externo.',
+              'allorigins-empty': 'Verificador secundário não obteve conteúdo da proxy.',
+              'all-cors-failed': 'Os dois verificadores externos falharam nesta tentativa.'
+            };
+            const reason = reasonMap[r] || (r.startsWith('http-') ? `HTTP ${r.slice(5)} no verificador.` : `Detalhe: ${r}`);
+            resultBox.textContent = `❌ Proxy inativa ou não confirmada. ${reason}`;
           }
         }
         if (btn) btn.disabled = false;
