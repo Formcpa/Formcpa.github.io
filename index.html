@@ -1869,7 +1869,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
             <div class="ciclo-modal-field">
               <label>Depósitos das contas (R$)</label>
               <div class="ciclo-field-row">
-                <input type="text" inputmode="decimal" id="cicloDepInput" placeholder="Ex: 100,00 ou 40,22,33 para somar" oninput="updateCicloPreview()" />
+                <input type="text" inputmode="decimal" id="cicloDepInput" placeholder="Ex: 40,22,33" oninput="updateCicloPreview()" />
                 <button class="ocr-btn" id="ocrDepBtn" title="Analisar print com IA" onclick="startOcr('dep')">📷</button>
               </div>
               <div class="ciclo-multi-hint">💡 Separe múltiplos valores por vírgula para somar automaticamente</div>
@@ -1892,7 +1892,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
             <div class="ciclo-modal-field">
               <label>Saques das contas (R$)</label>
               <div class="ciclo-field-row">
-                <input type="text" inputmode="decimal" id="cicloSaqInput" placeholder="Ex: 150,00 ou 50,80,30 para somar" oninput="updateCicloPreview()" />
+                <input type="text" inputmode="decimal" id="cicloSaqInput" placeholder="Ex: 50,80,30" oninput="updateCicloPreview()" />
                 <button class="ocr-btn" id="ocrSaqBtn" title="Analisar print com IA" onclick="startOcr('saq')">📷</button>
               </div>
               <div class="ciclo-sum-chips" id="cicloSaqChips"></div>
