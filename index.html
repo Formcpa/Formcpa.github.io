@@ -1213,6 +1213,15 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
     .ciclo-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:0.5px solid rgba(30,50,80,0.07);background:rgba(30,50,80,0.015)}
     .ciclo-num{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-0.01em}
     .ciclo-date{font-size:11px;color:var(--muted)}
+
+    .ciclo-note-btn{background:transparent;border:none;cursor:pointer;padding:3px 7px;border-radius:6px;font-size:14px;color:var(--muted);transition:all 0.15s;font-family:inherit;margin-right:2px}
+    .ciclo-note-btn:hover{background:rgba(43,123,228,0.1);color:var(--accent)}
+    .ciclo-note-btn.has-note{color:var(--accent)}
+    .ciclo-note-area{display:none;padding:0 16px 12px;border-top:1px solid rgba(30,50,80,0.08);margin-top:4px}
+    .ciclo-note-area.open{display:block}
+    .ciclo-note-textarea{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:0.5px solid rgba(43,123,228,0.25);background:rgba(43,123,228,0.04);color:var(--text);font-size:12px;font-family:inherit;resize:vertical;min-height:60px;outline:none;transition:border 0.15s}
+    .ciclo-note-textarea:focus{border-color:var(--accent);background:rgba(43,123,228,0.07)}
+    .ciclo-note-save-btn{margin-top:6px;padding:5px 14px;border-radius:7px;border:none;background:var(--accent);color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
     .ciclo-del-btn{background:transparent;border:none;cursor:pointer;padding:3px 7px;border-radius:6px;font-size:14px;color:var(--muted);transition:all 0.15s;font-family:inherit}
     .ciclo-del-btn:hover{background:rgba(255,77,79,0.1);color:var(--danger)}
     .ciclo-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;align-items:center}
@@ -1847,7 +1856,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
             <div class="ciclo-modal-field">
               <label>Depósitos das contas (R$)</label>
               <div class="ciclo-field-row">
-                <input type="text" inputmode="decimal" id="cicloDepInput" placeholder="Ex: 40,22,33" oninput="updateCicloPreview()" />
+                <input type="text" inputmode="decimal" id="cicloDepInput" placeholder="Ex: 100,00 ou 40,22,33 para somar" oninput="updateCicloPreview()" />
                 <button class="ocr-btn" id="ocrDepBtn" title="Analisar print com IA" onclick="startOcr('dep')">📷</button>
               </div>
               <div class="ciclo-multi-hint">💡 Separe múltiplos valores por vírgula para somar automaticamente</div>
@@ -1870,7 +1879,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
             <div class="ciclo-modal-field">
               <label>Saques das contas (R$)</label>
               <div class="ciclo-field-row">
-                <input type="text" inputmode="decimal" id="cicloSaqInput" placeholder="Ex: 50,80,30" oninput="updateCicloPreview()" />
+                <input type="text" inputmode="decimal" id="cicloSaqInput" placeholder="Ex: 150,00 ou 50,80,30 para somar" oninput="updateCicloPreview()" />
                 <button class="ocr-btn" id="ocrSaqBtn" title="Analisar print com IA" onclick="startOcr('saq')">📷</button>
               </div>
               <div class="ciclo-sum-chips" id="cicloSaqChips"></div>
@@ -3989,7 +3998,10 @@ platformsData.forEach(data => {
               <span class="ciclo-num">Ciclo #${ciclo.numero}</span>
               ${dateDisplay ? '<span class="ciclo-date">📅 ' + dateDisplay + '</span>' : ''}
             </div>
-            <button class="ciclo-del-btn" title="Remover ciclo">✕</button>
+            <div style="display:flex;align-items:center;gap:0">
+              <button class="ciclo-note-btn" title="Notas do ciclo">📝</button>
+              <button class="ciclo-del-btn" title="Remover ciclo">✕</button>
+            </div>
           </div>
           <div class="ciclo-body">
             <div class="ciclo-col">
@@ -4019,6 +4031,10 @@ platformsData.forEach(data => {
               <span class="ciclo-col-val ${lucroClass}">${lucroSign}R$ ${money(Math.abs(lucro))}</span>
               <span class="ciclo-badge ${lucroClass}">${badgeLabel}</span>
             </div>
+          </div>
+          <div class="ciclo-note-area" id="cicloNoteArea_${ciclo.id}">
+            <textarea class="ciclo-note-textarea" placeholder="Adicionar nota ao ciclo..." id="cicloNoteTA_${ciclo.id}"></textarea>
+            <button class="ciclo-note-save-btn">💾 Salvar nota</button>
           </div>
           <div class="ciclo-extra-area" id="cicloExtraArea_${ciclo.id}" style="${hasAnyExtra ? '' : 'display:none'}">
             <div class="ciclo-extra-area-inner">
@@ -4099,6 +4115,43 @@ platformsData.forEach(data => {
         });
 
         card.querySelector('.ciclo-del-btn').onclick = () => deleteCiclo(platform, ciclo.id);
+
+        // ── Note button ──────────────────────────────────────────────────────
+        const noteBtn  = card.querySelector('.ciclo-note-btn');
+        const noteArea = card.querySelector(`#cicloNoteArea_${ciclo.id}`);
+        const noteTA   = card.querySelector(`#cicloNoteTA_${ciclo.id}`);
+        const noteSave = card.querySelector('.ciclo-note-save-btn');
+
+        noteBtn.onclick = () => {
+          const isOpen = noteArea.classList.contains('open');
+          noteArea.classList.toggle('open', !isOpen);
+          if(!isOpen) noteTA?.focus();
+        };
+
+        noteSave.onclick = () => {
+          const texto = noteTA.value.trim();
+          if(!texto) return;
+          // Push to pending notes
+          if(!state.pendingNotes) state.pendingNotes = [];
+          state.pendingNotes.push({
+            platform: platform,
+            account: 'Ciclo #' + ciclo.numero,
+            text: texto,
+            date: new Date().toISOString().split('T')[0],
+            savedAt: new Date().toISOString()
+          });
+          noteTA.value = '';
+          noteBtn.classList.remove('has-note');
+          noteArea.classList.remove('open');
+          scheduleSave();
+          renderPendingNotes();
+          showToast('📝 Nota enviada para Notas Pendentes!', 'success');
+        };
+
+        noteTA.addEventListener('keydown', e => {
+          if(e.key === 'Enter' && e.ctrlKey) noteSave.click();
+        });
+
         wrap.appendChild(card);
 
         totalDep += totalDepCiclo;
