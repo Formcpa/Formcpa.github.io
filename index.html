@@ -1370,7 +1370,6 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         </div>
         <div class="nav-section-title">Config</div>
         <div class="nav-item" data-view="gastos"><div class="nav-icon">💸</div>Gastos</div>
-        <div class="nav-item" data-view="apiConfig"><div class="nav-icon">🔑</div>API / IA</div>
         <div class="nav-item" data-view="admin" id="navAdmin" style="display:none"><div class="nav-icon">🛡️</div>Admin</div>
       </nav>
 
@@ -1712,27 +1711,6 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
       </div>
 
       <!-- API Config Panel -->
-      <div class="panel" id="apiConfigPanel" style="display:none">
-        <div style="margin-bottom:18px">
-          <h3>🔑 API / Inteligência Artificial</h3>
-          <div class="muted" style="margin-top:4px">Configure sua chave para usar análise de prints por IA</div>
-        </div>
-
-        <div style="background:rgba(43,123,228,0.05);border:0.5px solid rgba(43,123,228,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="font-size:20px">🤖</span>
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--text)">OCR — Reconhecimento de Imagem</div>
-              <div style="font-size:11px;color:var(--muted)">Tesseract.js — funciona sem chave de API, 100% gratuito</div>
-            </div>
-            <span style="margin-left:auto;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(34,197,94,0.12);color:#16a34a">✅ Ativo</span>
-          </div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.7">
-            🔍 O reconhecimento de texto roda diretamente no seu navegador — nenhum dado é enviado para servidores externos.<br>
-            📷 Para usar: abra um ciclo, clique em <strong>📷</strong> ao lado de Depósito ou Saque, e cole um print com <strong>Ctrl+V</strong>.
-          </div>
-        </div>
-      </div>
 
       <!-- Plataformas -->
       <!-- Grid de todas as plataformas -->
@@ -3529,8 +3507,22 @@ platformsData.forEach(data => {
             return NaN;
           }
 
-          const rawTokens = text.match(/R?\$?\s*\d[\d.,]*/gi) || [];
-          const nums = rawTokens.map(t => parseBrMoney(t.replace(/[^\d.,]/g, ''))).filter(n => !isNaN(n) && n > 0);
+          // 1st pass: explicit "R$ X,XX" patterns (most reliable)
+          const explicit = [...text.matchAll(/R\$\s*([\d.]+,\d{2})/gi)]
+            .map(m => parseBrMoney(m[1])).filter(n => !isNaN(n) && n > 0);
+
+          // 2nd pass: any decimal-comma number like "34,00" or "1.234,56"
+          const implicit = [...text.matchAll(/\b(\d{1,3}(?:\.\d{3})*,\d{2})\b/g)]
+            .map(m => parseBrMoney(m[1])).filter(n => !isNaN(n) && n > 0);
+
+          // Deduplicate (same value appearing multiple times)
+          const seen = new Set();
+          const allFound = (explicit.length ? explicit : implicit).filter(n => {
+            const k = n.toFixed(2);
+            if (seen.has(k)) return false;
+            seen.add(k); return true;
+          });
+          const nums = allFound;
 
           if (nums.length === 0) throw new Error('Nenhum valor encontrado. Tente um print mais nítido ou com melhor contraste.');
 
@@ -3798,6 +3790,11 @@ platformsData.forEach(data => {
 
     // ── renderMae ─────────────────────────────────────────────────────────────
     function renderMae() {
+      const section  = document.getElementById('maeSectionWrap');
+      const divider  = document.getElementById('maecicloDivider');
+      const list     = document.getElementById('maeList');
+      if(!section || !list) return;
+
       const platform = state.selectedPlatform;
       const maes = state.platforms[platform]?.contasMae || [];
       if(maes.length === 0) {
@@ -3895,7 +3892,7 @@ platformsData.forEach(data => {
           bauInp.value = '';
           bauInputRow.style.display = 'none';
           bauSqBtn.classList.remove('active');
-          scheduleSave(); renderMae();
+          scheduleSave(); renderMae(); updatePlatformTotals(); renderPlatformsList(); renderSummary();
           showToast('🏦 Baú +R$ ' + money(val) + ' adicionado!', 'success');
         };
 
@@ -3908,7 +3905,7 @@ platformsData.forEach(data => {
             e.stopPropagation();
             const bi = parseInt(btn.dataset.bi);
             state.platforms[platform].contasMae[maeIdx].baus.splice(bi, 1);
-            scheduleSave(); renderMae();
+            scheduleSave(); renderMae(); updatePlatformTotals(); renderPlatformsList(); renderSummary();
           };
         });
 
@@ -4488,7 +4485,6 @@ platformsData.forEach(data => {
 
     // --- Actions
     function selectView(view){
-      if(view === 'apiConfig') { setTimeout(loadGeminiKeyUI, 50); }
       // Persiste a aba atual para restaurar no F5
       try {
         const snapshot = { view };
@@ -4500,7 +4496,6 @@ platformsData.forEach(data => {
       const panelMap = {
         'dashboard':         'dashboardPanel',
         'gastos':            'gastosPanel',
-        'apiConfig':         'apiConfigPanel',
         'plataformas':       'platGridPanel',       // grade de plataformas
         'plataformaDetalhe': 'plataformasPanel',    // detalhe de uma plataforma
         'dados':             'dadosPanel',
