@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light dark">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co https://corsproxy.io https://api.allorigins.win https://api.sms-activate.org https://cheapactivate.com wss://*.supabase.co https://cdn.jsdelivr.net; img-src 'self' data: https: blob: file:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; worker-src blob:; connect-src 'self' https://*.supabase.co https://corsproxy.io https://api.allorigins.win https://api.sms-activate.org https://cheapactivate.com wss://*.supabase.co https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://generativelanguage.googleapis.com; img-src 'self' data: https: blob: file:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;">
   <title>Dashboard Financeiro - Painel</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232b7be4'/><text y='.9em' font-size='72' x='12'>💰</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1138,7 +1138,188 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
     .card-v2-val{font-size:clamp(16px,1.8vw,26px);font-weight:700;letter-spacing:-.02em;line-height:1}
     .card-v2-val.blue{color:var(--accent)}.card-v2-val.green{color:var(--success)}.card-v2-val.red{color:var(--danger)}.card-v2-val.purple{color:#7c3aed}.card-v2-val.orange{color:#f59e0b}
     body.dark .card-v2{background:#13171c;border-color:#2a2d33}
-</style>
+
+
+    /* ── CONTA MÃE ── */
+    .mae-section{margin-top:20px}
+    .mae-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .mae-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);display:flex;align-items:center;gap:6px}
+    .mae-list{display:flex;flex-direction:column;gap:8px}
+    .mae-card{background:var(--card);border:0.5px solid rgba(124,58,237,0.2);border-left:3px solid #7c3aed;border-radius:12px;overflow:hidden;transition:box-shadow 0.2s}
+    .mae-card:hover{box-shadow:0 3px 12px rgba(124,58,237,0.12)}
+    .mae-card-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:0.5px solid rgba(30,50,80,0.07);background:rgba(124,58,237,0.03)}
+    .mae-card-title{font-size:12px;font-weight:700;color:#7c3aed;display:flex;align-items:center;gap:5px}
+    .mae-card-date{font-size:11px;color:var(--muted)}
+    .mae-del-btn{background:transparent;border:none;cursor:pointer;padding:3px 7px;border-radius:6px;font-size:13px;color:var(--muted);transition:all 0.15s;font-family:inherit}
+    .mae-del-btn:hover{background:rgba(255,77,79,0.1);color:var(--danger)}
+    /* mae-card-body now defined in bau section */
+    .mae-col{display:flex;flex-direction:column;gap:2px;padding:0 10px;border-right:0.5px solid rgba(30,50,80,0.07)}
+    .mae-col:first-child{padding-left:0}
+    .mae-col:last-child{border-right:none}
+    .mae-col-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)}
+    .mae-col-val{font-size:15px;font-weight:700;letter-spacing:-0.02em}
+    .mae-col-val.dep{color:var(--danger)}
+    .mae-col-val.saq{color:#7c3aed}
+    .mae-col-val.pos{color:var(--success)}
+    .mae-col-val.neg{color:var(--danger)}
+    .mae-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;margin-top:3px}
+    .mae-badge.pos{background:rgba(23,177,105,0.12);color:var(--success)}
+    .mae-badge.neg{background:rgba(255,77,79,0.1);color:var(--danger)}
+    .mae-badge.zero{background:rgba(30,50,80,0.07);color:var(--muted)}
+    body.dark .mae-card{background:#13171c;border-color:rgba(124,58,237,0.3)}
+    body.dark .mae-card-header{background:rgba(124,58,237,0.06);border-color:#1f2326}
+    body.dark .mae-col{border-color:#1f2326}
+    /* Modal conta mãe */
+    .mae-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px}
+    .mae-modal-overlay.open{display:flex}
+    .mae-modal{background:var(--card);border-radius:18px;padding:28px 26px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,0.22);display:flex;flex-direction:column;gap:18px;animation:fadeIn 0.25s ease;border-top:3px solid #7c3aed}
+    body.dark .mae-modal{background:#161a1f}
+
+
+    /* ── BAÚ na Conta Mãe ── */
+    .mae-card-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0;align-items:center}
+    .mae-bau-sq-btn{width:52px;height:52px;border-radius:12px;border:1.5px solid rgba(124,58,237,0.35);background:rgba(124,58,237,0.08);color:#7c3aed;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all 0.18s;flex-shrink:0;margin-left:10px;font-family:inherit}
+    .mae-bau-sq-btn:hover{background:rgba(124,58,237,0.18);border-color:#7c3aed;box-shadow:0 4px 14px rgba(124,58,237,0.22);transform:translateY(-1px)}
+    .mae-bau-sq-btn.active{background:#7c3aed;color:white;border-color:#7c3aed;box-shadow:0 4px 14px rgba(124,58,237,0.35)}
+    .mae-bau-sq-icon{font-size:18px;line-height:1}
+    .mae-bau-sq-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1}
+    .mae-bau-sq-count{font-size:9px;font-weight:700;background:rgba(255,255,255,0.2);border-radius:20px;padding:1px 5px;line-height:1.4;display:none}
+    .mae-bau-sq-btn.has-baus .mae-bau-sq-count{display:block}
+    body.dark .mae-bau-sq-btn{border-color:rgba(124,58,237,0.4);background:rgba(124,58,237,0.1)}
+    body.dark .mae-bau-sq-btn:hover{background:rgba(124,58,237,0.22)}
+    body.dark .mae-bau-sq-btn.active{background:#7c3aed}
+    .mae-bau-area{padding:12px 14px;border-top:0.5px solid rgba(124,58,237,0.12);background:rgba(124,58,237,0.025)}
+    .mae-bau-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+    .mae-bau-chip{background:rgba(124,58,237,0.12);color:#7c3aed;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+    .mae-bau-chip-del{background:transparent;border:none;cursor:pointer;font-size:11px;color:#7c3aed;opacity:0.5;padding:0;line-height:1;transition:opacity 0.15s}
+    .mae-bau-chip-del:hover{opacity:1}
+    .mae-bau-total{font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .mae-bau-add-row{display:none;gap:6px;align-items:center}
+    .mae-bau-input{flex:1;padding:8px 12px;border-radius:8px;border:0.5px solid rgba(124,58,237,0.3);background:var(--bg);font-size:13px;font-family:inherit;color:var(--text);transition:all 0.15s}
+    .mae-bau-input:focus{outline:none;border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,0.12);background:var(--card)}
+    .mae-bau-confirm-btn{padding:8px 14px;border-radius:8px;border:none;background:#7c3aed;color:white;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s}
+    .mae-bau-confirm-btn:hover{background:#6d28c9;box-shadow:0 3px 10px rgba(124,58,237,0.3)}
+    body.dark .mae-bau-area{background:rgba(124,58,237,0.06)}
+    body.dark .mae-bau-input{background:#0f1215;border-color:rgba(124,58,237,0.3);color:#e6eef8}
+    body.dark .mae-bau-input:focus{background:#13171c}
+
+    /* ── CICLOS ── */
+    .ciclos-wrap{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+    .ciclo-card{background:var(--card);border:0.5px solid rgba(30,50,80,0.1);border-radius:14px;overflow:hidden;transition:box-shadow 0.2s,transform 0.2s}
+    .ciclo-card:hover{box-shadow:0 4px 16px rgba(30,50,80,0.1);transform:translateY(-1px)}
+    .ciclo-card.pos{border-left:3px solid var(--success)}
+    .ciclo-card.neg{border-left:3px solid var(--danger)}
+    .ciclo-card.zero{border-left:3px solid rgba(30,50,80,0.2)}
+    .ciclo-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:0.5px solid rgba(30,50,80,0.07);background:rgba(30,50,80,0.015)}
+    .ciclo-num{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-0.01em}
+    .ciclo-date{font-size:11px;color:var(--muted)}
+    .ciclo-del-btn{background:transparent;border:none;cursor:pointer;padding:3px 7px;border-radius:6px;font-size:14px;color:var(--muted);transition:all 0.15s;font-family:inherit}
+    .ciclo-del-btn:hover{background:rgba(255,77,79,0.1);color:var(--danger)}
+    .ciclo-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;align-items:center}
+    .ciclo-extra-sq-btn{width:46px;height:46px;border-radius:10px;border:1.5px solid rgba(30,50,80,0.18);background:rgba(30,50,80,0.04);color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all 0.18s;flex-shrink:0;margin-left:8px;font-family:inherit}
+    .ciclo-extra-sq-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(43,123,228,0.08);box-shadow:0 3px 10px rgba(43,123,228,0.15);transform:translateY(-1px)}
+    .ciclo-extra-sq-btn.active{background:var(--accent);color:white;border-color:var(--accent);box-shadow:0 4px 12px rgba(43,123,228,0.3)}
+    .ciclo-extra-sq-btn.has-extras .ciclo-extra-sq-count{display:block}
+    .ciclo-extra-sq-icon{font-size:18px;line-height:1}
+    .ciclo-extra-sq-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;line-height:1}
+    .ciclo-extra-sq-count{font-size:8px;font-weight:700;display:none;line-height:1;opacity:0.85}
+    .ciclo-val-row{display:flex;align-items:center;gap:0}
+    .ciclo-extra-area{padding:10px 14px 12px;border-top:0.5px solid rgba(30,50,80,0.07);background:rgba(30,50,80,0.015)}
+    .ciclo-extra-area-inner{display:flex;gap:16px;flex-wrap:wrap}
+    .ciclo-extra-block{display:flex;flex-direction:column;gap:6px;flex:1;min-width:160px}
+    .ciclo-extra-block-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)}
+    .ciclo-extra-chips{display:flex;flex-wrap:wrap;gap:5px}
+    .ciclo-extra-chip{background:rgba(43,123,228,0.1);color:var(--accent);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+    .ciclo-extra-chip-del{background:none;border:none;cursor:pointer;color:var(--accent);font-size:11px;padding:0;opacity:0.6;line-height:1}
+    .ciclo-extra-chip-del:hover{opacity:1}
+    .ciclo-extra-add-row{display:none;gap:6px;align-items:center}
+    .ciclo-extra-input{flex:1;padding:7px 11px;border-radius:8px;border:0.5px solid rgba(30,50,80,0.15);background:var(--card);color:var(--text);font-size:13px;font-family:inherit;outline:none;min-width:0}
+    .ciclo-extra-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(43,123,228,0.12)}
+    .ciclo-extra-confirm-btn{padding:6px 13px;border-radius:8px;border:0.5px solid rgba(43,123,228,0.4);background:rgba(43,123,228,0.1);color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s}
+    .ciclo-extra-confirm-btn:hover{background:var(--accent);color:white}
+    body.dark .ciclo-extra-area{background:rgba(255,255,255,0.02);border-top-color:#1f2326}
+    body.dark .ciclo-extra-input{background:#1a1e24;border-color:#2a2d33;color:#e6eef8}
+    .ciclo-col{display:flex;flex-direction:column;gap:3px;padding:0 10px;border-right:0.5px solid rgba(30,50,80,0.07)}
+    .ciclo-col:first-child{padding-left:0}
+    .ciclo-col:last-child{border-right:none}
+    .ciclo-col-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)}
+    .ciclo-col-val{font-size:16px;font-weight:700;letter-spacing:-0.02em}
+    .ciclo-col-val.dep{color:var(--danger)}
+    .ciclo-col-val.saq{color:var(--accent)}
+    .ciclo-col-val.pos{color:var(--success)}
+    .ciclo-col-val.neg{color:var(--danger)}
+    .ciclo-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin-top:4px}
+    .ciclo-badge.pos{background:rgba(23,177,105,0.12);color:var(--success)}
+    .ciclo-badge.neg{background:rgba(255,77,79,0.1);color:var(--danger)}
+    .ciclo-badge.zero{background:rgba(30,50,80,0.07);color:var(--muted)}
+    body.dark .ciclo-card{background:#13171c;border-color:#2a2d33}
+    body.dark .ciclo-header{background:rgba(255,255,255,0.02);border-bottom-color:#1f2326}
+    body.dark .ciclo-num{color:#e6eef8}
+    body.dark .ciclo-col{border-color:#1f2326}
+    .ciclos-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 20px;gap:12px;text-align:center}
+    .ciclos-empty-icon{width:56px;height:56px;border-radius:16px;background:rgba(43,123,228,0.08);display:flex;align-items:center;justify-content:center;font-size:24px}
+    .ciclos-empty-title{font-size:15px;font-weight:500;color:var(--text)}
+    .ciclos-empty-sub{font-size:13px;color:var(--muted);max-width:240px;line-height:1.5}
+    .ciclo-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px}
+    .ciclo-modal-overlay.open{display:flex}
+    .ciclo-modal{background:var(--card);border-radius:18px;padding:28px 26px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,0.22);display:flex;flex-direction:column;gap:18px;animation:fadeIn 0.25s ease}
+    .ciclo-modal-title{font-size:17px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin:0}
+    .ciclo-modal-sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .ciclo-modal-fields{display:flex;flex-direction:column;gap:10px}
+    .ciclo-multi-hint{font-size:11px;color:var(--muted);margin-top:3px}
+    .ciclo-sum-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;min-height:20px}
+    .ciclo-sum-chip{background:rgba(43,123,228,0.1);color:var(--accent);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600}
+    body.dark .ciclo-sum-chip{background:rgba(126,179,245,0.12);color:#7eb3f5}
+    .ciclo-modal-field label{font-size:12px;font-weight:500;color:var(--muted);display:block;margin-bottom:5px}
+    .ciclo-modal-field input{width:100%;padding:10px 12px;border-radius:9px;border:0.5px solid rgba(30,50,80,0.18);background:#f8fafc;font-size:15px;font-family:inherit;color:var(--text);text-align:right;font-weight:600}
+    .ciclo-modal-field input:focus{outline:none;border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(43,123,228,0.1)}
+    .ciclo-modal-preview{background:var(--bg);border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border:0.5px solid rgba(30,50,80,0.07)}
+    .ciclo-preview-label{font-size:12px;color:var(--muted)}
+    .ciclo-preview-val{font-size:20px;font-weight:700;letter-spacing:-0.02em}
+    .ciclo-preview-val.pos{color:var(--success)}
+    .ciclo-preview-val.neg{color:var(--danger)}
+    .ciclo-preview-val.zero{color:var(--muted)}
+    .ciclo-modal-actions{display:flex;gap:8px;justify-content:flex-end}
+    body.dark .ciclo-modal{background:#161a1f}
+    body.dark .ciclo-modal-title{color:#e6eef8}
+    body.dark .ciclo-modal-preview{background:#0f1215;border-color:#2a2d33}
+    body.dark .ciclo-modal-field input{background:#0f1316;border-color:#2a2d33;color:#e6eef8}
+    body.dark .ciclo-modal-field input:focus{background:#111519}
+    .ciclos-totais{display:flex;gap:0;background:var(--bg);border-radius:12px;overflow:hidden;border:0.5px solid rgba(30,50,80,0.07);margin-top:4px}
+    .ciclos-totais-cell{flex:1;padding:10px 14px;text-align:center;border-right:0.5px solid rgba(30,50,80,0.06)}
+    .ciclos-totais-cell:last-child{border-right:none}
+    .ciclos-totais-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;font-weight:500}
+    .ciclos-totais-val{font-size:15px;font-weight:600}
+    body.dark .ciclos-totais{background:#0f1215;border-color:#2a2d33}
+    body.dark .ciclos-totais-cell{border-color:#1a1e22}
+
+    /* ── OCR / Visão IA ── */
+    .ciclo-modal-field{position:relative}
+    .ciclo-field-row{display:flex;gap:6px;align-items:center}
+    .ciclo-field-row input{flex:1;min-width:0}
+    .ocr-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid rgba(43,123,228,0.25);background:rgba(43,123,228,0.07);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:all 0.17s;font-family:inherit;padding:0}
+    .ocr-btn:hover{background:rgba(43,123,228,0.18);border-color:var(--accent);box-shadow:0 3px 10px rgba(43,123,228,0.2);transform:translateY(-1px)}
+    .ocr-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+    .ocr-btn.loading{animation:ocr-spin 0.9s linear infinite;pointer-events:none}
+    @keyframes ocr-spin{to{transform:rotate(360deg)}}
+    .ocr-paste-zone{border:2px dashed rgba(43,123,228,0.35);border-radius:12px;padding:16px;background:rgba(43,123,228,0.04);cursor:pointer;transition:all 0.18s;outline:none}
+    .ocr-paste-zone:focus,.ocr-paste-zone.ready{border-color:var(--accent);background:rgba(43,123,228,0.08);box-shadow:0 0 0 3px rgba(43,123,228,0.12)}
+    .ocr-paste-hint{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 0}
+    .ocr-paste-icon{font-size:28px}
+    .ocr-paste-text{font-size:12px;color:var(--muted);text-align:center}
+    .ocr-paste-text kbd{background:rgba(30,50,80,0.1);border:0.5px solid rgba(30,50,80,0.2);border-radius:5px;padding:1px 6px;font-size:11px;font-family:inherit;font-weight:700;color:var(--text)}
+    .ocr-paste-img{max-width:100%;max-height:120px;border-radius:8px;object-fit:contain;margin-bottom:8px;display:block}
+    .ocr-paste-status{font-size:12px;color:var(--muted);text-align:center;margin-bottom:6px;animation:ocr-pulse 1s ease-in-out infinite}
+    @keyframes ocr-pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .ocr-paste-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+    .ocr-result-chip{background:rgba(23,177,105,0.12);color:var(--success);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600}
+    .ocr-paste-actions{display:flex;gap:7px}
+    .ocr-use-btn{padding:6px 14px;border-radius:8px;border:none;background:var(--success);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s}
+    .ocr-use-btn:hover{opacity:0.88}
+    .ocr-retry-btn{padding:6px 11px;border-radius:8px;border:0.5px solid rgba(30,50,80,0.2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit}
+    body.dark .ocr-paste-zone{border-color:rgba(43,123,228,0.2);background:rgba(43,123,228,0.03)}
+    body.dark .ocr-paste-text kbd{background:rgba(255,255,255,0.07);border-color:#2a2d33;color:#e6eef8}
+    </style>
 </head>
 <body>
   <div id="initialLoader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;">
@@ -1189,6 +1370,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         </div>
         <div class="nav-section-title">Config</div>
         <div class="nav-item" data-view="gastos"><div class="nav-icon">💸</div>Gastos</div>
+        <div class="nav-item" data-view="apiConfig"><div class="nav-icon">🔑</div>API / IA</div>
         <div class="nav-item" data-view="admin" id="navAdmin" style="display:none"><div class="nav-icon">🛡️</div>Admin</div>
       </nav>
 
@@ -1233,7 +1415,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
           <div class="card-v2-top">
             <div class="card-v2-icon blue">🖥️</div>
           </div>
-          <div class="card-v2-lbl">Total de Contas</div>
+          <div class="card-v2-lbl">Total de Ciclos</div>
           <div class="card-v2-val blue" id="totalContas">0</div>
         </div>
         <div class="card-v2 green">
@@ -1312,7 +1494,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         </div>
         <table id="summaryTable">
           <thead>
-            <tr><th>Plataforma</th><th>Contas</th><th>Lucro</th><th style="width:80px">Participação</th></tr>
+            <tr><th>Plataforma</th><th>Ciclos</th><th>Lucro</th><th style="width:80px">Participação</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -1529,6 +1711,29 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         <div style="margin-top:12px" class="muted">Os valores são subtraídos do lucro total automaticamente.</div>
       </div>
 
+      <!-- API Config Panel -->
+      <div class="panel" id="apiConfigPanel" style="display:none">
+        <div style="margin-bottom:18px">
+          <h3>🔑 API / Inteligência Artificial</h3>
+          <div class="muted" style="margin-top:4px">Configure sua chave para usar análise de prints por IA</div>
+        </div>
+
+        <div style="background:rgba(43,123,228,0.05);border:0.5px solid rgba(43,123,228,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:20px">🤖</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text)">OCR — Reconhecimento de Imagem</div>
+              <div style="font-size:11px;color:var(--muted)">Tesseract.js — funciona sem chave de API, 100% gratuito</div>
+            </div>
+            <span style="margin-left:auto;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(34,197,94,0.12);color:#16a34a">✅ Ativo</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.7">
+            🔍 O reconhecimento de texto roda diretamente no seu navegador — nenhum dado é enviado para servidores externos.<br>
+            📷 Para usar: abra um ciclo, clique em <strong>📷</strong> ao lado de Depósito ou Saque, e cole um print com <strong>Ctrl+V</strong>.
+          </div>
+        </div>
+      </div>
+
       <!-- Plataformas -->
       <!-- Grid de todas as plataformas -->
       <div class="panel" id="platGridPanel" style="display:none">
@@ -1564,12 +1769,12 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
             <button onclick="selectView('plataformas')" class="plat-back-btn" title="Voltar para Plataformas">‹ Plataformas</button>
             <div>
               <h3 id="plataformaTitle">Plataformas</h3>
-              <div class="muted" style="font-size:11px">Contas da plataforma</div>
+              <div class="muted" style="font-size:11px">Ciclos da plataforma</div>
             </div>
           </div>
           <div style="display:flex;gap:8px">
-            <input type="text" id="searchAccounts" placeholder="🔍 Buscar conta..." style="padding:8px;width:200px;border-radius:8px;border:1px solid #e6edf6">
-            <button class="btn" id="addContaBtn">+ Adicionar Conta</button>
+            <button class="btn" id="addCicloBtn">+ Adicionar Ciclo</button>
+            <button class="btn" id="addMaeBtn" style="background:rgba(124,58,237,0.1);color:#7c3aed;border:0.5px solid rgba(124,58,237,0.25)">👑 Conta Mãe</button>
           </div>
         </div>
 
@@ -1578,29 +1783,147 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
           <div class="plat-stat-grid" id="platStatGrid"><!-- Injected by JS --></div>
           <div class="plat-rate-wrap" id="platRateWrap" style="display:none">
             <div class="plat-rate-label">
-              <span id="platRateLabel">Taxa de sucesso</span>
+              <span id="platRateLabel">Ciclos lucrativos</span>
               <span id="platRatePct">0%</span>
             </div>
             <div class="plat-rate-track"><div class="plat-rate-fill" id="platRateFill" style="width:0%"></div></div>
           </div>
         </div>
 
-        <table id="contasTable">
-          <thead>
-            <tr>
-              <th class="small">Conta</th>
-              <th>Nome</th>
-              <th class="small">Depósito (R$)</th>
-              <th class="small">Re-depósito (R$)</th>
-              <th class="small">Saque (R$)</th>
-              <th class="small">Baú (R$)</th>
-              <th>Lucro (R$)</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot></tfoot>
-        </table>
+        <!-- Conta Mãe Section (acima dos ciclos) -->
+        <div class="mae-section" id="maeSectionWrap" style="display:none">
+          <div class="mae-section-header">
+            <span class="mae-section-title">👑 Conta Mãe</span>
+          </div>
+          <div class="mae-list" id="maeList"></div>
+        </div>
+
+        <!-- Separador visual -->
+        <div id="maecicloDivider" style="display:none;height:1px;background:rgba(30,50,80,0.08);margin:16px 0"></div>
+
+        <!-- Ciclos container -->
+        <div id="ciclosWrap" class="ciclos-wrap"></div>
+
+        <!-- Totais dos ciclos -->
+        <div id="ciclosTotais" style="display:none" class="ciclos-totais">
+          <div class="ciclos-totais-cell">
+            <div class="ciclos-totais-label">Total Depósitos</div>
+            <div class="ciclos-totais-val" id="ciclosTotalDep" style="color:var(--danger)">R$ 0,00</div>
+          </div>
+          <div class="ciclos-totais-cell">
+            <div class="ciclos-totais-label">Total Saques</div>
+            <div class="ciclos-totais-val" id="ciclosTotalSaq" style="color:var(--accent)">R$ 0,00</div>
+          </div>
+          <div class="ciclos-totais-cell">
+            <div class="ciclos-totais-label">Lucro Total</div>
+            <div class="ciclos-totais-val" id="ciclosTotalLucro">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de Conta Mãe -->
+      <div class="mae-modal-overlay" id="maeModalOverlay" onclick="if(event.target===this)closeMaeModal()">
+        <div class="mae-modal">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div>
+              <div class="ciclo-modal-title" style="color:#7c3aed">👑 Conta Mãe</div>
+              <div class="ciclo-modal-sub" id="maeModalSubtitle">Anotação da conta mãe</div>
+            </div>
+            <button onclick="closeMaeModal()" style="background:transparent;border:none;cursor:pointer;font-size:20px;color:var(--muted);padding:0;line-height:1;margin-top:2px">✕</button>
+          </div>
+          <div class="ciclo-modal-fields">
+            <div class="ciclo-modal-field">
+              <label>Depósito (R$)</label>
+              <input type="text" inputmode="decimal" id="maeDepInput" placeholder="Ex: 500,00" oninput="updateMaePreview()" />
+            </div>
+            <div class="ciclo-modal-field">
+              <label>Saque (R$)</label>
+              <input type="text" inputmode="decimal" id="maeSaqInput" placeholder="Ex: 700,00" oninput="updateMaePreview()" />
+            </div>
+          </div>
+          <div class="ciclo-modal-preview">
+            <div>
+              <span class="ciclo-preview-label">Resultado da Conta Mãe</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px" id="maePreviewDetail"></div>
+            </div>
+            <span class="ciclo-preview-val zero" id="maePreviewVal">R$ 0,00</span>
+          </div>
+          <div class="ciclo-modal-actions">
+            <button class="btn ghost" onclick="closeMaeModal()">Cancelar</button>
+            <button class="btn" style="background:#7c3aed" onclick="saveMae()">👑 Salvar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de Adicionar Ciclo -->
+      <div class="ciclo-modal-overlay" id="cicloModalOverlay" onclick="if(event.target===this)closeCicloModal()">
+        <div class="ciclo-modal">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div>
+              <div class="ciclo-modal-title">🔄 Novo Ciclo</div>
+              <div class="ciclo-modal-sub" id="cicloModalSubtitle">Preencha os valores do ciclo atual</div>
+            </div>
+            <button onclick="closeCicloModal()" style="background:transparent;border:none;cursor:pointer;font-size:20px;color:var(--muted);padding:0;line-height:1;margin-top:2px">✕</button>
+          </div>
+          <div class="ciclo-modal-fields">
+            <div class="ciclo-modal-field">
+              <label>Depósitos das contas (R$)</label>
+              <div class="ciclo-field-row">
+                <input type="text" inputmode="decimal" id="cicloDepInput" placeholder="Ex: 100,00 ou 40,22,33 para somar" oninput="updateCicloPreview()" />
+                <button class="ocr-btn" id="ocrDepBtn" title="Analisar print com IA" onclick="startOcr('dep')">📷</button>
+              </div>
+              <div class="ciclo-multi-hint">💡 Separe múltiplos valores por vírgula para somar automaticamente</div>
+              <div class="ciclo-sum-chips" id="cicloDepChips"></div>
+              <div class="ocr-paste-zone" id="ocrDepArea" style="display:none;margin-top:8px" onclick="focusOcrPaste('dep')">
+                <div class="ocr-paste-hint" id="ocrDepHint">
+                  <span class="ocr-paste-icon">📋</span>
+                  <span class="ocr-paste-text">Pressione <kbd>Ctrl+V</kbd> para colar o print aqui</span>
+                </div>
+                <img id="ocrDepPreview" class="ocr-paste-img" style="display:none" />
+                <div class="ocr-paste-status" id="ocrDepStatus" style="display:none"></div>
+                <div id="ocrDepChips" class="ocr-paste-chips" style="display:none"></div>
+                <div id="ocrDepError" style="display:none;color:var(--danger);font-size:12px;margin-top:4px"></div>
+                <div class="ocr-paste-actions" id="ocrDepActions" style="display:none">
+                  <button class="ocr-use-btn" onclick="applyOcrResult('dep')">✓ Usar valores</button>
+                  <button class="ocr-retry-btn" onclick="resetOcrZone('dep')">↺ Colar outro</button>
+                </div>
+              </div>
+            </div>
+            <div class="ciclo-modal-field">
+              <label>Saques das contas (R$)</label>
+              <div class="ciclo-field-row">
+                <input type="text" inputmode="decimal" id="cicloSaqInput" placeholder="Ex: 150,00 ou 50,80,30 para somar" oninput="updateCicloPreview()" />
+                <button class="ocr-btn" id="ocrSaqBtn" title="Analisar print com IA" onclick="startOcr('saq')">📷</button>
+              </div>
+              <div class="ciclo-sum-chips" id="cicloSaqChips"></div>
+              <div class="ocr-paste-zone" id="ocrSaqArea" style="display:none;margin-top:8px" onclick="focusOcrPaste('saq')">
+                <div class="ocr-paste-hint" id="ocrSaqHint">
+                  <span class="ocr-paste-icon">📋</span>
+                  <span class="ocr-paste-text">Pressione <kbd>Ctrl+V</kbd> para colar o print aqui</span>
+                </div>
+                <img id="ocrSaqPreview" class="ocr-paste-img" style="display:none" />
+                <div class="ocr-paste-status" id="ocrSaqStatus" style="display:none"></div>
+                <div id="ocrSaqChips" class="ocr-paste-chips" style="display:none"></div>
+                <div id="ocrSaqError" style="display:none;color:var(--danger);font-size:12px;margin-top:4px"></div>
+                <div class="ocr-paste-actions" id="ocrSaqActions" style="display:none">
+                  <button class="ocr-use-btn" onclick="applyOcrResult('saq')">✓ Usar valores</button>
+                  <button class="ocr-retry-btn" onclick="resetOcrZone('saq')">↺ Colar outro</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ciclo-modal-preview">
+            <div>
+              <span class="ciclo-preview-label">Lucro / Loss do ciclo</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px" id="cicloPreviewDetail"></div>
+            </div>
+            <span class="ciclo-preview-val zero" id="cicloPreviewVal">R$ 0,00</span>
+          </div>
+          <div class="ciclo-modal-actions">
+            <button class="btn ghost" onclick="closeCicloModal()">Cancelar</button>
+            <button class="btn success" onclick="saveCiclo()">✅ Fechar Ciclo</button>
+          </div>
+        </div>
       </div>
 
       <!-- Dados -->
@@ -2052,6 +2375,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
   <!-- Modal de Notas -->
@@ -2225,7 +2549,17 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
       if(!state.monthlyGoal) state.monthlyGoal = 5000;
       if(!state.lastSmsService) state.lastSmsService = null;
       if(!state.pendingNotes) state.pendingNotes = [];
-      if(!state.platformOrder || state.platformOrder.length !== Object.keys(state.platforms).length) {
+      // Migration: ensure every platform has ciclos, contasMae arrays and baus in each mae
+      Object.values(state.platforms || {}).forEach(p => {
+        if (!p.ciclos) p.ciclos = [];
+        if (!p.contasMae) p.contasMae = [];
+        (p.contasMae||[]).forEach(m => { if(!m.baus) m.baus = []; });
+        (p.ciclos||[]).forEach(c => {
+          if(!c.extraDepositos) c.extraDepositos = [];
+          if(!c.extraSaques) c.extraSaques = [];
+        });
+      });
+            if(!state.platformOrder || state.platformOrder.length !== Object.keys(state.platforms).length) {
         // Rebuild order if it's missing or out of sync
         state.platformOrder = Object.keys(state.platforms);
         scheduleSave();
@@ -2777,8 +3111,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         const p = state.platforms[pName];
         if (!p) return;
 
-        const lucroPlat = p.accounts.reduce((s,a)=>
-          s + (((a.saque||0)+(a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+        const lucroPlat = getPlatformLucro(p);
         const avatarBg = avatarPalettes[idx % avatarPalettes.length];
         const initial = (p.name || '?').charAt(0).toUpperCase();
         const lucroFmt = (lucroPlat >= 0 ? '+' : '') + 'R$' + money(Math.abs(lucroPlat));
@@ -2791,7 +3124,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
           <div class="sb-plat-avatar" style="background:${avatarBg}">${initial}</div>
           <div class="sb-plat-info">
             <div class="sb-plat-name"></div>
-            <div class="sb-plat-sub">${p.accounts.length} conta${p.accounts.length!==1?'s':''}</div>
+            <div class="sb-plat-sub">${(p.ciclos||[]).length} ciclo${(p.ciclos||[]).length!==1?'s':''}</div>
           </div>
           <div class="sb-plat-profit ${lucroPlat>=0?'pos':'neg'}">${lucroFmt}</div>
           <div class="sb-plat-actions">
@@ -2863,8 +3196,7 @@ body.dark .toast { background: #0f1316 !important; border-color: #2a2d33 !import
         const sortBy = document.getElementById('sortPlatforms')?.value || 'name';
   
         const platformsData = Object.values(state.platforms).map(p => {
-        const lucroPlat = p.accounts.reduce((s,a)=>
-        s + (((a.saque||0) + (a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+        const lucroPlat = getPlatformLucro(p);
         return {
         platform: p,
         name: p.name,
@@ -2889,7 +3221,7 @@ platformsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 platformsData.forEach(data => {
       const p = data.platform;
       const lucroPlat = data.lucro;
-      totalAccounts += p.accounts.length;
+      totalAccounts += (p.ciclos||[]).length;
       totalLucro += lucroPlat;
       const tr = document.createElement('tr');
       tr.className = 'summary-row-clickable';
@@ -2914,10 +3246,10 @@ platformsData.forEach(data => {
           <div class="plat-tbl-avatar" style="background:${avatarBg}">${initial}</div>
           <div>
             <div class="plat-tbl-name">${escapeHtml(p.name)}</div>
-            <div class="plat-tbl-sub">${p.accounts.length} conta${p.accounts.length !== 1 ? 's' : ''}</div>
+            <div class="plat-tbl-sub">${(p.ciclos||[]).length} ciclo${(p.ciclos||[]).length!==1?'s':''}</div>
           </div>
         </div></td>
-        <td style="font-size:13px;font-weight:600">${p.accounts.length}</td>
+        <td style="font-size:13px;font-weight:600">${(p.ciclos||[]).length}</td>
         <td><span class="lucro-chip ${lucroChipClass}">${lucroSign}R$ ${money(lucroPlat)}</span></td>
         <td class="summary-bar-wrap">
           <div class="part-mini-bar"><div class="part-mini-fill" data-lucro="${lucroPlat}" style="width:0%;background:${lucroPlat>=0?'var(--success)':'var(--danger)'}"></div></div>
@@ -2980,22 +3312,45 @@ platformsData.forEach(data => {
     function updatePlatformTotals() {
         const platform = state.selectedPlatform;
         if(!platform || !state.platforms[platform]) return;
-        
-        const accounts = state.platforms[platform].accounts;
-        const searchTerm = document.getElementById('searchAccounts') ? document.getElementById('searchAccounts').value.toLowerCase() : '';
-        
-        let totalDep = 0, totalRedep = 0, totalSaque = 0, totalBau = 0, totalLucro = 0;
+
+        const ciclos = state.platforms[platform].ciclos || [];
+        // Also include legacy accounts
+        const accounts = state.platforms[platform].accounts || [];
+
+        let totalDep = 0, totalSaq = 0, totalLucro = 0;
         let visibleCount = 0, positiveCount = 0;
-        
-        accounts.forEach(acc => {
-            if(searchTerm && !acc.name.toLowerCase().includes(searchTerm)) return;
+
+        // Sum ciclos (including extra deposits/withdrawals)
+        ciclos.forEach(c => {
             visibleCount++;
-            const lucro = ((acc.saque||0) + (acc.bau||0)) - ((acc.deposito||0) + (acc.redeposito||0));
+            const dep = (c.depositos||0) + (c.extraDepositos||[]).reduce((a,b)=>a+b,0);
+            const saq = (c.saques||0) + (c.extraSaques||[]).reduce((a,b)=>a+b,0);
+            const lucro = saq - dep;
             if(lucro > 0) positiveCount++;
-            totalDep += Number(acc.deposito)||0;
-            totalRedep += Number(acc.redeposito)||0;
-            totalSaque += Number(acc.saque)||0;
-            totalBau += Number(acc.bau)||0;
+            totalDep += dep;
+            totalSaq += saq;
+            totalLucro += lucro;
+        });
+
+        // Sum contasMae
+        const contasMae = state.platforms[platform].contasMae || [];
+        contasMae.forEach(m => {
+            const dep = m.deposito||0;
+            const saq = (m.saque||0) + (m.baus||[]).reduce((a,b)=>a+b,0);
+            const lucro = saq - dep;
+            if(lucro > 0) positiveCount++;
+            totalDep += dep;
+            totalSaq += saq;
+            totalLucro += lucro;
+        });
+
+        // Sum legacy accounts
+        accounts.forEach(acc => {
+            visibleCount++;
+            const lucro = ((acc.saque||0)+(acc.bau||0)) - ((acc.deposito||0)+(acc.redeposito||0));
+            if(lucro > 0) positiveCount++;
+            totalDep += (acc.deposito||0) + (acc.redeposito||0);
+            totalSaq += (acc.saque||0) + (acc.bau||0);
             totalLucro += lucro;
         });
 
@@ -3005,8 +3360,8 @@ platformsData.forEach(data => {
         const gridEl = document.getElementById('platStatGrid');
         if(gridEl) {
             const lucroClass = totalLucro >= 0 ? 'green' : 'red';
-            const investTotal = totalDep + totalRedep;
-            const retornoTotal = totalSaque + totalBau;
+            const investTotal = totalDep;
+            const retornoTotal = totalSaq;
             const roi = investTotal > 0 ? ((retornoTotal - investTotal) / investTotal * 100) : 0;
             const roiSign = roi >= 0 ? '+' : '';
             const roiChip = `<span class="plat-stat-chip ${roi>=0?'up':'down'}">${roiSign}${roi.toFixed(0)}% ROI</span>`;
@@ -3031,9 +3386,9 @@ platformsData.forEach(data => {
                 <div class="plat-stat-bar"><div class="plat-stat-bar-fill" style="width:${Math.min(100,Math.abs(roi))}%;background:#7c3aed"></div></div>
               </div>
               <div class="plat-stat-card blue">
-                <div class="plat-stat-top"><div class="plat-stat-icon blue">🖥️</div>${successChip}</div>
-                <div class="plat-stat-label">Contas</div>
-                <div class="plat-stat-val" style="color:var(--accent)">${visibleCount}</div>
+                <div class="plat-stat-top"><div class="plat-stat-icon blue">🔄</div>${successChip}</div>
+                <div class="plat-stat-label">Ciclos</div>
+                <div class="plat-stat-val" style="color:var(--accent)">${ciclos.length}</div>
                 <div class="plat-stat-bar"><div class="plat-stat-bar-fill" style="width:${successRate}%;background:var(--accent)"></div></div>
               </div>
             `;
@@ -3048,150 +3403,733 @@ platformsData.forEach(data => {
             rateWrap.style.display = 'block';
             if(ratePct) ratePct.textContent = successRate + '%';
             if(rateFill) rateFill.style.width = successRate + '%';
-            if(rateLabel) rateLabel.textContent = `${positiveCount} de ${visibleCount} contas lucrativas`;
+            if(rateLabel) rateLabel.textContent = positiveCount + ' de ' + visibleCount + ' ciclos lucrativos';
         } else if(rateWrap) {
             rateWrap.style.display = 'none';
         }
-
-        // Update Footer
-        const tfoot = document.querySelector('#contasTable tfoot');
-        if(tfoot) {
-            tfoot.innerHTML = '';
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td colspan="8" style="padding:0">
-              <div class="tfoot-totals">
-                <div class="tfoot-cell"><div class="tfoot-cell-label">Depósito</div><div class="tfoot-cell-val" style="color:var(--danger)">R$ ${money(totalDep)}</div></div>
-                <div class="tfoot-cell"><div class="tfoot-cell-label">Re-depósito</div><div class="tfoot-cell-val" style="color:var(--danger)">R$ ${money(totalRedep)}</div></div>
-                <div class="tfoot-cell"><div class="tfoot-cell-label">Saque</div><div class="tfoot-cell-val" style="color:var(--success)">R$ ${money(totalSaque)}</div></div>
-                <div class="tfoot-cell"><div class="tfoot-cell-label">Baú</div><div class="tfoot-cell-val" style="color:var(--success)">R$ ${money(totalBau)}</div></div>
-                <div class="tfoot-cell"><div class="tfoot-cell-label">Lucro total</div><div class="tfoot-cell-val" style="color:${totalLucro>=0?'var(--success)':'var(--danger)'}">R$ ${money(totalLucro)}</div></div>
-              </div>
-            </td>`;
-            tfoot.appendChild(tr);
-        }
     }
 
-    function renderContas(){
-      const tbody = document.querySelector('#contasTable tbody'); 
-      const tfoot = document.querySelector('#contasTable tfoot');
-      tbody.innerHTML='';
-      if(tfoot) tfoot.innerHTML = '';
+    // ── Helper: lucro total de uma plataforma (ciclos + legacy accounts)
+    function getPlatformLucro(p) {
+      const fromAccounts = (p.accounts||[]).reduce((s,a)=>
+        s + (((a.saque||0)+(a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+      const fromCiclos = (p.ciclos||[]).reduce((s,c)=> {
+        const dep = (c.depositos||0) + (c.extraDepositos||[]).reduce((a,b)=>a+b,0);
+        const saq = (c.saques||0) + (c.extraSaques||[]).reduce((a,b)=>a+b,0);
+        return s + (saq - dep);
+      }, 0);
+      const fromMae = (p.contasMae||[]).reduce((s,m)=>
+        s + ((m.saque||0) - (m.deposito||0) + (m.baus||[]).reduce((a,b)=>a+b, 0)), 0);
+      return fromAccounts + fromCiclos + fromMae;
+    }
 
-      const platform = state.selectedPlatform;
-      if(!platform || !state.platforms[platform]) {
-          document.getElementById('platformSummary').style.display = 'none';
-          return;
+    // ── Modal de ciclo ────────────────────────────────────────────────────────
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // OCR — Tesseract.js (sem API key, roda no navegador)
+    // ══════════════════════════════════════════════════════════════════════════
+    const ocrValues = { dep: [], saq: [] };
+
+    function getOcrApiKey() { return localStorage.getItem('ocr_anthropic_key') || ''; }
+
+    function startOcr(type) {
+      const T = type === 'dep' ? 'Dep' : 'Saq';
+      const area = document.getElementById('ocr' + T + 'Area');
+      const btn  = document.getElementById('ocr' + T + 'Btn');
+      const isOpen = area.style.display !== 'none';
+      // Close both
+      ['Dep','Saq'].forEach(t => {
+        document.getElementById('ocr' + t + 'Area').style.display = 'none';
+        document.getElementById('ocr' + t + 'Btn').classList.remove('active');
+      });
+      if (!isOpen) {
+        resetOcrZone(type);
+        area.style.display = 'block';
+        btn.classList.add('active');
+        area.focus();
       }
-      
-      document.getElementById('platformSummary').style.display = 'block';
-      const accounts = state.platforms[platform].accounts;
-      const searchTerm = document.getElementById('searchAccounts') ? document.getElementById('searchAccounts').value.toLowerCase() : '';
+    }
 
-      if(accounts.length === 0){
-        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">Nenhuma conta nesta plataforma</div><div class="empty-state-sub">Clique em "+ Adicionar Conta" para registrar a primeira</div></div></td></tr>`;
+    function focusOcrPaste(type) {
+      const T = type === 'dep' ? 'Dep' : 'Saq';
+      document.getElementById('ocr' + T + 'Area').focus();
+    }
+
+    function resetOcrZone(type) {
+      const T = type === 'dep' ? 'Dep' : 'Saq';
+      ocrValues[type] = [];
+      const preview = document.getElementById('ocr' + T + 'Preview');
+      preview.style.display = 'none'; preview.src = '';
+      document.getElementById('ocr' + T + 'Hint').style.display = 'flex';
+      document.getElementById('ocr' + T + 'Status').style.display = 'none';
+      document.getElementById('ocr' + T + 'Chips').style.display = 'none';
+      document.getElementById('ocr' + T + 'Chips').innerHTML = '';
+      document.getElementById('ocr' + T + 'Error').style.display = 'none';
+      document.getElementById('ocr' + T + 'Actions').style.display = 'none';
+    }
+
+    async function analyzeOcrImage(type, file) {
+      const T = type === 'dep' ? 'Dep' : 'Saq';
+      const btn     = document.getElementById('ocr' + T + 'Btn');
+      const hint    = document.getElementById('ocr' + T + 'Hint');
+      const status  = document.getElementById('ocr' + T + 'Status');
+      const preview = document.getElementById('ocr' + T + 'Preview');
+      const chipsEl = document.getElementById('ocr' + T + 'Chips');
+      const errorEl = document.getElementById('ocr' + T + 'Error');
+      const actions = document.getElementById('ocr' + T + 'Actions');
+
+      ocrValues[type] = [];
+      chipsEl.innerHTML = '';
+      errorEl.style.display = 'none';
+      actions.style.display = 'none';
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target.result;
+        preview.src = dataUrl;
+        preview.style.display = 'block';
+        hint.style.display = 'none';
+
+        btn.textContent = '⏳';
+        btn.classList.add('loading');
+        status.textContent = '🔍 Lendo valores com OCR...';
+        status.style.display = 'block';
+
+        try {
+          // ── Tesseract.js OCR — sem API key, roda no browser ──────────────────
+          if (typeof Tesseract === 'undefined') throw new Error('Tesseract não carregou. Recarregue a página.');
+
+          // Use only 'eng' — sufficient for digits; avoids heavy 'por' download
+          const worker = await Tesseract.createWorker('eng', 1, {
+            logger: () => {}   // silence progress logs
+          });
+          await worker.setParameters({
+            tessedit_char_whitelist: '0123456789.,R$ ',
+            preserve_interword_spaces: '1',
+          });
+          const { data: { text } } = await worker.recognize(dataUrl);
+          await worker.terminate();
+
+          // Parse all monetary-looking numbers from OCR text
+          // Handles: 1.234,56 | 1,234.56 | 34,00 | 34.00 | 1234
+          function parseBrMoney(s) {
+            s = s.trim().replace(/\s/g, '');
+            // Remove currency symbol
+            s = s.replace(/^R\$\s*/i, '');
+            // Detect BR format: last separator is comma (e.g. 1.234,56 or 34,56)
+            if (/^\d{1,3}(\.\d{3})*(,\d{1,2})?$/.test(s)) {
+              return parseFloat(s.replace(/\./g, '').replace(',', '.'));
+            }
+            // US format: last separator is dot (e.g. 1,234.56 or 34.56)
+            if (/^\d{1,3}(,\d{3})*(\.\d{1,2})?$/.test(s)) {
+              return parseFloat(s.replace(/,/g, ''));
+            }
+            // Plain integer
+            if (/^\d+$/.test(s)) return parseFloat(s);
+            return NaN;
+          }
+
+          const rawTokens = text.match(/R?\$?\s*\d[\d.,]*/gi) || [];
+          const nums = rawTokens.map(t => parseBrMoney(t.replace(/[^\d.,]/g, ''))).filter(n => !isNaN(n) && n > 0);
+
+          if (nums.length === 0) throw new Error('Nenhum valor encontrado. Tente um print mais nítido ou com melhor contraste.');
+
+          ocrValues[type] = nums;
+          const total = nums.reduce((a, b) => a + b, 0);
+          status.style.display = 'none';
+          chipsEl.innerHTML = nums.map(v => `<span class="ocr-result-chip">R$ ${money(v)}</span>`).join('') +
+            `<span style="font-size:11px;color:var(--muted);margin-left:6px;align-self:center">= R$ ${money(total)}</span>`;
+          chipsEl.style.display = 'flex';
+          actions.style.display = 'flex';
+          showToast('✅ ' + nums.length + ' valor(es) reconhecido(s)!', 'success');
+
+        } catch (err) {
+          status.style.display = 'none';
+          errorEl.textContent = '❌ ' + err.message;
+          errorEl.style.display = 'block';
+          actions.style.display = 'flex';
+        } finally {
+          btn.textContent = '📷';
+          btn.classList.remove('loading');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function applyOcrResult(type) {
+      const vals = ocrValues[type];
+      if (!vals.length) return;
+      const inp = document.getElementById(type === 'dep' ? 'cicloDepInput' : 'cicloSaqInput');
+      const existing = inp.value.trim();
+      const newVals = vals.map(v => String(v).replace('.', ',')).join(',');
+      inp.value = existing ? existing + ',' + newVals : newVals;
+      inp.dispatchEvent(new Event('input'));
+      startOcr(type); // closes the zone
+      showToast('💰 Valores inseridos!', 'success');
+    }
+
+    // Ctrl+V to paste image into active zone
+    document.addEventListener('paste', (e) => {
+      const modal = document.getElementById('cicloModalOverlay');
+      if (!modal || modal.style.display === 'none') return;
+      // Find which zone is open
+      const activeType = document.getElementById('ocrDepArea').style.display !== 'none' ? 'dep'
+                       : document.getElementById('ocrSaqArea').style.display !== 'none' ? 'saq'
+                       : null;
+      if (!activeType) return;
+      const items = e.clipboardData?.items || [];
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) analyzeOcrImage(activeType, file);
+          break;
+        }
+      }
+    });
+    // ══════════════════════════════════════════════════════════════════════════
+    const ocrState = { dep: { b64: null, mime: null, values: [] }, saq: { b64: null, mime: null, values: [] } };
+
+
+    // ── Gemini API Key Management ──────────────────────────────────────────────
+    function loadGeminiKeyUI() {
+      const key = localStorage.getItem('ocr_anthropic_key') || '';
+      const field = document.getElementById('geminiApiKeyField');
+      const status = document.getElementById('geminiKeyStatus');
+      const clearBtn = document.getElementById('geminiKeyClearBtn');
+      const msg = document.getElementById('geminiKeyMsg');
+      if(!field) return;
+      if(key) {
+        field.value = key;
+        field.type = 'password';
+        status.textContent = '✅ Configurado';
+        status.style.background = 'rgba(23,177,105,0.12)';
+        status.style.color = 'var(--success)';
+        if(clearBtn) clearBtn.style.display = 'inline-block';
+        if(msg) { msg.textContent = '✅ Chave ativa — análise de prints habilitada.'; msg.style.color = 'var(--success)'; msg.style.display = 'block'; }
+      } else {
+        status.textContent = 'Não configurado';
+        status.style.background = 'rgba(30,50,80,0.07)';
+        status.style.color = 'var(--muted)';
+        if(clearBtn) clearBtn.style.display = 'none';
+        if(msg) msg.style.display = 'none';
+      }
+    }
+    function updateGeminiKeyStatus() {
+      const val = document.getElementById('geminiApiKeyField')?.value?.trim();
+      const status = document.getElementById('geminiKeyStatus');
+      if(!status) return;
+      if(val) {
+        status.textContent = '✏️ Não salvo';
+        status.style.background = 'rgba(245,158,11,0.12)';
+        status.style.color = '#f59e0b';
+      }
+    }
+    function saveGeminiKey() {
+      const val = document.getElementById('geminiApiKeyField')?.value?.trim();
+      const msg = document.getElementById('geminiKeyMsg');
+      if(!val) { if(msg){msg.textContent='⚠️ Digite uma chave antes de salvar.';msg.style.color='var(--danger)';msg.style.display='block';} return; }
+      localStorage.setItem('ocr_anthropic_key', val);
+      loadGeminiKeyUI();
+      showToast('🔑 Chave salva com sucesso!', 'success');
+    }
+    function clearGeminiKey() {
+      localStorage.removeItem('ocr_anthropic_key');
+      document.getElementById('geminiApiKeyField').value = '';
+      loadGeminiKeyUI();
+      showToast('Chave removida.', 'success');
+    }
+
+
+    // ── Ciclo Modal ───────────────────────────────────────────────────────────
+    function parseCicloField(raw) {
+      const trimmed = (raw || '').trim();
+      if(!trimmed) return { total: 0, parts: [] };
+      const parts = trimmed.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      const allNumbers = parts.length > 1 && parts.every(p => /^\d+([.,]\d+)?$/.test(p));
+      if(allNumbers) {
+        const vals = parts.map(p => parseFloat(p.replace(',','.')));
+        return { total: vals.reduce((a,b) => a+b, 0), parts: vals };
+      }
+      return { total: parseDecimal(trimmed), parts: [] };
+    }
+
+    function renderCicloChips(inputId, chipsId) {
+      const raw = document.getElementById(inputId)?.value || '';
+      const result = parseCicloField(raw);
+      const chipsEl = document.getElementById(chipsId);
+      if(result.parts.length > 1) {
+        chipsEl.innerHTML = result.parts.map(v => `<span class="ciclo-sum-chip">R$ ${money(v)}</span>`).join('') +
+          `<span class="ciclo-sum-chip" style="background:rgba(43,123,228,0.2);font-weight:700">= R$ ${money(result.total)}</span>`;
+      } else { chipsEl.innerHTML = ''; }
+      return result.total;
+    }
+
+    function updateCicloPreview() {
+      const dep = renderCicloChips('cicloDepInput', 'cicloDepChips');
+      const saq = renderCicloChips('cicloSaqInput', 'cicloSaqChips');
+      const lucro = saq - dep;
+      const sign = lucro > 0 ? '+' : '';
+      const cls = lucro > 0 ? 'pos' : lucro < 0 ? 'neg' : 'zero';
+      const el = document.getElementById('cicloPreviewVal');
+      el.textContent = sign + 'R$ ' + money(Math.abs(lucro));
+      el.className = 'ciclo-preview-val ' + cls;
+      const detail = document.getElementById('cicloPreviewDetail');
+      if(detail) detail.textContent = dep > 0 ? 'Dep: R$ ' + money(dep) + ' · Saq: R$ ' + money(saq) : '';
+    }
+
+    function openCicloModal() {
+      const p = state.selectedPlatform;
+      if(!p) return showToast('Selecione uma plataforma primeiro', 'error');
+      document.getElementById('cicloDepInput').value = '';
+      document.getElementById('cicloSaqInput').value = '';
+      document.getElementById('cicloDepChips').innerHTML = '';
+      document.getElementById('cicloSaqChips').innerHTML = '';
+      const previewEl = document.getElementById('cicloPreviewVal');
+      if(previewEl) { previewEl.textContent = 'R$ 0,00'; previewEl.className = 'ciclo-preview-val zero'; }
+      const ciclos = state.platforms[p].ciclos || [];
+      const sub = document.getElementById('cicloModalSubtitle');
+      if(sub) sub.textContent = 'Plataforma: ' + p + ' · Ciclo #' + (ciclos.length + 1);
+      document.getElementById('cicloModalOverlay').style.display = 'flex';
+      // Reset OCR areas
+      ['Dep','Saq'].forEach(T => {
+        const area = document.getElementById('ocr'+T+'Area');
+        if(area) area.style.display = 'none';
+        const btn = document.getElementById('ocr'+T+'Btn');
+        if(btn) { btn.textContent = '📷'; btn.classList.remove('active','loading'); }
+      });
+      setTimeout(() => document.getElementById('cicloDepInput')?.focus(), 80);
+    }
+
+    function closeCicloModal() {
+      document.getElementById('cicloModalOverlay').style.display = 'none';
+    }
+
+    function saveCiclo() {
+      const p = state.selectedPlatform;
+      if(!p) return;
+      const dep = renderCicloChips('cicloDepInput', 'cicloDepChips');
+      const saq = renderCicloChips('cicloSaqInput', 'cicloSaqChips');
+      if(!dep && !saq) return showToast('Preencha ao menos um valor', 'error');
+      if(!state.platforms[p].ciclos) state.platforms[p].ciclos = [];
+      const numero = state.platforms[p].ciclos.length + 1;
+      const dateStr = new Date().toISOString().split('T')[0];
+      state.platforms[p].ciclos.push({ numero, depositos: dep, saques: saq, extraDepositos: [], extraSaques: [], data: dateStr, id: Date.now() });
+      closeCicloModal();
+      scheduleSave();
+      renderCiclos();
+      updatePlatformTotals();
+      renderPlatformsList();
+      renderSummary();
+      showToast('✅ Ciclo #' + numero + ' fechado!', 'success');
+    }
+
+    function deleteCiclo(platform, cicloId) {
+      showConfirm('Remover este ciclo?', () => {
+        const plat = state.platforms[platform];
+        if(!plat) return;
+        const idx = plat.ciclos.findIndex(c => c.id === cicloId);
+        if(idx >= 0) plat.ciclos.splice(idx, 1);
+        scheduleSave(); renderCiclos(); updatePlatformTotals(); renderPlatformsList(); renderSummary();
+        showToast('Ciclo removido.', 'success');
+      }, { isDanger: true });
+    }
+
+    // ── Conta Mãe Modal ───────────────────────────────────────────────────────
+    function getMaeLucro(mae) {
+      const totalBau = (mae.baus||[]).reduce((s,b) => s+b, 0);
+      return (mae.saque||0) - (mae.deposito||0) + totalBau;
+    }
+
+    function updateMaePreview() {
+      const dep = parseDecimal(document.getElementById('maeDepInput')?.value || '0');
+      const saq = parseDecimal(document.getElementById('maeSaqInput')?.value || '0');
+      const lucro = saq - dep;
+      const sign = lucro > 0 ? '+' : '';
+      const cls = lucro > 0 ? 'pos' : lucro < 0 ? 'neg' : 'zero';
+      const el = document.getElementById('maePreviewVal');
+      if(el) { el.textContent = sign + 'R$ ' + money(Math.abs(lucro)); el.className = 'ciclo-preview-val ' + cls; }
+    }
+
+    function openMaeModal() {
+      const p = state.selectedPlatform;
+      if(!p) return showToast('Selecione uma plataforma primeiro', 'error');
+      const maeInput = document.getElementById('maeDepInput');
+      const saqInput = document.getElementById('maeSaqInput');
+      if(maeInput) maeInput.value = '';
+      if(saqInput) saqInput.value = '';
+      const maes = state.platforms[p].contasMae || [];
+      const sub = document.getElementById('maeModalSubtitle');
+      if(sub) sub.textContent = 'Anotação da conta mãe · #' + (maes.length + 1);
+      document.getElementById('maeModalOverlay').style.display = 'flex';
+      setTimeout(() => maeInput?.focus(), 80);
+    }
+
+    function closeMaeModal() {
+      document.getElementById('maeModalOverlay').style.display = 'none';
+    }
+
+    function saveMae() {
+      const p = state.selectedPlatform;
+      if(!p) return;
+      const dep = parseDecimal(document.getElementById('maeDepInput')?.value || '0');
+      const saq = parseDecimal(document.getElementById('maeSaqInput')?.value || '0');
+      if(!dep && !saq) return showToast('Preencha ao menos um valor', 'error');
+      if(!state.platforms[p].contasMae) state.platforms[p].contasMae = [];
+      const numero = state.platforms[p].contasMae.length + 1;
+      const dateStr = new Date().toISOString().split('T')[0];
+      const id = Date.now();
+      state.platforms[p].contasMae.push({ numero, deposito: dep, saque: saq, baus: [], data: dateStr, id });
+      closeMaeModal();
+      scheduleSave(); renderMae(); updatePlatformTotals(); renderPlatformsList(); renderSummary();
+      showToast('👑 Conta Mãe #' + numero + ' salva!', 'success');
+    }
+
+    function deleteMae(platform, maeId) {
+      showConfirm('Remover esta Conta Mãe?', () => {
+        const plat = state.platforms[platform];
+        if(!plat) return;
+        const idx = plat.contasMae.findIndex(m => m.id === maeId);
+        if(idx >= 0) plat.contasMae.splice(idx, 1);
+        scheduleSave(); renderMae(); updatePlatformTotals(); renderPlatformsList(); renderSummary();
+        showToast('Conta Mãe removida.', 'success');
+      }, { isDanger: true });
+    }
+
+    // ── renderMae ─────────────────────────────────────────────────────────────
+    function renderMae() {
+      const platform = state.selectedPlatform;
+      const maes = state.platforms[platform]?.contasMae || [];
+      if(maes.length === 0) {
+        section.style.display = 'none';
+        if(divider) divider.style.display = 'none';
         return;
       }
 
-      accounts.forEach((acc,i)=>{
-        if(!acc.name) acc.name = '';
-        if(searchTerm && !acc.name.toLowerCase().includes(searchTerm)) return; // Filtro de busca
-        
-        const notesCount = acc.notes ? acc.notes.length : 0;
+      section.style.display = 'block';
+      list.innerHTML = '';
 
-        const tr = document.createElement('tr');
-        const lucro = ((acc.saque||0) + (acc.bau||0)) - ((acc.deposito||0) + (acc.redeposito||0));
-        tr.className = lucro > 0 ? 'row-pos' : lucro < 0 ? 'row-neg' : 'row-zero';
-        const lucroChipClass = lucro >= 0 ? 'pos' : 'neg';
-        const lucroSign = lucro >= 0 ? '+' : '';
-        tr.innerHTML = `
-          <td style="color:var(--muted);font-size:12px">${i+1}</td>
-          <td><input type="text" class="inp inp-name" value="${acc.name||''}" placeholder="Nome da conta" style="width:150px;padding:7px 9px;border-radius:6px;border:0.5px solid rgba(30,50,80,0.15);background:var(--bg);font-family:inherit" /></td>
-          <td><input type="text" inputmode="decimal" class="inp deposito" value="${String(acc.deposito||0).replace('.',',')}" style="width:90px;padding:7px 9px;font-size:13px;text-align:right;border-radius:6px;border:0.5px solid rgba(30,50,80,0.15);background:var(--bg);font-family:inherit" /></td>
-          <td><input type="text" inputmode="decimal" class="inp redeposito" value="${String(acc.redeposito||0).replace('.',',')}" style="width:90px;padding:7px 9px;font-size:13px;text-align:right;border-radius:6px;border:0.5px solid rgba(30,50,80,0.15);background:var(--bg);font-family:inherit" /></td>
-          <td><input type="text" inputmode="decimal" class="inp saque" value="${String(acc.saque||0).replace('.',',')}" style="width:90px;padding:7px 9px;font-size:13px;text-align:right;border-radius:6px;border:0.5px solid rgba(30,50,80,0.15);background:var(--bg);font-family:inherit" /></td>
-          <td><input type="text" inputmode="decimal" class="inp bau" value="${String(acc.bau||0).replace('.',',')}" style="width:90px;padding:7px 9px;font-size:13px;text-align:right;border-radius:6px;border:0.5px solid rgba(30,50,80,0.15);background:var(--bg);font-family:inherit" /></td>
-          <td><span class="lucro-chip ${lucroChipClass} lucro-cell">${lucroSign}R$ ${money(lucro)}</span></td>
-          <td class="actions" style="display:flex;gap:4px;justify-content:flex-end">
-            <div class="btn-notes-container">
-              <button class="btn ghost btn-notes">📝</button>
-              ${notesCount > 0 ? `<span class="notes-badge">${notesCount}</span>` : ''}
+      maes.forEach((mae, maeIdx) => {
+        if(!mae.baus) mae.baus = [];
+        const totalBau = mae.baus.reduce((s,b)=>s+b, 0);
+        const lucro = getMaeLucro(mae);
+        const lucroClass = lucro > 0 ? 'pos' : lucro < 0 ? 'neg' : 'zero';
+        const lucroSign = lucro > 0 ? '+' : '';
+        const badgeLabel = lucro > 0 ? '🟢 Lucro' : lucro < 0 ? '🔴 Loss' : '➖ Neutro';
+        let dateDisplay = mae.data || '';
+        if(dateDisplay) {
+          const [y,m,d] = dateDisplay.split('-');
+          dateDisplay = (d||'') + '/' + (m||'') + '/' + (y||'');
+        }
+
+        const card = document.createElement('div');
+        card.className = 'mae-card';
+
+        // Chips dos baús
+        const bauChipsHtml = mae.baus.map((v,bi) =>
+          `<span class="mae-bau-chip">🏦 R$ ${money(v)}<button class="mae-bau-chip-del" data-bi="${bi}" title="Remover baú">✕</button></span>`
+        ).join('');
+
+        const bauTotalHtml = totalBau > 0
+          ? `<div class="mae-bau-total">🏦 Total Baú: <span>+R$ ${money(totalBau)}</span></div>` : '';
+
+        const hasBaus = mae.baus.length > 0;
+
+        card.innerHTML = `
+          <div class="mae-card-header">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="mae-card-title">👑 Conta Mãe #${mae.numero}</span>
+              ${dateDisplay ? '<span class="mae-card-date">📅 ' + dateDisplay + '</span>' : ''}
             </div>
-            <button class="btn ghost del">X</button>
-          </td>
+            <button class="mae-del-btn" title="Remover conta mãe">✕</button>
+          </div>
+          <div class="mae-card-body">
+            <div class="mae-col">
+              <span class="mae-col-label">Depósito</span>
+              <span class="mae-col-val dep">R$ ${money(mae.deposito||0)}</span>
+            </div>
+            <div class="mae-col">
+              <span class="mae-col-label">Saque</span>
+              <span class="mae-col-val saq">R$ ${money(mae.saque||0)}</span>
+            </div>
+            <div class="mae-col">
+              <span class="mae-col-label">Resultado</span>
+              <span class="mae-col-val ${lucroClass}">${lucroSign}R$ ${money(Math.abs(lucro))}</span>
+              <span class="mae-badge ${lucroClass}">${badgeLabel}</span>
+            </div>
+            <button class="mae-bau-sq-btn ${hasBaus ? 'has-baus' : ''}" title="Baú coletado">
+              <span class="mae-bau-sq-icon">🏦</span>
+              <span class="mae-bau-sq-label">Baú</span>
+              <span class="mae-bau-sq-count">${mae.baus.length}</span>
+            </button>
+          </div>
+          <div class="mae-bau-area" id="maeBauArea_${mae.id}">
+            ${hasBaus ? bauTotalHtml : ''}
+            ${hasBaus ? '<div class="mae-bau-chips" id="maeBauChips_' + mae.id + '">' + bauChipsHtml + '</div>' : '<div class="mae-bau-chips" id="maeBauChips_' + mae.id + '"></div>'}
+            <div class="mae-bau-add-row" id="maeBauInputRow_${mae.id}" style="display:none">
+              <input class="mae-bau-input" id="maeBauInput_${mae.id}" type="text" inputmode="decimal" placeholder="Valor do baú (R$)" />
+              <button class="mae-bau-confirm-btn" data-maeid="${mae.id}">✓ Adicionar</button>
+            </div>
+          </div>
         `;
-        const lucroCell = tr.querySelector('.lucro-cell');
 
-        tr.querySelector('.inp-name').addEventListener('input', (e)=>{
-          state.platforms[platform].accounts[i].name = e.target.value;
-          scheduleSave();
-        });
+        // Square baú button: toggle input row (not the whole area)
+        const bauSqBtn = card.querySelector('.mae-bau-sq-btn');
+        const bauInputRow = card.querySelector(`#maeBauInputRow_${mae.id}`);
+        const bauInp = card.querySelector(`#maeBauInput_${mae.id}`);
 
-        tr.querySelectorAll('.inp:not(.inp-name)').forEach((input)=>{
-        input.addEventListener('input', (e)=>{
-            const rowIdx = i;
-            const row = state.platforms[platform].accounts[rowIdx];
-            row.deposito = parseDecimal(tr.querySelector('.deposito').value);
-            row.redeposito = parseDecimal(tr.querySelector('.redeposito').value);
-            row.saque = parseDecimal(tr.querySelector('.saque').value);
-            row.bau = parseDecimal(tr.querySelector('.bau').value);
-            const newLucro = ((row.saque||0) + (row.bau||0)) - ((row.deposito||0) + (row.redeposito||0));
-            const newSign = newLucro >= 0 ? '+' : '';
-            lucroCell.textContent = `${newSign}R$ ${money(newLucro)}`;
-            lucroCell.className = `lucro-chip ${newLucro >= 0 ? 'pos' : 'neg'} lucro-cell`;
-            tr.className = newLucro > 0 ? 'row-pos' : newLucro < 0 ? 'row-neg' : 'row-zero';
-            scheduleSave();
-            updatePlatformTotals();
-        });
-        input.addEventListener('blur', ()=>{
-            renderSummary();
-            renderDiasTabela();
-        });
-        input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.target.blur(); } });
-    });
-        
-        tr.querySelector('.btn-notes').onclick = () => { openNotesModal(platform, i); };
-        tr.querySelector('.del').onclick = ()=>{
-          const accBackup = JSON.parse(JSON.stringify(state.platforms[platform].accounts[i]));
-          const accIdx = i;
-          state.platforms[platform].accounts.splice(i, 1);
-          scheduleSave(); renderContas(); renderPlatformsList(); renderSummary(); renderDiasTabela();
-          showUndoToast(
-            `Conta removida`,
-            accBackup.name ? accBackup.name + ' · ' + platform : platform,
-            () => {
-              state.platforms[platform].accounts.splice(accIdx, 0, accBackup);
-              scheduleSave(); renderContas(); renderPlatformsList(); renderSummary(); renderDiasTabela();
-              showToast('Conta restaurada!', 'success');
-            }
-          );
+        bauSqBtn.onclick = () => {
+          const isOpen = bauInputRow.style.display !== 'none';
+          bauInputRow.style.display = isOpen ? 'none' : 'flex';
+          bauSqBtn.classList.toggle('active', !isOpen);
+          if(!isOpen) { bauInp?.focus(); }
         };
 
-        tbody.appendChild(tr);
+        // Add baú — hides input row after adding
+        const addBau = () => {
+          const val = parseDecimal(bauInp.value||'0');
+          if(!val) return;
+          if(!state.platforms[platform].contasMae[maeIdx].baus)
+            state.platforms[platform].contasMae[maeIdx].baus = [];
+          state.platforms[platform].contasMae[maeIdx].baus.push(val);
+          bauInp.value = '';
+          bauInputRow.style.display = 'none';
+          bauSqBtn.classList.remove('active');
+          scheduleSave(); renderMae();
+          showToast('🏦 Baú +R$ ' + money(val) + ' adicionado!', 'success');
+        };
+
+        card.querySelector('.mae-bau-confirm-btn').onclick = addBau;
+        bauInp.addEventListener('keydown', e => { if(e.key === 'Enter') addBau(); });
+
+        // Remove individual baú chip
+        card.querySelectorAll('.mae-bau-chip-del').forEach(btn => {
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            const bi = parseInt(btn.dataset.bi);
+            state.platforms[platform].contasMae[maeIdx].baus.splice(bi, 1);
+            scheduleSave(); renderMae();
+          };
+        });
+
+        card.querySelector('.mae-del-btn').onclick = () => deleteMae(platform, mae.id);
+        list.appendChild(card);
       });
 
-      updatePlatformTotals();
+      // Mostrar separador se há ciclos também
+      const hasCiclos = (state.platforms[platform].ciclos||[]).length > 0;
+      if(divider) divider.style.display = hasCiclos ? 'block' : 'none';
+    }
 
-      // Habilita arrastar para reordenar contas
-      if(window.Sortable) {
-        const tbody2 = document.querySelector('#contasTable tbody');
-        if(tbody2) {
-          new Sortable(tbody2, {
-            animation: 150,
-            handle: 'td:first-child',
-            ghostClass: 'sortable-ghost',
-            onEnd: (evt) => {
-              const plat = state.selectedPlatform;
-              if(!plat || !state.platforms[plat]) return;
-              const accs = state.platforms[plat].accounts;
-              const moved = accs.splice(evt.oldIndex, 1)[0];
-              accs.splice(evt.newIndex, 0, moved);
-              scheduleSave();
-              renderContas();
-            }
-          });
-        }
+    // ── renderCiclos ──────────────────────────────────────────────────────────
+    function renderCiclos() {
+      const wrap = document.getElementById('ciclosWrap');
+      const totaisEl = document.getElementById('ciclosTotais');
+      const summaryEl = document.getElementById('platformSummary');
+      if(!wrap) return;
+      wrap.innerHTML = '';
+
+      const platform = state.selectedPlatform;
+      if(!platform || !state.platforms[platform]) {
+        if(summaryEl) summaryEl.style.display = 'none';
+        if(totaisEl) totaisEl.style.display = 'none';
+        return;
       }
+
+      if(summaryEl) summaryEl.style.display = 'block';
+
+      const ciclos = state.platforms[platform].ciclos || [];
+
+      if(ciclos.length === 0) {
+        wrap.innerHTML = `<div class="ciclos-empty">
+          <div class="ciclos-empty-icon">🔄</div>
+          <div class="ciclos-empty-title">Nenhum ciclo registrado</div>
+          <div class="ciclos-empty-sub">Clique em "+ Adicionar Ciclo" para registrar o primeiro ciclo desta plataforma</div>
+        </div>`;
+        if(totaisEl) totaisEl.style.display = 'none';
+        updatePlatformTotals();
+        return;
+      }
+
+      let totalDep = 0, totalSaq = 0;
+
+      ciclos.forEach((ciclo, cicloIdx) => {
+        if(!ciclo.extraDepositos) ciclo.extraDepositos = [];
+        if(!ciclo.extraSaques) ciclo.extraSaques = [];
+
+        const totalDepCiclo = (ciclo.depositos||0) + ciclo.extraDepositos.reduce((a,b)=>a+b,0);
+        const totalSaqCiclo = (ciclo.saques||0) + ciclo.extraSaques.reduce((a,b)=>a+b,0);
+        const lucro = totalSaqCiclo - totalDepCiclo;
+        const lucroClass = lucro > 0 ? 'pos' : lucro < 0 ? 'neg' : 'zero';
+        const lucroSign = lucro > 0 ? '+' : '';
+
+        // Format date
+        let dateDisplay = ciclo.data || '';
+        if(dateDisplay) {
+          const [y,m,d] = dateDisplay.split('-');
+          dateDisplay = (d||'') + '/' + (m||'') + '/' + (y||'');
+        }
+
+        const badgeLabel = lucro > 0 ? '🟢 Lucro' : lucro < 0 ? '🔴 Loss' : '➖ Neutro';
+
+        // chips for extras
+        const depChipsHtml = ciclo.extraDepositos.map((v,i) =>
+          `<span class="ciclo-extra-chip">+R$ ${money(v)}<button class="ciclo-extra-chip-del" data-type="dep" data-bi="${i}">×</button></span>`
+        ).join('');
+        const saqChipsHtml = ciclo.extraSaques.map((v,i) =>
+          `<span class="ciclo-extra-chip">+R$ ${money(v)}<button class="ciclo-extra-chip-del" data-type="saq" data-bi="${i}">×</button></span>`
+        ).join('');
+
+        const hasExtraDep = ciclo.extraDepositos.length > 0;
+        const hasExtraSaq = ciclo.extraSaques.length > 0;
+        const hasAnyExtra = hasExtraDep || hasExtraSaq;
+
+        const card = document.createElement('div');
+        card.className = 'ciclo-card ' + lucroClass;
+        card.innerHTML = `
+          <div class="ciclo-header">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="ciclo-num">Ciclo #${ciclo.numero}</span>
+              ${dateDisplay ? '<span class="ciclo-date">📅 ' + dateDisplay + '</span>' : ''}
+            </div>
+            <button class="ciclo-del-btn" title="Remover ciclo">✕</button>
+          </div>
+          <div class="ciclo-body">
+            <div class="ciclo-col">
+              <span class="ciclo-col-label">Depósitos</span>
+              <div class="ciclo-val-row">
+                <span class="ciclo-col-val dep">R$ ${money(totalDepCiclo)}</span>
+                <button class="ciclo-extra-sq-btn ${hasExtraDep ? 'has-extras' : ''}" data-action="dep" title="Redepósito">
+                  <span class="ciclo-extra-sq-icon">💰</span>
+                  <span class="ciclo-extra-sq-label">Redep.</span>
+                  <span class="ciclo-extra-sq-count">${ciclo.extraDepositos.length}</span>
+                </button>
+              </div>
+            </div>
+            <div class="ciclo-col">
+              <span class="ciclo-col-label">Saques</span>
+              <div class="ciclo-val-row">
+                <span class="ciclo-col-val saq">R$ ${money(totalSaqCiclo)}</span>
+                <button class="ciclo-extra-sq-btn ${hasExtraSaq ? 'has-extras' : ''}" data-action="saq" title="Saque extra">
+                  <span class="ciclo-extra-sq-icon">💸</span>
+                  <span class="ciclo-extra-sq-label">Saque</span>
+                  <span class="ciclo-extra-sq-count">${ciclo.extraSaques.length}</span>
+                </button>
+              </div>
+            </div>
+            <div class="ciclo-col">
+              <span class="ciclo-col-label">Resultado</span>
+              <span class="ciclo-col-val ${lucroClass}">${lucroSign}R$ ${money(Math.abs(lucro))}</span>
+              <span class="ciclo-badge ${lucroClass}">${badgeLabel}</span>
+            </div>
+          </div>
+          <div class="ciclo-extra-area" id="cicloExtraArea_${ciclo.id}" style="${hasAnyExtra ? '' : 'display:none'}">
+            <div class="ciclo-extra-area-inner">
+              <div class="ciclo-extra-block" id="cicloDepBlock_${ciclo.id}" style="${hasExtraDep ? '' : 'display:none'}">
+                <span class="ciclo-extra-block-label">💰 Redepósitos</span>
+                <div class="ciclo-extra-chips" id="cicloDepChipsEl_${ciclo.id}">${depChipsHtml}</div>
+              </div>
+              <div class="ciclo-extra-block" id="cicloSaqBlock_${ciclo.id}" style="${hasExtraSaq ? '' : 'display:none'}">
+                <span class="ciclo-extra-block-label">💸 Saques extras</span>
+                <div class="ciclo-extra-chips" id="cicloSaqChipsEl_${ciclo.id}">${saqChipsHtml}</div>
+              </div>
+            </div>
+            <div class="ciclo-extra-add-row" id="cicloExtraInputRow_${ciclo.id}" style="display:none;margin-top:8px">
+              <input class="ciclo-extra-input" id="cicloExtraInput_${ciclo.id}" type="text" inputmode="decimal" placeholder="Valor (R$)" />
+              <button class="ciclo-extra-confirm-btn">✓ Adicionar</button>
+            </div>
+          </div>
+        `;
+
+        // ── button logic ──────────────────────────────────────────────────────
+        let activeType = null; // 'dep' | 'saq' | null
+
+        const extraArea = card.querySelector(`#cicloExtraArea_${ciclo.id}`);
+        const inputRow = card.querySelector(`#cicloExtraInputRow_${ciclo.id}`);
+        const extraInp = card.querySelector(`#cicloExtraInput_${ciclo.id}`);
+        const confirmBtn = card.querySelector('.ciclo-extra-confirm-btn');
+
+        card.querySelectorAll('.ciclo-extra-sq-btn').forEach(btn => {
+          btn.onclick = () => {
+            const type = btn.dataset.action; // 'dep' or 'saq'
+            const isAlreadyOpen = activeType === type && inputRow.style.display !== 'none';
+            // close
+            inputRow.style.display = 'none';
+            card.querySelectorAll('.ciclo-extra-sq-btn').forEach(b => b.classList.remove('active'));
+            activeType = null;
+            if(!isAlreadyOpen) {
+              // open for this type
+              activeType = type;
+              extraArea.style.display = 'block';
+              inputRow.style.display = 'flex';
+              btn.classList.add('active');
+              extraInp.placeholder = type === 'dep' ? 'Valor do redepósito (R$)' : 'Valor do saque (R$)';
+              extraInp.value = '';
+              extraInp.focus();
+            }
+          };
+        });
+
+        const addExtra = () => {
+          if(!activeType) return;
+          const val = parseDecimal(extraInp.value||'0');
+          if(!val) return;
+          const arr = activeType === 'dep' ? 'extraDepositos' : 'extraSaques';
+          if(!state.platforms[platform].ciclos[cicloIdx][arr])
+            state.platforms[platform].ciclos[cicloIdx][arr] = [];
+          state.platforms[platform].ciclos[cicloIdx][arr].push(val);
+          extraInp.value = '';
+          inputRow.style.display = 'none';
+          card.querySelectorAll('.ciclo-extra-sq-btn').forEach(b => b.classList.remove('active'));
+          activeType = null;
+          scheduleSave(); renderCiclos(); updatePlatformTotals(); renderPlatformsList(); renderSummary();
+          showToast((arr === 'extraDepositos' ? '💰 Redepósito' : '💸 Saque') + ' +R$ ' + money(val) + ' adicionado!', 'success');
+        };
+
+        confirmBtn.onclick = addExtra;
+        extraInp.addEventListener('keydown', e => { if(e.key === 'Enter') addExtra(); });
+
+        // chip delete
+        card.querySelectorAll('.ciclo-extra-chip-del').forEach(btn => {
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            const type = btn.dataset.type;
+            const bi = parseInt(btn.dataset.bi);
+            const arr = type === 'dep' ? 'extraDepositos' : 'extraSaques';
+            state.platforms[platform].ciclos[cicloIdx][arr].splice(bi, 1);
+            scheduleSave(); renderCiclos(); updatePlatformTotals(); renderPlatformsList(); renderSummary();
+          };
+        });
+
+        card.querySelector('.ciclo-del-btn').onclick = () => deleteCiclo(platform, ciclo.id);
+        wrap.appendChild(card);
+
+        totalDep += totalDepCiclo;
+        totalSaq += totalSaqCiclo;
+      });
+
+      // Totais
+      if(totaisEl) {
+        totaisEl.style.display = 'flex';
+        const totalLucro = totalSaq - totalDep;
+        const sign = totalLucro >= 0 ? '+' : '';
+        document.getElementById('ciclosTotalDep').textContent = 'R$ ' + money(totalDep);
+        document.getElementById('ciclosTotalSaq').textContent = 'R$ ' + money(totalSaq);
+        const lucroEl = document.getElementById('ciclosTotalLucro');
+        lucroEl.textContent = sign + 'R$ ' + money(Math.abs(totalLucro));
+        lucroEl.style.color = totalLucro >= 0 ? 'var(--success)' : 'var(--danger)';
+      }
+
+      updatePlatformTotals();
+    }
+
+    // ── renderContas (legado — não usada na nova UI, mantida para compatibilidade) ──
+    function renderContas(){
+      // Redireciona para o novo sistema de ciclos
+      renderCiclos();
+      renderMae();
     } // fim renderContas
+
 
     function renderDiasTabela(){
       const tbody = document.querySelector("#tabelaDias tbody");
@@ -3550,6 +4488,7 @@ platformsData.forEach(data => {
 
     // --- Actions
     function selectView(view){
+      if(view === 'apiConfig') { setTimeout(loadGeminiKeyUI, 50); }
       // Persiste a aba atual para restaurar no F5
       try {
         const snapshot = { view };
@@ -3561,6 +4500,7 @@ platformsData.forEach(data => {
       const panelMap = {
         'dashboard':         'dashboardPanel',
         'gastos':            'gastosPanel',
+        'apiConfig':         'apiConfigPanel',
         'plataformas':       'platGridPanel',       // grade de plataformas
         'plataformaDetalhe': 'plataformasPanel',    // detalhe de uma plataforma
         'dados':             'dadosPanel',
@@ -3641,19 +4581,13 @@ platformsData.forEach(data => {
     // --- Event listeners (buttons, inputs)
     // Criação de plataforma movida para a aba de Plataformas (openPlatNewModal)
 
-    document.getElementById('addContaBtn').onclick = ()=>{
-      const p = state.selectedPlatform || Object.keys(state.platforms)[0];
-      if(!p) return showToast('Crie uma plataforma primeiro', 'error');
-      state.platforms[p].accounts.push({deposito:0,redeposito:0,saque:0, bau:0});
-      scheduleSave(); updateUI(); renderContas();
-      setTimeout(() => {
-        const firstInput = document.querySelector('#contasTable tbody tr:last-child .inp.deposito');
-        if(firstInput) firstInput.focus();
-      }, 100);
-    }
-
-    document.getElementById('searchAccounts')?.addEventListener('input', () => {
-        renderContas();
+    document.getElementById('addCicloBtn').onclick = () => openCicloModal();
+    document.getElementById('addMaeBtn').onclick = () => openMaeModal();
+    // Enter key inside ciclo modal
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' && document.getElementById('cicloModalOverlay')?.classList.contains('open')) {
+        saveCiclo();
+      }
     });
 
     document.getElementById('searchPlatforms').addEventListener('input', renderPlatformsList);
@@ -3699,8 +4633,14 @@ platformsData.forEach(data => {
 
     // Fechar sidebar ao apertar ESC
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && sidebarEl.classList.contains('open')) {
-        closeSidebar();
+      if (e.key === 'Escape') {
+        if (document.getElementById('cicloModalOverlay')?.classList.contains('open')) {
+          closeCicloModal();
+        } else if (document.getElementById('maeModalOverlay')?.classList.contains('open')) {
+          closeMaeModal();
+        } else if (sidebarEl.classList.contains('open')) {
+          closeSidebar();
+        }
       }
     });
 
@@ -4274,8 +5214,7 @@ platformsData.forEach(data => {
       // Calcula o lucro bruto total, incluindo plataformas e fintech
       let totalLucroPlataformas = 0;
       Object.values(state.platforms).forEach(p=>{
-        totalLucroPlataformas += p.accounts.reduce((s,a)=>
-    s + (((a.saque||0) + (a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+        totalLucroPlataformas += getPlatformLucro(p);
       });
 
       let totalFintech = 0;
@@ -6234,7 +7173,20 @@ window.exportData = () => {
 window.exportCsv = () => {
   const rows = [['Plataforma','Conta','Depósito','Re-depósito','Saque','Baú','Lucro']];
   Object.values(state.platforms).forEach(p => {
-    p.accounts.forEach(acc => {
+    (p.ciclos||[]).forEach((c,i) => {
+      const lucro = (c.saques||0) - (c.depositos||0);
+      rows.push([
+        p.name,
+        'Ciclo #' + c.numero,
+        (c.depositos||0).toFixed(2),
+        '',
+        (c.saques||0).toFixed(2),
+        '',
+        lucro.toFixed(2)
+      ]);
+    });
+    // legacy accounts
+    (p.accounts||[]).forEach(acc => {
       const lucro = ((acc.saque||0)+(acc.bau||0)) - ((acc.deposito||0)+(acc.redeposito||0));
       rows.push([
         p.name,
@@ -6264,7 +7216,13 @@ window.exportXlsx = () => {
   html += '<tr><th>Plataforma</th><th>Conta</th><th>Depósito</th><th>Re-depósito</th><th>Saque</th><th>Baú</th><th>Lucro</th></tr>';
   let totalLucro = 0;
   Object.values(state.platforms).forEach(p => {
-    p.accounts.forEach(acc => {
+    (p.ciclos||[]).forEach(c => {
+      const lucro = (c.saques||0) - (c.depositos||0);
+      totalLucro += lucro;
+      const color = lucro >= 0 ? '#e6f9ef' : '#fde8e8';
+      html += `<tr><td>${escapeHtml(p.name)}</td><td>Ciclo #${c.numero}</td><td>${(c.depositos||0).toFixed(2)}</td><td></td><td>${(c.saques||0).toFixed(2)}</td><td></td><td style="background:${color}">${lucro.toFixed(2)}</td></tr>`;
+    });
+    (p.accounts||[]).forEach(acc => {
       const lucro = ((acc.saque||0)+(acc.bau||0)) - ((acc.deposito||0)+(acc.redeposito||0));
       totalLucro += lucro;
       const color = lucro >= 0 ? '#e6f9ef' : '#fde8e8';
@@ -6373,8 +7331,7 @@ window.exportXlsx = () => {
       const cards = platforms.map(pName => {
         const p = state.platforms[pName];
         if (!p) return null;
-        const lucro = p.accounts.reduce((s, a) =>
-          s + (((a.saque||0)+(a.bau||0)) - ((a.deposito||0)+(a.redeposito||0))), 0);
+        const lucro = getPlatformLucro(p);
         const lucroClass = lucro >= 0 ? 'pos' : 'neg';
         const cardClass = lucro >= 0 ? 'lucro-pos' : 'lucro-neg';
         const contas = p.accounts.length;
@@ -6384,7 +7341,7 @@ window.exportXlsx = () => {
         el.innerHTML = `
           <div class="plat-grid-name"></div>
           <div class="plat-grid-profit ${lucroClass}">R$ ${money(lucro)}</div>
-          <div class="plat-grid-meta">${contas} conta${contas !== 1 ? 's' : ''}</div>
+          <div class="plat-grid-meta">${(state.platforms[pName]?.ciclos||[]).length} ciclo${(state.platforms[pName]?.ciclos||[]).length!==1?'s':''}</div>
           <div class="plat-grid-btns">
             <button class="plat-grid-btn" data-action="edit" title="Renomear">✏️ Renomear</button>
             <button class="plat-grid-btn del" data-action="del" title="Excluir">🗑️</button>
@@ -6451,7 +7408,7 @@ window.exportXlsx = () => {
       const v = (input?.value || '').trim();
       if (!v) { input?.focus(); return; }
       if (state.platforms[v]) { showToast('Plataforma já existe', 'error'); return; }
-      state.platforms[v] = { name: v, accounts: [], createdAt: new Date().toISOString() };
+      state.platforms[v] = { name: v, accounts: [], ciclos: [], contasMae: [], createdAt: new Date().toISOString() };
       if (!state.platformOrder) state.platformOrder = [];
       state.platformOrder.push(v);
       if (input) input.value = '';
@@ -6462,6 +7419,30 @@ window.exportXlsx = () => {
     window.openPlatNewModal  = openPlatNewModal;
     window.closePlatNewModal = closePlatNewModal;
     window.confirmPlatNew    = confirmPlatNew;
+
+    // ── Ciclos ────────────────────────────────────────────────────────────────
+    window.openCicloModal     = openCicloModal;
+    window.closeCicloModal    = closeCicloModal;
+    window.saveCiclo          = saveCiclo;
+    window.deleteCiclo        = deleteCiclo;
+    window.updateCicloPreview = updateCicloPreview;
+
+    // ── Conta Mãe ─────────────────────────────────────────────────────────────
+    window.openMaeModal       = openMaeModal;
+    window.closeMaeModal      = closeMaeModal;
+    window.saveMae            = saveMae;
+    window.deleteMae          = deleteMae;
+    window.updateMaePreview   = updateMaePreview;
+
+    // ── OCR / IA ──────────────────────────────────────────────────────────────
+    window.startOcr           = startOcr;
+    window.applyOcrResult     = applyOcrResult;
+    window.resetOcrZone       = resetOcrZone;
+    window.focusOcrPaste      = focusOcrPaste;
+    window.saveGeminiKey      = saveGeminiKey;
+    window.loadGeminiKeyUI    = loadGeminiKeyUI;
+    window.clearGeminiKey     = clearGeminiKey;
+    window.updateGeminiKeyStatus = updateGeminiKeyStatus;
 
     }); // Fim do window.addEventListener('load')
 
